@@ -1,0 +1,89 @@
+{% if comment_form %}
+<div class="modal fade" id="comment-dlg">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Comment on {% if entity %}{{ entity.headline }}{% endif %}
+        {% if topic %}{{ topic.headline }}{% endif %}
+        </h4>
+      </div>
+      <div class="modal-body">
+        <p>One fine body&hellip;</p>
+      <form method='POST'
+        class="form"
+        id="comment-form"
+        action='comment'>
+     {{ comment_form.csrf_token }}
+    <div class="form-group">
+    <label class="control-label" for='commentTime'>
+     Commented on:
+    </label>
+   {{ comment_form.commentTime(**{"class_": "form-control",
+                                  "data-bind": "value: commentTime"}) }}
+   </div>
+
+   <div class="form-group">
+    <label class="control-label" for='creator'>
+      Your email or URI
+    </label>
+   {{ comment_form.creator(**{"class_": "form-control",
+                              "data-bind": "value: creator"}) }}
+   </div>
+   <div class="form-group">
+    <label class="control-label" for='commentText'>
+      Comment (use either Raw text or Markdown)
+    </label>
+   {{ comment_form.commentText(**{"class_": "form-control",
+                               "data-bind": "value: commentText"}) }}
+   </div>
+  </form>
+  </div>
+  <div class="modal-footer">
+  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+   <button type="button" 
+           class="btn btn-primary" 
+            data-bind="click: addComment">Save changes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<script>
+function CommentFromViewModel() {
+   var self = this;
+   self.commentText = ko.observable();
+   self.commentTime = ko.observable();
+   self.creator = ko.observable();
+
+   self.addComment = function() {
+     var url = '';
+     {% if entity %}
+      {% if '@id' in entity %}
+       url +=  '{{ entity['@id']|local_url }}/UserComments/add';
+      {% else %}
+       url += '{{ entity }}/UserComments/add';
+      {% endif %}
+     {% endif %}
+     {% if topic %}
+      url += '{{ topic['@id']|local_url }}/UserComments/add';
+     {% endif %}
+     $.ajax({
+      type: 'POST',
+      url: url,
+      data: $('#comment-form').serialize(),
+      success: function(response) {
+       alert("Comment added " + response['result']);
+       $('#comment').reset();
+      } 
+    });
+  }
+  self.resetForm = function() {
+    self.commentTime('');
+
+  }
+ }
+
+ ko.applyBindings(new CommentFromViewModel(),
+                  document.getElementById('comment-dlg'));
+</script>
+{% endif %}

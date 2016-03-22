@@ -1,0 +1,6 @@
+*.swp
+*.pyc
+*.bak
+instance/
+config.py
+raw
