@@ -1,0 +1,6 @@
+[submodule "rdfw"]
+	path = rdfw
+	url = https://github.com/KnowledgeLinks/rdfframework
+[submodule "core"]
+	path = core
+	url = https://github.com/KnowledgeLinks/rdfw-core

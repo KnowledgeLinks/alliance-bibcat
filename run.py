@@ -7,7 +7,7 @@ from flask import url_for, Response, send_file
 from flask.ext.login import LoginManager, login_user, login_required, logout_user
 from flask.ext.login import make_secure_token, UserMixin, current_user
 #! Insert path to RdfFramework package
-sys.path.append(os.path.realpath('./rdfframework/'))
+sys.path.append(os.path.realpath('./rdfw/'))
 from rdfframework.security import User 
 from rdfframework import get_framework as rdfw
 
