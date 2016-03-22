@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import argparse
 import requests
 from flask import abort, Flask, g, jsonify, redirect, render_template, request
 from flask import url_for, Response, send_file
@@ -10,6 +11,9 @@ from flask.ext.login import make_secure_token, UserMixin, current_user
 sys.path.append(os.path.realpath('./rdfw/'))
 from rdfframework.security import User 
 from rdfframework import get_framework as rdfw
+from rdfframework.utilities import cbool
+
+RDFW_RESET = True
 
 __version_info__ = ('0', '0', '1')
 __version__ = '.'.join(__version_info__)
@@ -21,13 +25,6 @@ app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 app.jinja_env.filters['quote_plus'] = lambda u: quote_plus(u)
     
-# initialize the rdfframework
-rdfw(config=app.config)
-# load default data into the server core
-ctx = app.test_request_context('/')
-with ctx:
-    rdfw().load_default_data()
-
 #Intialize Flask Login Manager
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -41,10 +38,37 @@ def load_user(user_id):
         return User(loaded_user_obj)
     else:
         return None
+from core.rdfwcoreviews import *
 
-if __name__ == '__main__':
+
+def main(args):
+    ''' Launches application with passed in Args '''
+    global RDFW_RESET
+    if cbool(args.get("rdfw_reset",True)):
+        RDFW_RESET = True
+    else:
+        RDFW_RESET = False   
+    print("post init in main ", RDFW_RESET) 
+    
+    # initialize the rdfframework
+    rdfw(config=app.config,
+         reset=RDFW_RESET)
+    # load default data into the server core
+    ctx = app.test_request_context('/')
+    with ctx:
+        rdfw().load_default_data()
     host = '0.0.0.0'
     port = 8081 # Debug
     app.run(host=host,
             port=port,
             debug=True)
+            
+if __name__ == '__main__':
+    parser=argparse.ArgumentParser()
+    parser.add_argument(
+        '--rdfw-reset',
+        default=True,
+        help="reset the the application RDF definitions")
+    args=vars(parser.parse_args())
+    main(args)
+   
