@@ -12,6 +12,8 @@ sys.path.append(os.path.realpath('./rdfw/'))
 from rdfframework.security import User 
 from rdfframework import get_framework as rdfw
 from rdfframework.utilities import cbool
+from core.rdfwcoreviews import rdfw_core 
+from views import *
 
 RDFW_RESET = True
 
@@ -24,6 +26,8 @@ __copyright__ = '(c) 2016 by Jeremy Nelson and Mike Stabile'
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 app.jinja_env.filters['quote_plus'] = lambda u: quote_plus(u)
+
+app.register_blueprint(rdfw_core, url_prefix='/')
     
 #Intialize Flask Login Manager
 login_manager = LoginManager()
@@ -38,7 +42,7 @@ def load_user(user_id):
         return User(loaded_user_obj)
     else:
         return None
-from core.rdfwcoreviews import *
+
 
 
 def main(args):
