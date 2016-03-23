@@ -2,91 +2,25 @@
 
 {% block main %}
 <div class="container">
- {% include 'snippets/navbar.html' %}
- {# START row #}
- <div class="row">
-  <div class="col-md-2">
-    <img src="{{ url_for('static', filename='img/chalk-blocks.png') }}">
-  </div>
-  <div class="col-md-10"> 
-   <h1 style="font-size: 6em; margin-botton: 0">intro2libsys.info</h1>
-   <h2>Coaching, Consulting, and Education</h2>
-   <p class="lead">
-    A collection of resources, presentations, and
-    educational assessments on a range of topics related to library
-    systems and technology as categorized, annotated, and curated by 
-    <a href="/about">Jeremy Nelson</a>. This site is the 
-    home for <a href="/JeremyNelson/services.html">intro2libsys.info LLC</a>.
-   </p>
-  </div> 
-  {# include 'snippets/right-nav.html' #}
-  {# END row #}
- </div>
+	{% include 'snippets/navbar.html' %}
+	{# START row #}
+	<div class="row">
+		<div class="col-md-12">
+			<p>Header row</p>
+		</div> 
+		{# include 'snippets/right-nav.html' #}
+	{# END row #}
+	</div>
 
-  <hr>
-  <div class="row">
-   <div class="col-md-4">
-    <h2>History of this site</h2>
-    <a href="http://morgridge.du.edu/programs/library-and-information-science/">
-      <img src="{{ url_for('static', filename='img/du_logo.gif') }}" style="float:left">
-    </a>
-    <p class="lead">
-     This site initially started off as an <a href="/archive/textbook">online text-book</a> 
-     for a graduate course, <strong>Introduction to Library Systems</strong> taught at the University of Denver's  
-     <em>Library and Information Science</em> program. 
-    </p>
-    <h3>Contact</h3>
-    <p class="lead">
-    Email <a href="mailto:jermnelson@gmail.com">Jeremy Nelson</a>, text or call 
-    (719) 299-1073. 
-    </p>
-{#    <a class="btn btn-primary" href="{{ url_for("JeremyNelson" page='services') }}")Professional Services</a>#}
-    {#
-    <p>
-     Now this site is collection of online tutorials and references topics on Libraries and Library Systems. 
-     We are the home of the <a href="/catalog-pull-platform">catalog pull platform</a>, an open-source
-     collection of bibliographic software components. This site provides opportunities for individuals to 
-     demonstrate their competency and earn their open badges on most of these topics. Many of these
-     badges are free to take and earn your badge, some badges have a minimal charge.  
-    </p>
-    #}
-   </div>
-   <div class="col-md-4">
-    <h3>Current Projects</h3>
-    <p class="lead">Collaborating with Aaron Schmidt of <a href="http://weareinflux.com/">Influx 
-    Library User Experience</a> on a relaunch and update of a digital repository at a major 
-    University. This project uses components of the <a href="/catalog-pull-platform">Catalog
-    Pull Platform</a> such as the <a href="http://pythonhosted.org/Flask-FedoraCommons/">Flask-FedoraCommons</a>
-    open-source Flask extension. </p>
-    <hr>
-    <p class="lead"> 
-     As the lead architect and software engineer for individual components of the <a href="/catalog-pull-platform">CPP</a>,
- <img src="https://raw.github.com/jermnelson/tiger-catalog/master/catalog/static/img/tiger-logo.png" class="pull-left">
-     I'm working towards a soft launch of the <a href="https://github.com/jermnelson/tiger-catalog">Colorado 
-     College TIGER Catalog</a> with a first MVP release now available at <a href="http://catalog.coloradocollege.edu/">catalog.coloradocollege.edu</a>. 
-    </p>
-    <p class="lead"> 
-     The current emphasis is building a <a href="/semantic-server">Semantic Server</a> that provides an common REST API to 
-     entities structured as BIBFRAME, Schema.org, and MARC JSON-LD. 
-    </p>
-   </div>
-   <div class="col-md-4 alert alert-info">
-    <img src="{{ url_for('static', filename='img/gunnison-river-bridge.png') }}" 
-         class="" style="width: 300px;height:auto">
-    <h2>Coming in 2015</h2> 
-    <p class="lead">
-     I am writing a book under contract with <a href="http://www.woodheadpublishing.com/en/ChandosHome.aspx">Chandos Publishing</a> titled
-     <a href="http://www.woodheadpublishing.com/en/book.aspx?bookID=3354&ChandosTitle=1">Becoming a Lean Library</a> with
-     a forecast publication date in April 2015. A special Introduction chapter will be released in a few
-     months at the Book's <a href="http://www.becomingleanlibrary.com/">website</a>.
-   </div>
- </div>
-  {% include 'snippets/copyright.html' %}
-
-   {# END row #}
- </div>
-  </div>
- {# END row #}
- </div>
+	<div class="row">
+		<div class="col-md-12">
+			<p>Main Body</p>
+			{% include 'snippets/copyright.html' %}	
+		</div>
+		
+		{# END row #}
+	</div>
+{# END row #}
+</div>
 </div>
 {% endblock %}
