@@ -59,7 +59,8 @@ def main(args):
     
     # initialize the rdfframework
     rdfw(config=app.config,
-         reset=RDFW_RESET)
+         reset=RDFW_RESET,
+         root_file_path=os.path.realpath('./'))
     # load default data into the server core
     ctx = app.test_request_context('/')
     with ctx:
@@ -74,8 +75,8 @@ if __name__ == '__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument(
         '--rdfw-reset',
-        default=True,
+        default=False,
         help="reset the the application RDF definitions")
     args=vars(parser.parse_args())
-    main(args)
+    main(args) 
    
