@@ -78,5 +78,5 @@ if __name__ == '__main__':
         default=False,
         help="reset the the application RDF definitions")
     args=vars(parser.parse_args())
-    main(args) 
+    main(args)
    
