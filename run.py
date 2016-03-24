@@ -3,15 +3,15 @@ import re
 import sys
 import argparse
 import requests
-from flask import abort, Flask, g, jsonify, redirect, render_template, request
-from flask import url_for, Response, send_file
-from flask.ext.login import LoginManager, login_user, login_required, logout_user
-from flask.ext.login import make_secure_token, UserMixin, current_user
+from flask import abort, Flask, g, jsonify, redirect, render_template, \
+        request, url_for, Response, send_file, json
+from flask.ext.login import LoginManager, login_user, login_required, \
+    logout_user, make_secure_token, current_user
 #! Insert path to RdfFramework package
 sys.path.append(os.path.realpath('./rdfw/'))
 from rdfframework.security import User 
 from rdfframework import get_framework as rdfw
-from rdfframework.utilities import cbool
+from rdfframework.utilities import cbool, slugify, separate_props
 from core.rdfwcoreviews import rdfw_core 
 from views import base_site
 
@@ -26,9 +26,13 @@ __copyright__ = '(c) 2016 by Jeremy Nelson and Mike Stabile'
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 app.jinja_env.filters['quote_plus'] = lambda u: quote_plus(u)
+app.jinja_env.filters['slugify'] = lambda u: slugify(u)
+app.jinja_env.filters['pjson'] = lambda u: json.dumps(u, indent=4)
+app.jinja_env.filters['is_list'] = lambda u: isinstance(u, list)
+app.jinja_env.filters['separate_props'] = lambda u: separate_props(u)
 # register the main site views    
 app.register_blueprint(base_site, url_prefix='') 
-# register the rdfw core application views
+# register the rdfw core application views 
 app.register_blueprint(rdfw_core, url_prefix='') 
 # register any additional rdfw modules
    
