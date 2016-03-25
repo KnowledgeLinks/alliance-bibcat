@@ -30,7 +30,7 @@ app.jinja_env.filters['slugify'] = lambda u: slugify(u)
 app.jinja_env.filters['pjson'] = lambda u: json.dumps(u, indent=4)
 app.jinja_env.filters['is_list'] = lambda u: isinstance(u, list)
 app.jinja_env.filters['separate_props'] = lambda u: separate_props(u)
-app.jinja_env.filters['app_item'] = lambda u: rdfw().app.get(u,str(u))
+app.jinja_env.filters['app_item'] = lambda u: rdfw().app.get(u,str(u)) 
     
 # register the main site views    
 app.register_blueprint(base_site, url_prefix='') 
