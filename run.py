@@ -16,6 +16,7 @@ from core.rdfwcoreviews import rdfw_core
 from views import base_site
 
 RDFW_RESET = True
+SERVER_CHECK = True
 
 __version_info__ = ('0', '0', '1')
 __version__ = '.'.join(__version_info__)
@@ -57,15 +58,22 @@ def load_user(user_id):
 def main(args):
     ''' Launches application with passed in Args '''
     global RDFW_RESET
+    global SERVER_CHECK
+    # test to see if a forced definition reset is required
     if cbool(args.get("rdfw_reset",True)):
         RDFW_RESET = True
     else:
         RDFW_RESET = False   
-    print("post init in main ", RDFW_RESET) 
-    
+    # test to see if the server status check should be skipped
+    if cbool(args.get("server_check",True)):
+        SERVER_CHECK = True
+    else:
+        SERVER_CHECK = False   
+        
     # initialize the rdfframework
     rdfw(config=app.config,
          reset=RDFW_RESET,
+         server_check = SERVER_CHECK,
          root_file_path=os.path.realpath('./'))
     # load default data into the server core
     ctx = app.test_request_context('/')
@@ -83,6 +91,10 @@ if __name__ == '__main__':
         '--rdfw-reset',
         default=False,
         help="reset the the application RDF definitions")
+    parser.add_argument(
+        '--server-check',
+        default=True,
+        help="test to see it semanitc server is running")
     args=vars(parser.parse_args())
     main(args)
    
