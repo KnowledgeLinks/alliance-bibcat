@@ -39,7 +39,12 @@ function test_and_remove_row(subform) {
 	subform.find('.subform-row').each(function () {
 		var empty_row = true;
 		$(this).find(':input').each(function () {
-			if (($(this).val()) && ($(this).attr("type").indexOf("hidden") == -1)) {
+			if (!($(this).attr("type"))) {
+				type = "ok"
+			} else {
+				type = $(this).attr("type")
+			}
+			if (($(this).val()) && (type.indexOf("hidden") == -1)) {
 				empty_row = false
 			};
 		});
@@ -57,7 +62,14 @@ function test_and_add_new_row(subform) {
 	var empty_last = true
 	// see if the last row is empty
 	last_row.find(':input').each(function () {
-		if (($(this).val()) && ($(this).attr("type").indexOf("hidden") == -1)) {
+		if (!($(this).attr("type"))) {
+			type = "ok"
+		} else {
+			type = $(this).attr("type")
+		}
+			
+		var y = $(this).val()
+		if (($(this).val()) && (type.indexOf("hidden") == -1)) {
 			empty_last = false
 		};
 	});
@@ -73,6 +85,9 @@ function clone_field_row(row) {
     var new_element = row.clone(true);
     var elem_id = new_element.find(':input')[0].id;
     var elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})-.*/m, '$1')) + 1;
+    if (isNaN(elem_num)) {
+    	elem_num = parseInt(elem_id.replace(/.*-(\d{1,4})/m, '$1')) + 1;
+    }
     new_element.find(':input').each(function() {
     	var input_val = '';
     	if ($(this).attr("id").indexOf("csrf_token") > -1) {
@@ -80,6 +95,9 @@ function clone_field_row(row) {
     		input_val = $(selector).val();
     	};
         var id = $(this).attr('id').replace('-' + (elem_num - 1) + '-', '-' + elem_num + '-');
+        if (id === elem_id) {
+        	id = $(this).attr('id').replace('-' + (elem_num - 1), '-' + elem_num);
+        }
         $(this).attr({'name': id, 'id': id}).val(input_val).removeAttr('checked');
     });
     new_element.find('label').each(function() {
