@@ -4,3 +4,6 @@
 [submodule "core"]
 	path = core
 	url = https://github.com/KnowledgeLinks/rdfw-core
+[submodule "bibcat"]
+	path = bibcat
+	url = https://github.com/KnowledgeLinks/rdfw-bibcat
