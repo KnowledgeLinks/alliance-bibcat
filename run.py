@@ -5,6 +5,7 @@ import argparse
 from urllib.parse import quote_plus
 from flask import  Flask, json
 from flask.ext.login import LoginManager
+from flask.ext.mail import Mail, Message
 #! Insert path to RdfFramework package
 sys.path.append(os.path.realpath('./rdfw/'))
 from rdfframework.security import User
@@ -36,11 +37,23 @@ app.register_blueprint(base_site, url_prefix='')
 # register the rdfw core application views
 app.register_blueprint(rdfw_core, url_prefix='')
 # register any additional rdfw modules
-
+mail=Mail(app)
 #Intialize Flask Login Manager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "/login"
+
+@app.route("/emailtest")
+def index():
+	msg = Message(
+              'Test of emailer',
+	       sender='emailer.knowledgelinks.io@gmail.com',
+	       recipients=
+               ['Jeremy.Nelson@coloradocollege.edu','jermnelson@gmail.com'])
+	msg.body = "Testing emailer"
+	mail.send(msg)
+	return "Sent"
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -79,8 +92,10 @@ def main(args):
         rdfw().load_default_data()
     host = '0.0.0.0'
     port = 8081 # Debug
+    ssl_context = 'adhoc'
     app.run(host=host,
             port=port,
+            #ssl_context=ssl_context,
             debug=True)
 
 if __name__ == '__main__':

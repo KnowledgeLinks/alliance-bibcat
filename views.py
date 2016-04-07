@@ -24,13 +24,13 @@ base_site = Blueprint("base_site", __name__,
                        template_folder="templates")
 base_site.config = {}
 
-#from flask import current_app as app
-
-'''ctx = app.test_request_context('/')
-with ctx:'''
-#app = Flask(__name__)
-#login_manager = app.login_manager
-
+'''@base_site.before_request
+def before_request():
+    if request.url.startswith('http://'):
+        url = request.url.replace('http://', 'https://', 1)
+        code = 301
+        return redirect(url, code=code)'''
+        
 @base_site.route("/")
 def home():
     print("Current user is {}".format(current_user))
