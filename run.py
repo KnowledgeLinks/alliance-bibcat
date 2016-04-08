@@ -12,6 +12,7 @@ from rdfframework.security import User
 from rdfframework import get_framework as rdfw
 from rdfframework.utilities import cbool, slugify, separate_props
 from core.rdfwcoreviews import rdfw_core
+from bibcat.rdfwbibcatviews import bibcat
 from views import base_site
 
 RDFW_RESET = True
@@ -36,6 +37,8 @@ app.jinja_env.filters['app_item'] = lambda u: rdfw().app.get(u,str(u))
 app.register_blueprint(base_site, url_prefix='')
 # register the rdfw core application views
 app.register_blueprint(rdfw_core, url_prefix='')
+# register any additional rdfw modules
+app.register_blueprint(bibcat, url_prefix='')
 # register any additional rdfw modules
 mail=Mail(app)
 #Intialize Flask Login Manager

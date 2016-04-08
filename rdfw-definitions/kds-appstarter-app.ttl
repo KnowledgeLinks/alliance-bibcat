@@ -8,7 +8,7 @@
 @prefix schema: <https://schema.org/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-kdr:Application kds:siteBrand "Library Site";
+kdr:Application kds:siteBrand "BIBCAT";
 	kds:personClass schema:Person ;
 	kds:siteLogoFile "/static/img/kl-logo.svg" .
 
