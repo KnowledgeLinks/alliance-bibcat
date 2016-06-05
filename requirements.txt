@@ -10,6 +10,7 @@ rdflib-jsonld
 elasticsearch_dsl
 Flask-Mail
 Flask-Login
+passlib
 pytz
 requests
 simplepam
