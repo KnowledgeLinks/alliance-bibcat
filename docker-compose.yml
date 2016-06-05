@@ -1,0 +1,15 @@
+bibcat:
+    build: .
+    ports:
+     - "5000"
+    links:
+     - search
+
+search:
+    build: .
+    dockerfile: DockerfileElasticSearch
+    ports:
+     - "9200:9200"
+     - "9300:9300"
+    volumes:
+     - /opt/bibcat_index:/usr/share/elasticsearch/data

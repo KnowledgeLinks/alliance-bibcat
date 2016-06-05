@@ -1,0 +1,6 @@
+FROM elasticsearch:2.3.3
+MAINTAINER "Jeremy Nelson <jermnelson@gmail.com>"
+
+RUN apt-get update && \
+    /usr/share/elasticsearch/bin/plugin install delete-by-query &&\
+    /usr/share/elasticsearch/bin/plugin install mobz/elasticsearch-head
