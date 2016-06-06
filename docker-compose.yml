@@ -3,7 +3,17 @@ bibcat:
     ports:
      - "5000"
     links:
+     - repository
      - search
+     - triplestore
+
+repository:
+    build: .
+    dockerfile: DockerfileRepository
+    ports:
+     - "8080:8080"
+    volumes:
+     - /opt/bibcat_repository/fedora-data:/opt/bibcat_repository/fedora-data
 
 search:
     build: .
@@ -13,3 +23,10 @@ search:
      - "9300:9300"
     volumes:
      - /opt/bibcat_index:/usr/share/elasticsearch/data
+
+triplestore:
+    build: .
+    dockerfile: DockerfileTriplestore
+    ports:
+     - "9999:9999"
+
