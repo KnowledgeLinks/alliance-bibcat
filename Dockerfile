@@ -24,7 +24,7 @@ RUN git clone $BIBCAT_GIT $BIBCAT_HOME && \
   #chmod +x $DIGCC_HOME/search/poll.py && \
   #crontab crontab.txt
 
-COPY instance/conf.py $BIBCAT_HOME/instance/conf.py
+COPY instance/config.py $BIBCAT_HOME/instance/config.py
 COPY supervisord.conf /etc/supervisor/conf.d/
 EXPOSE 5000
 
