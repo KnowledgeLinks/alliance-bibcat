@@ -3,17 +3,16 @@ bibcat:
     ports:
      - "5000"
     links:
-     - repository
+     - semanticServer
      - search
-     - triplestore
 
-repository:
-    build: .
-    dockerfile: DockerfileRepository
+semanticServer:
+    image: jermnelson/semantic-server-core:dev
     ports:
      - "8080:8080"
     volumes:
-     - /opt/bibcat_repository/fedora-data:/opt/bibcat_repository/fedora-data
+     - /opt/bibcat_repository/fedora-data:/usr/share/fedora-data
+     - /opt/bibcat_triplestore:/usr/share/blazegraph
 
 search:
     build: .
@@ -24,9 +23,11 @@ search:
     volumes:
      - /opt/bibcat_index:/usr/share/elasticsearch/data
 
-triplestore:
+web:
     build: .
-    dockerfile: DockerfileTriplestore
+    dockerfile: DockerNginx
+    links:
+     - bibcat:bibcat
     ports:
-     - "9999:9999"
+     -  "80:80"
 
