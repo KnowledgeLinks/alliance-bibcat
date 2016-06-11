@@ -1,5 +1,6 @@
 import os
-
+import logging
+import inspect
 import sys
 import argparse
 from urllib.parse import quote_plus
@@ -46,6 +47,10 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "/login"
 
+logging.basicConfig(level=logging.DEBUG)
+logging_off = logging.getLogger("requests")
+logging_off.setLevel(logging.WARN)
+
 @app.route("/emailtest")
 def index():
 	msg = Message(
@@ -66,7 +71,6 @@ def load_user(user_id):
         return User(loaded_user_obj)
     else:
         return None
-
 
 
 def main(args):
