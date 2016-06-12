@@ -100,7 +100,7 @@ function clone_field_row(row) {
         }
         $(this).attr({'name': id, 'id': id}).val(input_val).removeAttr('checked');
     });
-    new_element.find('label').each(function() {
+    new_element.find('label[for]').each(function() {
         var new_for = $(this).attr('for').replace('-' + (elem_num - 1) + '-', '-' + elem_num + '-');
         $(this).attr('for', new_for);
     });
