@@ -72,8 +72,8 @@ def load_user(user_id):
     else:
         return None
 
-
-def main(args):
+def setup(args={}):
+    "Setup environment"
     ''' Launches application with passed in Args '''
     global RDFW_RESET
     global SERVER_CHECK
@@ -97,16 +97,27 @@ def main(args):
     ctx = app.test_request_context('/')
     with ctx:
         rdfw().load_default_data()
-    host = '0.0.0.0'
-    port = 8081 # Debug
-    ssl_context = 'adhoc'
-    app.run(host=host,
-            port=port,
+
+def main(args):
+    if args.get("setup_only").lower().startswith("true"):
+        setup(args)
+    else:
+        print("Running standalone")
+        setup(args)
+        host = '0.0.0.0'
+        port = 8081 # Debug
+        ssl_context = 'adhoc'
+        app.run(host=host,
+                port=port,
             #ssl_context=ssl_context,
-            debug=True)
+                debug=True)
 
 if __name__ == '__main__':
     arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument(
+        '--setup-only',
+        default=False,
+        help='Run RDF framework setup only')
     arg_parser.add_argument(
         '--rdfw-reset',
         default=False,
