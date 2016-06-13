@@ -41,5 +41,3 @@ def home():
 def home2():
     print("Current user is {}".format(current_user))
     return current_app.login_manager.unauthorized() 
-        
-from run import login_manager
