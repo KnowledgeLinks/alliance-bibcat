@@ -129,3 +129,5 @@ if __name__ == '__main__':
     app_args = vars(arg_parser.parse_args())
     main(app_args)
 
+#! Trying to force loading for Docker container
+setup()
