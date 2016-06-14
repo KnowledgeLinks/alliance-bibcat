@@ -1,7 +1,7 @@
 bibcat:
     build: .
     ports:
-     - "5000"
+        - "5000:5000"
     links:
      - semanticServer
      - search
