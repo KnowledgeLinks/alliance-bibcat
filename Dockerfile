@@ -8,9 +8,9 @@ ENV BIBCAT_HOME /opt/bibcat
 
 # Update and install Python3 setuptool and pip
 RUN apt-get update && apt-get install -y && \
-  apt-get install -y python3-setuptools &&\
-  apt-get install -y python3-pip && \
-  apt-get install -y supervisor && \
+#  apt-get install -y python3-setuptools &&\
+#  apt-get install -y python3-pip && \
+#  apt-get install -y supervisor && \
   apt-get install -y cron
 
 # Clone master branch of BIBCAT repository,
@@ -25,8 +25,9 @@ RUN git clone $BIBCAT_GIT $BIBCAT_HOME && \
   #crontab crontab.txt
 
 COPY instance/config.py $BIBCAT_HOME/instance/config.py
-COPY supervisord.conf /etc/supervisor/conf.d/
+#COPY supervisord.conf /etc/supervisor/conf.d/
 EXPOSE 5000
 
 WORKDIR $BIBCAT_HOME
-CMD ["/usr/bin/supervisord"]
+CMD ["nohup", "uwsgi", "-s", "0.0.0.0:5000", "-w", "run:app"]
+#CMD ["/usr/bin/supervisord"]

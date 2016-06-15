@@ -4,7 +4,6 @@ bibcat:
         - "5000:5000"
     links:
      - semanticServer
-     - search
 
 semanticServer:
     image: jermnelson/semantic-server-core:dev
@@ -13,21 +12,3 @@ semanticServer:
     volumes:
      - /opt/bibcat_repository/fedora-data:/usr/share/fedora-data
      - /opt/bibcat_triplestore:/usr/share/blazegraph
-
-search:
-    build: .
-    dockerfile: DockerfileElasticSearch
-    ports:
-     - "9200:9200"
-     - "9300:9300"
-    volumes:
-     - /opt/bibcat_index:/usr/share/elasticsearch/data
-
-web:
-    build: .
-    dockerfile: DockerNginx
-    links:
-     - bibcat:bibcat
-    ports:
-     -  "80:80"
-
