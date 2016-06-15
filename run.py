@@ -27,6 +27,7 @@ __copyright__ = '(c) 2016 by Jeremy Nelson and Mike Stabile'
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
+app.config['APPLICATION_ROOT'] = '/2.0'
 app.jinja_env.filters['quote_plus'] = lambda u: quote_plus(u)
 app.jinja_env.filters['slugify'] = lambda u: slugify(u)
 app.jinja_env.filters['pjson'] = lambda u: json.dumps(u, indent=4)
