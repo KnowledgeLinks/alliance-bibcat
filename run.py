@@ -15,6 +15,7 @@ from rdfframework.utilities import cbool, slugify, separate_props
 from core.rdfwcoreviews import rdfw_core
 from bibcat.rdfwbibcatviews import bibcat
 from views import base_site
+from werkzeug.wsgi import DispatcherMiddleware
 
 RDFW_RESET = True
 SERVER_CHECK = True
@@ -50,6 +51,10 @@ login_manager.login_view = "/login"
 logging.basicConfig(level=logging.DEBUG)
 logging_off = logging.getLogger("requests")
 logging_off.setLevel(logging.WARN)
+
+parent_app = DispatcherMiddleware(
+    app,
+    {"/two": app})
 
 @app.route("/emailtest")
 def index():
