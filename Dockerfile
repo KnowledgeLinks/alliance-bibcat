@@ -29,5 +29,5 @@ COPY instance/config.py $BIBCAT_HOME/instance/config.py
 EXPOSE 5000
 
 WORKDIR $BIBCAT_HOME
-CMD ["nohup", "uwsgi", "-s", "0.0.0.0:5000", "-w", "run:app"]
+CMD ["nohup", "uwsgi", "-s", "0.0.0.0:5000", "-w", "run:parent_app"]
 #CMD ["/usr/bin/supervisord"]
