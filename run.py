@@ -15,6 +15,7 @@ from rdfframework.utilities import cbool, slugify, separate_props
 from core.rdfwcoreviews import rdfw_core
 from bibcat.rdfwbibcatviews import bibcat
 from views import base_site
+from werkzeug.wsgi import DispatcherMiddleware
 
 RDFW_RESET = True
 SERVER_CHECK = True
@@ -50,6 +51,10 @@ login_manager.login_view = "/login"
 logging.basicConfig(level=logging.DEBUG)
 logging_off = logging.getLogger("requests")
 logging_off.setLevel(logging.WARN)
+
+parent_app = DispatcherMiddleware(
+    app,
+    {"/two": app})
 
 @app.route("/emailtest")
 def index():
@@ -99,7 +104,7 @@ def setup(args={}):
         rdfw().load_default_data()
 
 def main(args):
-    if cbool(args.get("setup_only", True)):
+    if cbool(args.get("setup_only")):
         setup(args)
     else:
         print("Running standalone")
@@ -129,3 +134,5 @@ if __name__ == '__main__':
     app_args = vars(arg_parser.parse_args())
     main(app_args)
 
+#! Trying to force loading for Docker container
+setup()
