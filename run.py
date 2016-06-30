@@ -99,7 +99,7 @@ def setup(args={}):
         rdfw().load_default_data()
 
 def main(args):
-    if args.get("setup_only").lower().startswith("true"):
+    if cbool(args.get("setup_only", True)):
         setup(args)
     else:
         print("Running standalone")
