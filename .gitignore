@@ -1,6 +1,8 @@
 *.swp
 *.pyc
 *.bak
+*.project
+*.pydevproject
 instance/
 config.py
 raw

@@ -9,7 +9,7 @@
         <span class="icon-bar"></span>
       </button>
       <a class="navbar-brand" href="/">
-      	<img src="{{ "kds_siteLogoFile"|app_item }}" style="height:45px;margin:-20px 0px -20px 0px">
+      	<img src="{{ "kds_siteLogoFile"|app_url }}" style="height:45px;margin:-20px 0px -20px 0px">
       	{{ 'kds_siteBrand'|app_item }}
       </a>
     </div>
@@ -17,15 +17,15 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li><a href="/institutions">Institutions <span class="sr-only">(current)</span></a></li>
+        <li><a href="{{ url_for('bibcat.institution_list_path') }}">Institutions <span class="sr-only">(current)</span></a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
       	{% if current_user.username %}
 	      	<li class="dropdown">
 	          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ current_user.full_name }} <span class="caret"></span></a>
 	          <ul class="dropdown-menu">
-	            <li><a href="/UserForm/DisplayForm?id={{ current_user.person_uri }}">Profile</a></li>
-	            <li><a href="/logout">Logout</a></li>
+	            <li><a href="{{ url_for('rdfw_core.rdf_class_forms', form_name='UserForm', form_instance='DisplayForm') }}?id={{ current_user.person_uri }}">Profile</a></li>
+	            <li><a href="{{ url_for('rdfw_core.logout') }}">Logout</a></li>
 	          </ul>
 	        </li>
 	        {% if "acl_Control" in current_user.app_security %}
@@ -33,14 +33,14 @@
 		        <li class="dropdown">
 		          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> <span class="caret"></span></a>
 		          <ul class="dropdown-menu">
-		            <li><a href="/appdefs/">App Definitions</a></li>
-		            <li><a href="/UserForm/NewForm">New User</a></li>
-		            <li><a href="{{ "kds_frameworkDocUrl"|app_item }}" target="_blank">RdfFramework Docs</a></li>
+		            <li><a href="{{ url_for('rdfw_core.app_defintions') }}">App Definitions</a></li>
+		            <li><a href="{{ url_for('rdfw_core.rdf_class_forms', form_name='UserForm', instance='NewForm') }}">New User</a></li>
+		            <li><a href="{{ 'kds_frameworkDocUrl'|app_item }}" target="_blank">RdfFramework Docs</a></li>
 		          </ul>
 		        </li>
 		    
       	{% else %}
-      		<li><a href="/login">Login</a></li>
+      		<li><a href="{{ url_for('rdfw_core.rdf_class_forms', form_name='login') }}">Login</a></li>
       	{% endif %}
       </ul>
     </div><!-- /.navbar-collapse -->
