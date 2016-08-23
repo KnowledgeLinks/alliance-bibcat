@@ -20,7 +20,7 @@ from werkzeug.wsgi import DispatcherMiddleware
 RDFW_RESET = True
 SERVER_CHECK = True
 
-__version_info__ = ('0', '0', '1')
+__version_info__ = ('0', '1', '0')
 __version__ = '.'.join(__version_info__)
 __author__ = "Jeremy Nelson, Mike Stabile"
 __license__ = 'MIT'
@@ -94,7 +94,6 @@ def setup(args={}):
         SERVER_CHECK = True
     else:
         SERVER_CHECK = False
-
     # initialize the rdfframework
     rdfw(config=app.config,
          reset=RDFW_RESET,
