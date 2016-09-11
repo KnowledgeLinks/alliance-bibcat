@@ -4,5 +4,4 @@
 *.project
 *.pydevproject
 instance/
-config.py
 raw

@@ -13,6 +13,7 @@ semanticServer:
     volumes:
      - /opt/bibcat_repository/fedora-data:/usr/share/fedora-data
      - /opt/bibcat_triplestore:/usr/share/blazegraph
+     - $HOME/local_data:/local_data
 
 search:
     build: .
