@@ -1,0 +1,41 @@
+@prefix bc: <http://knowledgelinks.io/ns/bibcat/> .
+@prefix bf: <http://id.loc.gov/ontologies/bibframe/> .
+@prefix cc_fac: <https://www.coloradocollege.edu/ns/faculty/> .
+@prefix dbo: <http://dbpedia.org/ontology/> .
+@prefix dbp: <http://dbpedia.org/property/> .
+@prefix dbr: <http://dbpedia.org/resource/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcr: <http://knowledgelinks.io/ns/dc/> .
+@prefix dcterm: <http://purl.org/dc/terms/> .
+@prefix es: <http://knowledgelinks.io/ns/elasticsearch/> .
+@prefix kdr: <http://knowledgelinks.io/ns/data-resources/> .
+@prefix kds: <http://knowledgelinks.io/ns/data-structures/> .
+@prefix loc: <http://id.loc.gov/authorities/> .
+@prefix loc1: <http://id.loc.gov/> .
+@prefix m21: <http://knowledgelinks.io/ns/marc21/> .
+@prefix mods: <http://www.loc.gov/mods/v3> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pcdm: <http://pcdm.org/models#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix relators: <http://id.loc.gov/vocabulary/relators/> .
+@prefix schema: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://www.colorado.edu/libraries/> a bf:Organization,
+        schema:Library ;
+    rdfs:label "University Libraries - University of Colorado Boulder"@en ;
+    schema:oclc "COD",
+        "CODA" .
+
+<https://www.coalliance.org/> a bf:Organization ;
+    rdfs:label "Colorado Alliance of Research Libraries"@en .
+
+<https://www.coloradocollege.edu/library> a bf:Organization,
+        schema:Library ;
+    rdfs:label "Colorado College Tutt Library"@en ;
+    schema:oclc "COCA" .
+  
