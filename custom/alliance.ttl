@@ -38,4 +38,10 @@
         schema:Library ;
     rdfs:label "Colorado College Tutt Library"@en ;
     schema:oclc "COCA" .
+
+<https://www.coloradocollege.edu/library/seay> a bf:Organization,
+        schema:Library ;
+    rdfs:label "Colorado College Seay Music Library"@en ;
+    schema:oclc "CJJA" .
+
   
