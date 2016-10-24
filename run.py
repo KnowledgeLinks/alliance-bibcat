@@ -14,13 +14,14 @@ from rdfframework import get_framework as rdfw
 from rdfframework.utilities import cbool, slugify, separate_props
 from core.rdfwcoreviews import rdfw_core
 from bibcat.rdfwbibcatviews import bibcat
+from flask_sitemap import Sitemap
 from views import base_site
 from werkzeug.wsgi import DispatcherMiddleware
 
 RDFW_RESET = True
 SERVER_CHECK = True
 
-__version_info__ = ('0', '1', '0')
+__version_info__ = ('0', '2', '0')
 __version__ = '.'.join(__version_info__)
 __author__ = "Jeremy Nelson, Mike Stabile"
 __license__ = 'MIT'
@@ -49,6 +50,13 @@ mail=Mail(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "/login"
+
+# Initialize Flask-Sitemap
+sitemap = Sitemap(app=app)
+
+@sitemap.register_generator
+def home():
+    yield 'home', {}
 
 logging.basicConfig(level=logging.DEBUG)
 logging_off = logging.getLogger("requests")
