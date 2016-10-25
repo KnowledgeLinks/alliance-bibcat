@@ -17,7 +17,7 @@ RUN apt-get update && \
     apt-get install -y apache2 && \
     apt-get install -y libapache2-mod-proxy-uwsgi && \
     a2enmod ssl && \
-    ln -s $APACHE_HOME/sites-available/digitalcchosts.conf $APACHE_HOME/sites-enabled
+    ln -s $APACHE_HOME/sites-available/alliancehosts.conf $APACHE_HOME/sites-enabled/alliancehosts.conf
 
 EXPOSE 80
 EXPOSE 443

@@ -16,17 +16,18 @@ RUN apt-get update && apt-get install -y && \
 
 # Clone master branch of BIBCAT repository,
 # setup Python env, run 
-RUN git clone https://github.com/KnowledgeLink/alliance-bibcat.git /opt/alliance-bibcat
-#    cd $BIBCAT_HOME && \
-#    git submodule init && \
-#    git submodule update && \
-#    mkdir instance && \
-#    pip3 install -r requirements.txt
-#  #chmod +x $DIGCC_HOME/search/poll.py && \
+RUN git clone  https://github.com/KnowledgeLinks/alliance-bibcat.git /opt/alliance-bibcat && \
+    cd /opt && \
+    ls -ltra && \
+    cd $BIBCAT_HOME && \
+    git submodule init && \
+    git submodule update && \
+    mkdir instance && \
+    pip3 install -r requirements.txt
+  #chmod +x $DIGCC_HOME/search/poll.py && \
   #crontab crontab.txt
 
-#COPY instance/config.py $BIBCAT_HOME/instance/config.py
-#COPY supervisord.conf /etc/supervisor/conf.d/
+COPY instance/config.py $BIBCAT_HOME/instance/config.py
 EXPOSE 5000
 
 WORKDIR $BIBCAT_HOME
