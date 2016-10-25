@@ -28,6 +28,10 @@
 <http://www.colorado.edu/libraries/> a bf:Organization,
         schema:Library ;
     rdfs:label "University Libraries - University of Colorado Boulder"@en ;
+    schema:geo [ a schema:GeoCoordinates ;
+        schema:latitude "40.0087 N";
+        schema:longitude "105.2709 W"
+    ] ;
     schema:oclc "COD",
         "CODA" .
 
@@ -37,11 +41,19 @@
 <https://www.coloradocollege.edu/library> a bf:Organization,
         schema:Library ;
     rdfs:label "Colorado College Tutt Library"@en ;
+    schema:geo [ a schema:GeoCoordinates ;
+        schema:latitude: "38.8489 N" ;
+        schema:longitude: "104.8238 W"
+    ];
     schema:oclc "COCA" .
 
 <https://www.coloradocollege.edu/library/seay> a bf:Organization,
         schema:Library ;
     rdfs:label "Colorado College Seay Music Library"@en ;
+    schema:geo [ a schema:GeoCoordinates ;
+        schema:latitude: "38.8463 N";
+        schema:longitude: "104.8256 W"
+    ] ;
     schema:oclc "CJJA" .
 
   

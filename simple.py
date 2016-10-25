@@ -8,17 +8,71 @@ app.config.from_pyfile('config.py')
 def home():
     return "Colorado Alliance of Research Libraries BIBCAT Sitemap"
 
+def __run_query__(sparql):
+    result = requests.post(app.config.get("TRIPLESTORE_URL"),
+        data={"query": sparql,
+              "format": "json"})
+    bindings = result.json().get('results').get('bindings')
+    return bindings
+
+    
+
+def get_authors(uri):
+    authors = []
+    sparql = AUTHOR.format(uri)
+    bindings = __run_query__(sparql)
+    for row in bindings:
+        authors.append({"@type": "Person",
+                        "name": row.get('name').get('value')})
+    return authors
+    
+def get_item(uri):
+    item = None
+    sparql = ITEM.format(uri)
+    bindings = __run_query__(sparql)
+    if len(bindings) == 1:
+        item = bindings[0].get('item').get('value')    
+    return item
+
+def get_place(uri):
+    sparql = LIBRARY_GEO.format(uri)
+    bindings = __run_query__(sparql)
+    if len(bindings) != 1:
+        return
+    return {
+        "@type": "Library",
+        "@id": bindings.get('library').get('value'),
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": bindings.get('latitude').get('value'),
+            "longitude": bindings.get('longitude').get('value')
+        }
+    }
+        
+
+def get_title(uri):
+    sparql = TITLE.format(uri)
+    bindings = __run_query__(sparql)
+    title = ''
+    for row in bindings:
+        title += row.get('main').get('value')
+        if 'subtitle' in row:
+            title += row.get('subtitle').get('value')
+    return title 
+                            
+
 @app.route("/<uuid>")
 def instance(uuid):
+    uri = "http://bibcat.coalliance.org/{}".format(uuid)
     output = {"@context": "http://schema.org",
         "@type": "CreativeWork",
-        "name": "",
+        "name": get_title(uri),
         "datePublished": "",
-        "author": "",
+        "author": get_authors(uri),
         "mainEntityOfPage": {
             "@type": "CreativeWork",
-            "@id": None,
-            "place": {}
+            "@id": get_item(uri),
+            "contentLocation": get_place(uri)
         },
         "publisher": {
             "@type": "Organization",
@@ -31,6 +85,7 @@ def instance(uuid):
              }
         }
     }
+    # add_isbns(uri)
     return jsonify(output)
     
 
@@ -80,6 +135,24 @@ WHERE {
     ?instance bf:generationProcess ?process .
     ?process bf:generationDate ?date .
 } LIMIT 100"""
+
+ITEM = PREFIX + """
+
+SELECT DISTINCT ?item
+WHERE {{
+    ?item bf:itemOf <{0}> .
+}}""" 
+
+LIBRARY_GEO = PREFIX + """
+
+SELECT DISTINCT ?library ?lat ?long
+WHERE {{
+    ?item bf:itemOf <{0}> .
+    ?item bf:heldBy ?library .
+    ?library schema:geo ?coor .
+    ?coor schema:latitude ?lat .
+    ?coor schema:longitude ?long .
+}}"""
 
 TITLE = PREFIX + """
 SELECT ?main ?subtitle
