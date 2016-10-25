@@ -1,0 +1,25 @@
+# Dockerfile for DigitalCC Apache2 web server
+FROM ubuntu:16.04
+MAINTAINER Jeremy Nelson <jermnelson@gmail.com>
+
+env APACHE_HOME /etc/apache2
+env APACHE_RUN_USER    www-data
+env APACHE_RUN_GROUP   www-data
+env APACHE_PID_FILE    /var/run/apache2.pid
+env APACHE_RUN_DIR     /var/run/apache2
+env APACHE_LOCK_DIR    /var/lock/apache2
+env APACHE_LOG_DIR     /var/log/apache2
+env LANG               C
+
+COPY ./alliancehosts.conf $APACHE_HOME/sites-available/alliancehosts.conf
+
+RUN apt-get update && \
+    apt-get install -y apache2 && \
+    apt-get install -y libapache2-mod-proxy-uwsgi && \
+    a2enmod ssl && \
+    ln -s $APACHE_HOME/sites-available/digitalcchosts.conf $APACHE_HOME/sites-enabled
+
+EXPOSE 80
+EXPOSE 443
+
+CMD ["apache2", "-D", "FOREGROUND"]
