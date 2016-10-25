@@ -19,10 +19,15 @@ def __run_query__(sparql):
 
 def get_authors(uri):
     authors = []
-    sparql = AUTHOR.format(uri)
+    sparql = CREATORS.format(uri)
     bindings = __run_query__(sparql)
     for row in bindings:
-        authors.append({"@type": "Person",
+        raw_type = row.get('type_of').get('value')
+        if raw_type.endswith("Organization"):
+            type_of = "Organization"
+        else:
+            type_of = "Person"
+        authors.append({"@type": type_of,
                         "name": row.get('name').get('value')})
     return authors
     
@@ -35,19 +40,17 @@ def get_item(uri):
     return item
 
 def get_place(uri):
+    output = {"@type": "Library"}
     sparql = LIBRARY_GEO.format(uri)
     bindings = __run_query__(sparql)
-    if len(bindings) != 1:
-        return
-    return {
-        "@type": "Library",
-        "@id": bindings.get('library').get('value'),
-        "geo": {
+    for row in bindings:
+        output["@id"] = row.get('library').get('value')
+        output["geo"] = {
             "@type": "GeoCoordinates",
-            "latitude": bindings.get('latitude').get('value'),
-            "longitude": bindings.get('longitude').get('value')
+            "latitude": row.get('latitude', {}).get('value'),
+            "longitude": row.get('longitude', {}).get('value')
         }
-    }
+    return output
         
 
 def get_title(uri):
@@ -59,19 +62,24 @@ def get_title(uri):
         if 'subtitle' in row:
             title += row.get('subtitle').get('value')
     return title 
+
+def get_types(uuid):
+    return "CreativeWork"
                             
 
 @app.route("/<uuid>")
 def instance(uuid):
     uri = "http://bibcat.coalliance.org/{}".format(uuid)
-    output = {"@context": "http://schema.org",
-        "@type": "CreativeWork",
+    output = {"@context": {"name":"http://schema.org",
+                           "bf": "http://id.loc.gov/ontologies/bibframe/"},
+        "@type": get_types(uuid),
         "name": get_title(uri),
         "datePublished": "",
         "author": get_authors(uri),
         "mainEntityOfPage": {
-            "@type": "CreativeWork",
+            "@type": "CreativeWork", 
             "@id": get_item(uri),
+            "additionalType": "bf:Item",
             "contentLocation": get_place(uri)
         },
         "publisher": {
@@ -106,13 +114,22 @@ PREFIX schema: <http://schema.org/>
 """
 
 
-AUTHOR = PREFIX + """
+CREATORS = PREFIX + """
 
-SELECT DISTINCT ?name
+SELECT DISTINCT ?name ?type_of
 WHERE {{
-    <{0}> relators:aut ?author .
-    ?author schema:name ?name .
+    BIND(<{0}> as ?instance) 
+ {{
+    ?instance relators:aut ?author 
+ }} UNION {{
+    ?instance relators:cre ?author 
+ }} UNION {{
+    ?instance relators:aus ?author 
+ }}
+ ?author schema:name ?name . 
+ ?author rdf:type ?type_of .
 }} ORDER BY ?name"""
+
 
 
 DETAIL = PREFIX + """
@@ -145,13 +162,10 @@ WHERE {{
 
 LIBRARY_GEO = PREFIX + """
 
-SELECT DISTINCT ?library ?lat ?long
+SELECT DISTINCT ?library 
 WHERE {{
     ?item bf:itemOf <{0}> .
     ?item bf:heldBy ?library .
-    ?library schema:geo ?coor .
-    ?coor schema:latitude ?lat .
-    ?coor schema:longitude ?long .
 }}"""
 
 TITLE = PREFIX + """

@@ -38,22 +38,20 @@
 <https://www.coalliance.org/> a bf:Organization ;
     rdfs:label "Colorado Alliance of Research Libraries"@en .
 
-<https://www.coloradocollege.edu/library> a bf:Organization,
+<https://www.coloradocollege.edu/library/> a bf:Organization,
         schema:Library ;
     rdfs:label "Colorado College Tutt Library"@en ;
     schema:geo [ a schema:GeoCoordinates ;
-        schema:latitude: "38.8489 N" ;
-        schema:longitude: "104.8238 W"
+        schema:latitude "38.8489 N" ;
+        schema:longitude "104.8238 W"
     ];
     schema:oclc "COCA" .
 
-<https://www.coloradocollege.edu/library/seay> a bf:Organization,
+<https://www.coloradocollege.edu/library/seay/> a bf:Organization,
         schema:Library ;
     rdfs:label "Colorado College Seay Music Library"@en ;
     schema:geo [ a schema:GeoCoordinates ;
-        schema:latitude: "38.8463 N";
-        schema:longitude: "104.8256 W"
+        schema:latitude "38.8463 N";
+        schema:longitude "104.8256 W"
     ] ;
     schema:oclc "CJJA" .
-
-  
