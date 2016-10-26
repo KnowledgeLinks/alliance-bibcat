@@ -17,7 +17,7 @@ semanticServer:
 
 web:
     build: .
-    dockerfile: DockerUbuntuApache
+    dockerfile: DockerNginx
     links:
      - bibcat:bibcat
     ports:
