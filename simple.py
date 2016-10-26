@@ -91,7 +91,8 @@ def instance(uuid):
                   "height": "90px",
                   "width": "257px"
              }
-        }
+        },
+        "version": "0.5.0"
     }
     # add_isbns(uri)
     return jsonify(output)
