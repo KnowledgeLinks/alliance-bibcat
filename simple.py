@@ -1,12 +1,20 @@
 import requests
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
-@app.route("/")
-def home():
-    return "Colorado Alliance of Research Libraries BIBCAT Sitemap"
+LIBRARIES = dict()
+
+def __setup__():
+    global LIBRARIES
+    bindings = __run_query__(LIBRARY_GEO)
+    for row in bindings:
+        LIBRARIES[row.get('library').get('value')] = {
+            "name": row.get('name').get('value'),
+            "latitude": row.get('lat').get('value'),
+            "longitude": row.get('long').get('value')
+        }
 
 def __run_query__(sparql):
     result = requests.post(app.config.get("TRIPLESTORE_URL"),
@@ -14,6 +22,12 @@ def __run_query__(sparql):
               "format": "json"})
     bindings = result.json().get('results').get('bindings')
     return bindings
+
+
+
+@app.route("/")
+def home():
+    return "Colorado Alliance of Research Libraries BIBCAT Sitemap"
 
     
 
@@ -41,15 +55,18 @@ def get_item(uri):
 
 def get_place(uri):
     output = {"@type": "Library"}
-    sparql = LIBRARY_GEO.format(uri)
+    sparql = LIBRARY.format(uri)
     bindings = __run_query__(sparql)
     for row in bindings:
-        output["@id"] = row.get('library').get('value')
+        library_uri = row.get('library').get('value')
+        output["@id"] = library_uri
         output["geo"] = {
             "@type": "GeoCoordinates",
-            "latitude": row.get('latitude', {}).get('value'),
-            "longitude": row.get('longitude', {}).get('value')
-        }
+            "latitude": LIBRARIES[library_uri]['latitude'],
+            "longitude": LIBRARIES[library_uri]['longitude']
+        },
+        output["name"] = LIBRARIES[library_uri]["name"]
+        
     return output
         
 
@@ -70,6 +87,12 @@ def get_types(uuid):
 @app.route("/<uuid>")
 def instance(uuid):
     uri = "http://bibcat.coalliance.org/{}".format(uuid)
+    if request.args.get("vocab") == "bibframe":
+        return jsonify({"@context": "http://id.loc.gov/ontologies/bibframe/",
+            "@id": uri,
+            "title": {"@type": "InstanceTitle",
+                      "mainTitle": get_title(uri)}
+        })
     output = {"@context": {"name":"http://schema.org",
                            "bf": "http://id.loc.gov/ontologies/bibframe/"},
         "@type": get_types(uuid),
@@ -142,9 +165,6 @@ WHERE {
     ?process bf:generationDate ?date .
 } LIMIT 100"""
 
-
-
-
 INSTANCES = PREFIX + """
 
 SELECT DISTINCT ?instance ?date
@@ -161,13 +181,25 @@ WHERE {{
     ?item bf:itemOf <{0}> .
 }}""" 
 
-LIBRARY_GEO = PREFIX + """
+LIBRARY = PREFIX + """
 
 SELECT DISTINCT ?library 
 WHERE {{
     ?item bf:itemOf <{0}> .
     ?item bf:heldBy ?library .
-}}"""
+}}
+"""
+
+LIBRARY_GEO = PREFIX + """
+
+SELECT DISTINCT ?library ?name ?lat ?long
+WHERE {
+    ?library rdf:type schema:Library .
+    ?library rdfs:label ?name .
+    ?library schema:geo ?coor .
+    ?coor schema:latitude ?lat .
+    ?coor schema:longitude ?long .
+}"""
 
 TITLE = PREFIX + """
 SELECT ?main ?subtitle
@@ -179,4 +211,5 @@ WHERE {{
 
 
 if __name__ == '__main__':
+    __setup__()
     app.run(debug=True)
