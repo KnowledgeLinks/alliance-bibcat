@@ -10,6 +10,7 @@ import time
 from flask import Flask, render_template, request
 from flask import abort, Response
 from flask_cache import Cache
+from flask_negotiate import consumes, produces
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -75,7 +76,9 @@ def __run_query__(sparql):
 
 @app.route("/")
 def home():
-    return "Colorado Alliance of Research Libraries BIBCAT Sitemap"
+    if len(LIBRARIES) < 1:
+        __setup__()
+    return render_template("simple.html")
 
     
 
@@ -133,6 +136,7 @@ def get_types(uuid):
                             
 
 @app.route("/<uuid>")
+@produces("application/json", "application/ld-json")
 def instance(uuid):
     uri = "http://bibcat.coalliance.org/{}".format(uuid)
     bindings = __run_query__(GET_CLASS.format(uri))
@@ -169,11 +173,13 @@ def instance(uuid):
         "version": "0.5.0"
     }
     # add_isbns(uri)
+    print(request.headers["Content-Type"])
     return Response(json.dumps(output), mimetype="application/ld+json")
     
 
 @app.route("/siteindex.xml")
 @cache.cached(timeout=86400) # Cached for 1 day
+@produces("text/xml")
 def site_index():
     """Generates siteindex XML, each sitemap has a maximum of 50k links
     dynamically generates the necessary number of sitemaps in the 
@@ -188,6 +194,7 @@ def site_index():
 
 @app.route("/sitemap<offset>.xml", methods=["GET"])
 @cache.cached(timeout=86400)
+@produces("text/xml")
 def sitemap(offset=0):
     offset = (int(offset)*50000) - 50000
     sparql = INSTANCES.format(offset)
@@ -295,9 +302,6 @@ TRIPLESTORE_COUNT = """SELECT (count(*) as ?count) WHERE {
    ?s ?p ?o .
 }"""
 
-
-
-__setup__()
 
 if __name__ == '__main__':
     app.run(debug=True)
