@@ -6,3 +6,4 @@
 instance/
 tmp/
 raw
+cache/
