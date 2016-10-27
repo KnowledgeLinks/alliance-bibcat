@@ -8,6 +8,7 @@ pymarc>=3.0.3
 rdflib>=4.1.2
 rdflib-jsonld
 elasticsearch_dsl
+Flask-Cache
 Flask-Mail
 Flask-Login
 passlib

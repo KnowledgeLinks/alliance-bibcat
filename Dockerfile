@@ -23,6 +23,7 @@ RUN git clone  https://github.com/KnowledgeLinks/alliance-bibcat.git /opt/allian
     git submodule init && \
     git submodule update && \
     mkdir instance && \
+    mkdir cache && \
     pip3 install -r requirements.txt
   #chmod +x $DIGCC_HOME/search/poll.py && \
   #crontab crontab.txt
