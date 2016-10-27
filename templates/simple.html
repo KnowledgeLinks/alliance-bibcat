@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
   </head>
   <body class="container">
-    <h1>Colorado Alliance of Research Libraries BIBCAT Project</h1>
+    <h1>Colorado Alliance of Research Libraries BIBCAT Pilot</h1>
+    {% block body %}
     <div class="row">
         <section class="col-md-4">
             <h3>Project Links</h3>
@@ -20,12 +21,63 @@
                 <li><a href="{{ url_for('site_index') }}">XML Siteindex</a></li>
             </ul>
         </section>
-        <section>
+        <section class="col-md-8">
             <h2 id="bml-iteration-1">Build-Measure-Learn Iteration One</h2>
-            
-
+            <p class="lead">This first iteration is to build a sitemap interface for 
+            search engines to index selected University of Colorado and Colorado College
+            Linked Data that has been transformed from MARC 21 records to BIBFRAME 2.0
+            entities hosted and published by Colorado Alliance.</p> 
+            <h3>Pilot Triplestore Statistics</h3>
+            <table class="table" id="bml-iteration-1-triplestore">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th>Library</th>
+                        <th># Source MARC</th>
+                        <th># Triples</th>
+                    <tr>
+                </thead>
+            </table>
+            <h3>Pilot BIBFRAME Counts</h3>
+            <table class="table" id="bml-iteration-1-bf-counts">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th>Library</th>
+                        <th>Works</th>
+                        <th>Instances</th>
+                        <th>Items</th> 
+                    </tr>
+                </thead>
+                <tbody>
+                {% for iri, info in bf_counts.items() %}
+                    <tr>
+                        <td>
+                            <a href="{{ iri }}">{{ info.get('name') }}</a>
+                        </td>
+                        {% for row in info.counts %}
+                        <td>
+                           {{ row.get('work_count').get("value") }} 
+                        </td>
+                        <td>
+                           {{ row.get('instance_count').get("value") }} 
+                        </td>
+                        <td>
+                           {{ row.get('item_count').get("value") }} 
+                        </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </section>
     </div>
+    {% endblock body %}
+    <footer class="footer">
+        <div class="container">
+        Project participants include <a href="#">Colorado Alliance of Research Libraries</a>, <a href="#">University of Colorado Boulder Libraries</a>,
+        <a href="#">Colorado College</a>, and <a href="http://knowledgedlinks.io/">Knownledgelinks</a>.
+
+        </div>
+    </footer>
     <!-- jQuery first, then Tether, then Bootstrap JS. -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>

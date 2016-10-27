@@ -5,10 +5,11 @@ import json
 import math
 import os
 import requests
+import threading
 import sys
 import time
 from flask import Flask, render_template, request
-from flask import abort, Response
+from flask import abort, flash, Response
 from flask_cache import Cache
 from flask_negotiate import consumes, produces
 
@@ -21,49 +22,57 @@ PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
 cache = Cache(app, config={"CACHE_TYPE": "filesystem",
                            "CACHE_DIR": os.path.join(PROJECT_BASE, "cache")})
 
+BACKGROUND_THREAD = None
 
-def __setup__():
-    global LIBRARIES
-    bindings = __run_query__(LIBRARY_GEO)
-    for row in bindings:
-        LIBRARIES[row.get('library').get('value')] = {
-            "name": row.get('name').get('value'),
-            "latitude": row.get('lat').get('value'),
-            "longitude": row.get('long').get('value')
-        }
-    while 1:
-        time.sleep(10)
-        try:
-            bindings = __run_query__(TRIPLESTORE_COUNT)
-            count = int(bindings[0].get("count").get("value"))
-            # Check for Empty triplestore, load data and alliance graphs
-            # if empty
-            if count < 1:
-                # Alliance RDF
-                print("...Loading Alliance RDF Graph")
-                with open(os.path.join(PROJECT_BASE,
-                    "custom",
-                    "alliance.ttl")) as fo:
-                    result = requests.post(
-                        app.config.get("TRIPLESTORE_URL"),
-                        data=fo.read(),
-                        headers={"Content-Type": "text/turtle"})
-                # Now loads all TTL files in data directory
-                data_dir = os.path.join(PROJECT_BASE, "data")
-                data_walker = next(os.walk(data_dir))
-                for ttl_filename in data_walker[2]:
-                    print("...Loading {}".format(ttl_filename))
-                    with open(os.path.join(
-                        PROJECT_BASE,
-                        "data",
-                        ttl_filename), "rb+") as fo:
+class SetupThread(threading.Thread):
+
+    def __init__(self, **kwargs):
+        threading.Thread.__init__(self)
+        self.messages = []
+    
+    def run(self):
+        global LIBRARIES
+        bindings = __run_query__(LIBRARY_GEO)
+        for row in bindings:
+            LIBRARIES[row.get('library').get('value')] = {
+                "name": row.get('name').get('value'),
+                "latitude": row.get('lat').get('value'),
+                "longitude": row.get('long').get('value')
+            }
+        while 1:
+            time.sleep(10)
+            try:
+                bindings = __run_query__(TRIPLESTORE_COUNT)
+                count = int(bindings[0].get("count").get("value"))
+                # Check for Empty triplestore, load data and alliance graphs
+                # if empty
+                if count < 1:
+                    # Alliance RDF
+                    self.messages.append("...Loading Alliance RDF Graph")
+                    with open(os.path.join(PROJECT_BASE,
+                        "custom",
+                        "alliance.ttl")) as fo:
                         result = requests.post(
                             app.config.get("TRIPLESTORE_URL"),
-                            data=fo,
+                            data=fo.read(),
                             headers={"Content-Type": "text/turtle"})
-            break
-        except:
-            pass
+                    # Now loads all TTL files in data directory
+                    data_dir = os.path.join(PROJECT_BASE, "data")
+                    data_walker = next(os.walk(data_dir))
+                    for ttl_filename in data_walker[2]:
+                        self.messages.append("...Loading {}".format(ttl_filename))
+                        with open(os.path.join(
+                            PROJECT_BASE,
+                            "data",
+                            ttl_filename), "rb+") as fo:
+                                result = requests.post(
+                                    app.config.get("TRIPLESTORE_URL"),
+                                    data=fo,
+                                headers={"Content-Type": "text/turtle"})
+                break
+            except:
+                pass
+        cache.clear()
 
 def __run_query__(sparql):
     result = requests.post(app.config.get("TRIPLESTORE_URL"),
@@ -76,9 +85,20 @@ def __run_query__(sparql):
 
 @app.route("/")
 def home():
+    global BACKGROUND_THREAD   
     if len(LIBRARIES) < 1:
-        __setup__()
-    return render_template("simple.html")
+        BACKGROUND_THREAD = SetupThread()
+        BACKGROUND_THREAD.start()
+        return render_template("loading.html")
+    triples_store_stats = {}
+    bf_counts = {}
+    for iri, info in LIBRARIES.items():
+        bf_counts_bindings = __run_query__(BIBFRAME_COUNTS.format(iri))
+        bf_counts[iri] = {"name": info.get('name'),
+                          "counts": bf_counts_bindings}
+    return render_template("simple.html", 
+        ts_stats=triples_store_stats,
+        bf_counts=bf_counts)
 
     
 
@@ -179,7 +199,6 @@ def instance(uuid):
 
 @app.route("/siteindex.xml")
 @cache.cached(timeout=86400) # Cached for 1 day
-@produces("text/xml")
 def site_index():
     """Generates siteindex XML, each sitemap has a maximum of 50k links
     dynamically generates the necessary number of sitemaps in the 
@@ -210,6 +229,16 @@ PREFIX = """PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX relators: <http://id.loc.gov/vocabulary/relators/>
 PREFIX schema: <http://schema.org/>
+"""
+
+BIBFRAME_COUNTS = PREFIX + """
+
+SELECT DISTINCT (count(?work) as ?work_count) (count(?instance) as ?instance_count) (count(?item) as ?item_count)
+WHERE {{
+    ?item bf:heldBy <{0}> .
+    ?item bf:itemOf ?instance .
+    ?instance bf:instanceOf ?work .
+}}
 """
 
 CREATORS = PREFIX + """
@@ -301,7 +330,6 @@ WHERE {{
 TRIPLESTORE_COUNT = """SELECT (count(*) as ?count) WHERE {
    ?s ?p ?o .
 }"""
-
 
 if __name__ == '__main__':
     app.run(debug=True)
