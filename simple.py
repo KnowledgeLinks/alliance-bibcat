@@ -9,7 +9,7 @@ import threading
 import sys
 import time
 from flask import Flask, render_template, request
-from flask import abort, flash, Response
+from flask import abort, jsonify, flash, Response
 from flask_cache import Cache
 from flask_negotiate import consumes, produces
 
@@ -24,6 +24,17 @@ cache = Cache(app, config={"CACHE_TYPE": "filesystem",
 
 BACKGROUND_THREAD = None
 
+def set_libraries():
+    global LIBRARIES
+    bindings = __run_query__(LIBRARY_GEO)
+    for row in bindings:
+        LIBRARIES[row.get('library').get('value')] = {
+            "name": row.get('name').get('value'),
+            "latitude": row.get('lat').get('value'),
+            "longitude": row.get('long').get('value')
+    }
+
+
 class SetupThread(threading.Thread):
 
     def __init__(self, **kwargs):
@@ -31,14 +42,7 @@ class SetupThread(threading.Thread):
         self.messages = []
     
     def run(self):
-        global LIBRARIES
-        bindings = __run_query__(LIBRARY_GEO)
-        for row in bindings:
-            LIBRARIES[row.get('library').get('value')] = {
-                "name": row.get('name').get('value'),
-                "latitude": row.get('lat').get('value'),
-                "longitude": row.get('long').get('value')
-            }
+        set_libraries()
         while 1:
             time.sleep(10)
             try:
@@ -48,7 +52,9 @@ class SetupThread(threading.Thread):
                 # if empty
                 if count < 1:
                     # Alliance RDF
-                    self.messages.append("...Loading Alliance RDF Graph")
+                    msg = "...Loading Alliance RDF Graph"
+                    self.messages.append(msg)
+                    print(msg)
                     with open(os.path.join(PROJECT_BASE,
                         "custom",
                         "alliance.ttl")) as fo:
@@ -60,7 +66,9 @@ class SetupThread(threading.Thread):
                     data_dir = os.path.join(PROJECT_BASE, "data")
                     data_walker = next(os.walk(data_dir))
                     for ttl_filename in data_walker[2]:
-                        self.messages.append("...Loading {}".format(ttl_filename))
+                        msg = "...Loading {}".format(ttl_filename)
+                        self.messages.append(msg)
+                        print(msg)
                         with open(os.path.join(
                             PROJECT_BASE,
                             "data",
@@ -78,6 +86,9 @@ def __run_query__(sparql):
     result = requests.post(app.config.get("TRIPLESTORE_URL"),
         data={"query": sparql,
               "format": "json"})
+    if result.status_code > 399:
+        print(result.text)
+        return []
     bindings = result.json().get('results').get('bindings')
     return bindings
 
@@ -85,20 +96,29 @@ def __run_query__(sparql):
 
 @app.route("/")
 def home():
-    global BACKGROUND_THREAD   
-    if len(LIBRARIES) < 1:
-        BACKGROUND_THREAD = SetupThread()
-        BACKGROUND_THREAD.start()
-        return render_template("loading.html")
+    global BACKGROUND_THREAD
+    #print(len(LIBRARIES))
+    #if len(LIBRARIES) < 1:
+     #   time.sleep(5)
+     #   set_libraries() 
+        #BACKGROUND_THREAD = SetupThread()
+        #BACKGROUND_THREAD.start()
+     #   return render_template("loading.html")
+    #print("Here is the next thing")
+    
     triples_store_stats = {}
     bf_counts = {}
     for iri, info in LIBRARIES.items():
+        
         bf_counts_bindings = __run_query__(BIBFRAME_COUNTS.format(iri))
+        print("\t{}".format(iri))
         bf_counts[iri] = {"name": info.get('name'),
                           "counts": bf_counts_bindings}
+
     return render_template("simple.html", 
         ts_stats=triples_store_stats,
         bf_counts=bf_counts)
+
 
     
 
@@ -115,7 +135,14 @@ def get_authors(uri):
         authors.append({"@type": type_of,
                         "name": row.get('name').get('value')})
     return authors
-    
+   
+def get_isbns(uri):
+    isbns = []
+    bindings = __run_query__(ISBNS.format(uri))
+    for row in bindings:
+        isbns.append(row.get('isbn').get('value'))
+    return isbns
+
 def get_item(uri):
     item = None
     sparql = ITEM.format(uri)
@@ -156,7 +183,7 @@ def get_types(uuid):
                             
 
 @app.route("/<uuid>")
-@produces("application/json", "application/ld-json")
+#@produces("application/json", "application/ld-json")
 def instance(uuid):
     uri = "http://bibcat.coalliance.org/{}".format(uuid)
     bindings = __run_query__(GET_CLASS.format(uri))
@@ -174,6 +201,7 @@ def instance(uuid):
         "name": get_title(uri),
         "datePublished": "",
         "author": get_authors(uri),
+        "isbn": get_isbns(uri),
         "mainEntityOfPage": {
             "@type": "CreativeWork", 
             "@id": get_item(uri),
@@ -192,8 +220,7 @@ def instance(uuid):
         },
         "version": "0.5.0"
     }
-    # add_isbns(uri)
-    print(request.headers["Content-Type"])
+    return jsonify(output)
     return Response(json.dumps(output), mimetype="application/ld+json")
     
 
@@ -213,7 +240,7 @@ def site_index():
 
 @app.route("/sitemap<offset>.xml", methods=["GET"])
 @cache.cached(timeout=86400)
-@produces("text/xml")
+#@produces("text/xml")
 def sitemap(offset=0):
     offset = (int(offset)*50000) - 50000
     sparql = INSTANCES.format(offset)
@@ -290,6 +317,14 @@ SELECT (count(*) as ?count) WHERE {
    ?s rdf:type bf:Instance .
 }"""
 
+ISBNS = PREFIX + """
+
+SELECT DISTINCT ?isbn
+WHERE {{
+    <{0}> bf:identifiedBy ?isbn_node .
+    ?isbn_node rdf:type bf:Isbn .
+    ?isbn_node rdf:value ?isbn .
+}}"""
 
 ITEM = PREFIX + """
 
@@ -332,4 +367,5 @@ TRIPLESTORE_COUNT = """SELECT (count(*) as ?count) WHERE {
 }"""
 
 if __name__ == '__main__':
+    set_libraries()
     app.run(debug=True)
