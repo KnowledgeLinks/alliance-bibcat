@@ -28,6 +28,17 @@
             Linked Data that has been transformed from MARC 21 records to BIBFRAME 2.0
             entities hosted and published by Colorado Alliance.</p> 
             <h3>Pilot Triplestore Statistics</h3>
+            <h4>Build Constraints</h4>
+            <ul>
+                <li>Simplified BF relationships; uses unique Instances with corresponding
+                Item with a 1-to-1 relationship. Works are blank nodes in the Instance
+                graph</li>
+                <li>No de-duplication done on any of the BIBFRAME entities</li>
+                <li>If a local ILS number wasn't found, generated stub URI for Items that
+                may not be correct</li>
+                <li>Work and Instance Subclasses not generated</li>
+            </ul>
+
             <table class="table" id="bml-iteration-1-triplestore">
                 <thead class="thead-inverse">
                     <tr>
@@ -37,7 +48,16 @@
                     <tr>
                 </thead>
                 <tbody>
-
+                    <tr>
+                        <td>University of Colorado Boulder</td>
+                        <td>87,546</td>
+                        <td>3,602,203</td>
+                    </tr>
+                    <tr>
+                        <td>Colorado College</td>
+                        <td>84,013</td>
+                        <td>3,508,039</td>
+                    </tr>
                 </tbody>
             </table>
             <h3>Pilot BIBFRAME Counts</h3>

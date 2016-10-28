@@ -66,6 +66,8 @@ class SetupThread(threading.Thread):
                     data_dir = os.path.join(PROJECT_BASE, "data")
                     data_walker = next(os.walk(data_dir))
                     for ttl_filename in data_walker[2]:
+                        if not ttl_filename.endswith("ttl"):
+                            continue
                         msg = "...Loading {}".format(ttl_filename)
                         self.messages.append(msg)
                         print(msg)
@@ -96,20 +98,9 @@ def __run_query__(sparql):
 
 @app.route("/")
 def home():
-    global BACKGROUND_THREAD
-    #print(len(LIBRARIES))
-    #if len(LIBRARIES) < 1:
-     #   time.sleep(5)
-     #   set_libraries() 
-        #BACKGROUND_THREAD = SetupThread()
-        #BACKGROUND_THREAD.start()
-     #   return render_template("loading.html")
-    #print("Here is the next thing")
-    
     triples_store_stats = {}
     bf_counts = {}
     for iri, info in LIBRARIES.items():
-        
         bf_counts_bindings = __run_query__(BIBFRAME_COUNTS.format(iri))
         print("\t{}".format(iri))
         bf_counts[iri] = {"name": info.get('name'),
@@ -120,7 +111,14 @@ def home():
         bf_counts=bf_counts)
 
 
-    
+@app.route("/init")
+def initialize():
+    global BACKGROUND_THREAD
+    BACKGROUND_THREAD = SetupThread()
+    BACKGROUND_THREAD.start()
+    time.sleep(15)
+    set_libraries()
+    return "Initializing Triplestore"
 
 def get_authors(uri):
     authors = []
@@ -367,5 +365,4 @@ TRIPLESTORE_COUNT = """SELECT (count(*) as ?count) WHERE {
 }"""
 
 if __name__ == '__main__':
-    set_libraries()
     app.run(debug=True)
