@@ -11,7 +11,6 @@ import time
 from flask import Flask, render_template, request
 from flask import abort, jsonify, flash, Response
 from flask_cache import Cache
-from flask_negotiate import consumes, produces
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -89,7 +88,6 @@ def __run_query__(sparql):
         data={"query": sparql,
               "format": "json"})
     if result.status_code > 399:
-        print(result.text)
         return []
     bindings = result.json().get('results').get('bindings')
     return bindings
@@ -100,9 +98,10 @@ def __run_query__(sparql):
 def home():
     triples_store_stats = {}
     bf_counts = {}
+    if len(LIBRARIES) < 1:
+        set_libraries()
     for iri, info in LIBRARIES.items():
         bf_counts_bindings = __run_query__(BIBFRAME_COUNTS.format(iri))
-        print("\t{}".format(iri))
         bf_counts[iri] = {"name": info.get('name'),
                           "counts": bf_counts_bindings}
 
@@ -110,15 +109,6 @@ def home():
         ts_stats=triples_store_stats,
         bf_counts=bf_counts)
 
-
-@app.route("/init")
-def initialize():
-    global BACKGROUND_THREAD
-    BACKGROUND_THREAD = SetupThread()
-    BACKGROUND_THREAD.start()
-    time.sleep(15)
-    set_libraries()
-    return "Initializing Triplestore"
 
 def get_authors(uri):
     authors = []
@@ -181,7 +171,6 @@ def get_types(uuid):
                             
 
 @app.route("/<uuid>")
-#@produces("application/json", "application/ld-json")
 def instance(uuid):
     uri = "http://bibcat.coalliance.org/{}".format(uuid)
     bindings = __run_query__(GET_CLASS.format(uri))
@@ -238,7 +227,6 @@ def site_index():
 
 @app.route("/sitemap<offset>.xml", methods=["GET"])
 @cache.cached(timeout=86400)
-#@produces("text/xml")
 def sitemap(offset=0):
     offset = (int(offset)*50000) - 50000
     sparql = INSTANCES.format(offset)
