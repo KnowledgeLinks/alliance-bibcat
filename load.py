@@ -9,7 +9,7 @@ import urllib.request
 PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
 sys.path.append(PROJECT_BASE)
 import instance.config as config
-
+TRIPLESTORE_URL = "http://localhost:9999/sparql/query"
 
 def load_turtles():
     """Loads all RDF Turtle files located in the custom and data 
@@ -29,7 +29,7 @@ def load_turtles():
             with open(full_path, "rb") as fo:
                 raw_turtle = fo.read()
             request = urllib.request.Request(
-                          url=config.TRIPLESTORE_URL,
+                          url=TRIPLESTORE_URL,
                           data=raw_turtle,
                           headers={"Content-type": "text/turtle"})
             with urllib.request.urlopen(request) as triplestore_response:
