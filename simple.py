@@ -145,6 +145,8 @@ def get_place(uri):
     bindings = __run_query__(sparql)
     for row in bindings:
         library_uri = row.get('library').get('value')
+        if not library_uri in LIBRARIES:
+            continue
         output["@id"] = library_uri
         output["geo"] = {
             "@type": "GeoCoordinates",
@@ -353,4 +355,5 @@ TRIPLESTORE_COUNT = """SELECT (count(*) as ?count) WHERE {
 }"""
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    set_libraries()
+    app.run(host='0.0.0.0', debug=True)
