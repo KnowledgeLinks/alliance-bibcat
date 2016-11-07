@@ -123,7 +123,15 @@ def get_authors(uri):
         authors.append({"@type": type_of,
                         "name": row.get('name').get('value')})
     return authors
-   
+  
+def get_date_published(uri):
+    sparql = WORK_DATE.format(uri)
+    bindings = __run_query__(sparql)
+    dates = []
+    for row in bindings:
+        dates.append(row.get('date').get('value')
+    return dates
+ 
 def get_isbns(uri):
     isbns = []
     bindings = __run_query__(ISBNS.format(uri))
@@ -184,17 +192,15 @@ def instance(uuid):
             "title": {"@type": "InstanceTitle",
                       "mainTitle": get_title(uri)}
         })
-    output = {"@context": {"name":"http://schema.org",
-                           "bf": "http://id.loc.gov/ontologies/bibframe/"},
+    output = {"@context": "http://schema.org",
         "@type": get_types(uuid),
         "name": get_title(uri),
-        "datePublished": "",
+        "datePublished": get_date_published(uri),
         "author": get_authors(uri),
         "isbn": get_isbns(uri),
         "mainEntityOfPage": {
             "@type": "CreativeWork", 
             "@id": get_item(uri),
-            "additionalType": "bf:Item",
             "contentLocation": get_place(uri)
         },
         "publisher": {
@@ -207,7 +213,7 @@ def instance(uuid):
                   "width": "257px"
              }
         },
-        "version": "0.5.0"
+        "version": "0.6.0"
     }
     return jsonify(output)
     return Response(json.dumps(output), mimetype="application/ld+json")
@@ -353,6 +359,13 @@ WHERE {{
 TRIPLESTORE_COUNT = """SELECT (count(*) as ?count) WHERE {
    ?s ?p ?o .
 }"""
+
+WORK_DATE = PREFIX + """
+SELECT ?date
+WHERE {{
+    <{0}> bf:instanceOf ?work .
+    ?work bf:originDate ?date .
+}}"""
 
 if __name__ == '__main__':
     set_libraries()
