@@ -34,55 +34,6 @@ def set_libraries():
     }
 
 
-class SetupThread(threading.Thread):
-
-    def __init__(self, **kwargs):
-        threading.Thread.__init__(self)
-        self.messages = []
-    
-    def run(self):
-        set_libraries()
-        while 1:
-            time.sleep(10)
-            try:
-                bindings = __run_query__(TRIPLESTORE_COUNT)
-                count = int(bindings[0].get("count").get("value"))
-                # Check for Empty triplestore, load data and alliance graphs
-                # if empty
-                if count < 1:
-                    # Alliance RDF
-                    msg = "...Loading Alliance RDF Graph"
-                    self.messages.append(msg)
-                    print(msg)
-                    with open(os.path.join(PROJECT_BASE,
-                        "custom",
-                        "alliance.ttl")) as fo:
-                        result = requests.post(
-                            app.config.get("TRIPLESTORE_URL"),
-                            data=fo.read(),
-                            headers={"Content-Type": "text/turtle"})
-                    # Now loads all TTL files in data directory
-                    data_dir = os.path.join(PROJECT_BASE, "data")
-                    data_walker = next(os.walk(data_dir))
-                    for ttl_filename in data_walker[2]:
-                        if not ttl_filename.endswith("ttl"):
-                            continue
-                        msg = "...Loading {}".format(ttl_filename)
-                        self.messages.append(msg)
-                        print(msg)
-                        with open(os.path.join(
-                            PROJECT_BASE,
-                            "data",
-                            ttl_filename), "rb+") as fo:
-                                result = requests.post(
-                                    app.config.get("TRIPLESTORE_URL"),
-                                    data=fo,
-                                headers={"Content-Type": "text/turtle"})
-                break
-            except:
-                pass
-        cache.clear()
-
 def __run_query__(sparql):
     result = requests.post(app.config.get("TRIPLESTORE_URL"),
         data={"query": sparql,
@@ -129,7 +80,7 @@ def get_date_published(uri):
     bindings = __run_query__(sparql)
     dates = []
     for row in bindings:
-        dates.append(row.get('date').get('value')
+        dates.append(row.get('date').get('value'))
     return dates
  
 def get_isbns(uri):
@@ -215,6 +166,9 @@ def instance(uuid):
         },
         "version": "0.6.0"
     }
+    if len(output['isbn']) > 0:
+        output.pop("@type")
+        output['@type'] = 'Book' 
     return jsonify(output)
     return Response(json.dumps(output), mimetype="application/ld+json")
     
