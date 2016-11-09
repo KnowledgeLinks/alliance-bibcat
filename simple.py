@@ -175,7 +175,6 @@ def instance(uuid):
     return jsonify(output)
     return Response(json.dumps(output), mimetype="application/ld+json")
     
-
 @app.route("/siteindex.xml")
 @cache.cached(timeout=86400) # Cached for 1 day
 def site_index():
@@ -187,7 +186,7 @@ def site_index():
     shards = math.ceil(count/50000)
     xml = render_template("siteindex.xml", 
             count=range(1, shards+1), 
-            last_modified=datetime.datetime.utcnow().isoformat())
+            last_modified=datetime.datetime.utcnow().strftime("%Y-%m-%d"))
     return Response(xml, mimetype="text/xml")
 
 @app.route("/sitemap<offset>.xml", methods=["GET"])
