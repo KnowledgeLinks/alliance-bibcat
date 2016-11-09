@@ -29,6 +29,7 @@ RUN git clone  https://github.com/KnowledgeLinks/alliance-bibcat.git /opt/allian
   #crontab crontab.txt
 
 COPY instance/config.py $BIBCAT_HOME/instance/config.py
+COPY instance/google*.html $BIBCAT_HOME/instance/.
 EXPOSE 5000
 
 WORKDIR $BIBCAT_HOME

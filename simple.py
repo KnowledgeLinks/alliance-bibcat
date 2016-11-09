@@ -133,6 +133,9 @@ def get_types(uuid):
 
 @app.route("/<uuid>")
 def instance(uuid):
+    # Hack for Google verification
+    if uuid.startswith("google"):
+        return render_template(uuid)
     uri = "http://bibcat.coalliance.org/{}".format(uuid)
     bindings = __run_query__(GET_CLASS.format(uri))
     if len(bindings) < 1:
