@@ -1,0 +1,30 @@
+{% extends 'simple.html' %}
+
+{% block body %}
+<script type="application/ld+json">
+    {{ info|tojson|safe }}
+</script>
+<div class="row">
+    <div class="card col-md-6">
+        <div class="card-block">
+            <h4 class="card-title">{{ info.name }}</h4>
+            {% if info.author %}
+            <p class="card-text">by {% for row in info.author %}{{ row.name }}{% if not loop.last %},{% endif %}</p>
+            {% endfor %}
+            {% endif %}
+            {% if info.datePublished %}
+            <p class="card-text">Date Published: 
+                {% for row in info.datePublished %}
+                    {{ row }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+            </p>
+            {% endif %}
+            <a href="{{ info.mainEntityOfPage.get('@id') }}" class="btn btn-primary">{{ info.mainEntityOfPage.get('@id') }}</a>
+        </div>
+    </div>
+    <div class="col-md-6">
+
+
+    </div>
+</div>
+{% endblock %}

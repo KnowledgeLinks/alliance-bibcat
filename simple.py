@@ -27,11 +27,16 @@ def set_libraries():
     global LIBRARIES
     bindings = __run_query__(LIBRARY_GEO)
     for row in bindings:
-        LIBRARIES[row.get('library').get('value')] = {
+        library_iri = row.get('library').get('value')
+        LIBRARIES[library_iri] = {
             "name": row.get('name').get('value'),
+            "address": get_address(library_iri),
+            "image": row.get('image').get('value'),
             "latitude": row.get('lat').get('value'),
-            "longitude": row.get('long').get('value')
-    }
+            "longitude": row.get('long').get('value'),
+            "telephone": row.get('telephone').get('value')
+        }
+        
 
 
 def __run_query__(sparql):
@@ -60,6 +65,18 @@ def home():
         ts_stats=triples_store_stats,
         bf_counts=bf_counts)
 
+def get_address(uri):
+    address = {"@type": "PostalAddress"}
+    sparql = LIBRARY_ADDRESS.format(uri)
+    bindings = __run_query__(sparql)
+    for row in bindings:
+        address["streetAddress"] = row.get('streetAddr').get('value')
+        address["addressLocality"] = row.get('city').get('value')
+        address["addressRegion"] = row.get('state').get('value')
+        address["postalCode"] = row.get('zip').get('value')
+        break
+    return address 
+        
 
 def get_authors(uri):
     authors = []
@@ -99,7 +116,7 @@ def get_item(uri):
     return item
 
 def get_place(uri):
-    output = {"@type": "Library"}
+    output = {"@type": "Library", "priceRange" : "0"}
     sparql = LIBRARY.format(uri)
     bindings = __run_query__(sparql)
     for row in bindings:
@@ -111,9 +128,11 @@ def get_place(uri):
             "@type": "GeoCoordinates",
             "latitude": LIBRARIES[library_uri]['latitude'],
             "longitude": LIBRARIES[library_uri]['longitude']
-        },
+        }
+        output["address"] = LIBRARIES[library_uri]["address"]
+        output["image"] = LIBRARIES[library_uri]["image"]
         output["name"] = LIBRARIES[library_uri]["name"]
-        
+        output["telephone"] = LIBRARIES[library_uri]["telephone"]
     return output
         
 
@@ -167,13 +186,12 @@ def instance(uuid):
                   "width": "257px"
              }
         },
-        "version": "0.6.0"
+        "version": "0.7.0"
     }
     if len(output['isbn']) > 0:
         output.pop("@type")
         output['@type'] = 'Book' 
-    return jsonify(output)
-    return Response(json.dumps(output), mimetype="application/ld+json")
+    return render_template('detail.html', info=output)
     
 @app.route("/siteindex.xml")
 @cache.cached(timeout=86400) # Cached for 1 day
@@ -293,12 +311,26 @@ WHERE {{
 }}
 """
 
+LIBRARY_ADDRESS = PREFIX + """
+
+SELECT DISTINCT ?streetAddr ?city ?state ?zip
+WHERE {{
+    <{0}> schema:address ?addr .
+    ?addr schema:streetAddress ?streetAddr .
+    ?addr schema:addressLocality ?city .
+    ?addr schema:addressRegion ?state .
+    ?addr schema:postalCode ?zip .
+}}
+"""
+
 LIBRARY_GEO = PREFIX + """
 
-SELECT DISTINCT ?library ?name ?lat ?long
+SELECT DISTINCT ?library ?name ?image ?telephone ?lat ?long
 WHERE {
     ?library rdf:type schema:Library .
     ?library rdfs:label ?name .
+    ?library schema:telephone ?telephone .
+    ?library schema:image ?image .
     ?library schema:geo ?coor .
     ?coor schema:latitude ?lat .
     ?coor schema:longitude ?long .

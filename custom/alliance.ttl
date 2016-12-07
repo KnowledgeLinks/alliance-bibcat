@@ -28,12 +28,21 @@
 <http://www.colorado.edu/libraries/> a bf:Organization,
         schema:Library ;
     rdfs:label "University Libraries - University of Colorado Boulder"@en ;
+    schema:address [
+        schema:addressCountry "US" ;
+        schema:addressLocality "Boulder"@en ;
+        schema:addressRegion "Colorado"@en ;
+        schema:postalCode "80309-0184";
+        schema:streetAddress "1720 Pleasant Street"@en 
+    ] ;
     schema:geo [ a schema:GeoCoordinates ;
         schema:latitude "40.0087 N";
         schema:longitude "105.2709 W"
     ] ;
+    schema:image "http://www.colorado.edu/libraries/sites/default/files/styles/large_wide_thumbnail/public/callout/norlin.jpg" ;
     schema:oclc "COD",
-        "CODA" .
+        "CODA" ;
+    schema:telephone "303-492-8705" .
 
 <https://www.coalliance.org/> a bf:Organization ;
     rdfs:label "Colorado Alliance of Research Libraries"@en .
@@ -41,17 +50,35 @@
 <https://www.coloradocollege.edu/library/> a bf:Organization,
         schema:Library ;
     rdfs:label "Colorado College Tutt Library"@en ;
+    schema:address [ a schema:PostalAddress ;
+        schema:streetAddress "1021 N. Cascade Avenue"@en ;
+        schema:postalCode "80903" ;
+        schema:addressCountry "US" ;
+        schema:addressLocality "Colorado Springs"@en ;
+        schema:addressRegion "Colorado"@en 
+    ] ;
     schema:geo [ a schema:GeoCoordinates ;
         schema:latitude "38.8489 N" ;
         schema:longitude "104.8238 W"
     ];
-    schema:oclc "COCA" .
+    schema:image "https://www.coloradocollege.edu/library/images/history/22580f_a300fbc3f90b4ca8b3465f3a512aefb2.jpg" ;
+    schema:oclc "COCA" ;
+    schema:telephone "719-389-6184" .
 
 <https://www.coloradocollege.edu/library/seay/> a bf:Organization,
         schema:Library ;
     rdfs:label "Colorado College Seay Music Library"@en ;
+    schema:address [ a schema:PostalAddress ;
+        schema:streetAddress "5 W. Cache La Poudre Street"@en ;
+        schema:postalCode "80903" ;
+        schema:addressCountry "US" ;
+        schema:addressLocality "Colorado Springs"@en ;
+        schema:addressRegion "Colorado"@en 
+    ] ;
     schema:geo [ a schema:GeoCoordinates ;
         schema:latitude "38.8463 N";
         schema:longitude "104.8256 W"
     ] ;
-    schema:oclc "CJJA" .
+    schema:image "https://www.coloradocollege.edu/dotAsset/466fb386-021d-4ea5-87e5-0d03432c0bcc.jpg" ;
+    schema:oclc "CJJA" ;
+    schema:telephone "719-389-6560" .
