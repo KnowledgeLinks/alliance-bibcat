@@ -3,7 +3,7 @@
     {% for instance in instances %}
     <url>
         <loc>{{ instance.get('instance').get('value') }}</loc>
-        <lastmod>{{ instance.get('date').get('value')[0:10] }}</lastmod>
+        <lastmod>{% if config.MOD_DATE %}{{ config.MOD_DATE }}{% else %}{{ instance.get('date').get('value')[0:10] }}{% endif %}</lastmod>
     </url>
     {% endfor %}
 </urlset>
