@@ -54,6 +54,7 @@ def __run_query__(sparql):
 def home():
     triples_store_stats = {}
     bf_counts = {}
+    print("Before simple")
     if len(LIBRARIES) < 1:
         set_libraries()
     for iri, info in LIBRARIES.items():
@@ -202,9 +203,12 @@ def site_index():
     bindings = __run_query__(INSTANCE_COUNT)
     count = int(bindings[0].get('count').get('value'))
     shards = math.ceil(count/50000)
+    mod_date = app.config.get('MOD_DATE')
+    if mod_date is None:
+        mod_date=datetime.datetime.utcnow().strftime("%Y-%m-%d")
     xml = render_template("siteindex.xml", 
             count=range(1, shards+1), 
-            last_modified=datetime.datetime.utcnow().strftime("%Y-%m-%d"))
+            last_modified=mod_date)
     return Response(xml, mimetype="text/xml")
 
 @app.route("/sitemap<offset>.xml", methods=["GET"])

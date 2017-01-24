@@ -1,11 +1,27 @@
 {% extends 'simple.html' %}
 
+{% block head_title %}{{ info.name }}{% endblock head_title %}
+
+{% block css %}
+<style>
+    iframe {
+        border: 1px  rgba(0, 0, 0, 0.125) solid;
+        margin: .5em;
+        width: 800px;
+        height: 950px;
+    }
+</style>
+{% endblock css %}
+{% block title %}{{ info.name }}{% endblock title %}
+
+
+
 {% block body %}
 <script type="application/ld+json">
     {{ info|tojson|safe }}
 </script>
 <div class="row">
-    <div class="card col-md-6">
+    <div class="card col-md-4">
         <div class="card-block">
             <h4 class="card-title">{{ info.name }}</h4>
             {% if info.author %}
@@ -19,11 +35,20 @@
                 {% endfor %}
             </p>
             {% endif %}
-            <a href="{{ info.mainEntityOfPage.get('@id') }}" class="btn btn-primary">{{ info.mainEntityOfPage.get('@id') }}</a>
+            <p class="card-text inverse"> 
+                <i class="fa fa-commenting-o" aria-hidden="true"></i> Alliance BIBFRAME Instance
+            </p>
         </div>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-8">
+        <p class="lead"><i class="fa fa-sticky-note fa-flip-vertical" aria-hidden="true"></i>
+            {{ info.mainEntityOfPage.contentLocation.name }} BIBFRAME Item
 
+        </p>
+        <h3><a href="{{ info.mainEntityOfPage.get('@id') }}">{{ info.mainEntityOfPage.get('@id') }}</a>:</h3>
+
+        <iframe src="{{ info.mainEntityOfPage.get('@id') }}"></iframe>  
+                
 
     </div>
 </div>
