@@ -3,8 +3,13 @@ __author__ = "Jeremy Nelson"
 
 import datetime
 import os
+import rdflib
 import sys
 import urllib.request
+try:
+    from lxml import etree
+except ImportError:
+    import xml.etree.ElementTree as etree
 
 PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
 sys.path.append(PROJECT_BASE)
@@ -39,6 +44,21 @@ def load_turtles():
     print("Finished RDF turtle load at {}, total time {} minutes".format(
         end,
         (end-start).seconds / 60.0))
+
+def load_marc_xml(marc_filepath, mrc2bf_xsl):
+    marc_context = etree.iterparse(marc_filepath)
+    xslt_tree = etree.parse(mrc2bf_xsl)
+    xslt_transform = etree.XSLT(xslt_tree)
+    match_keys, record = None, {}
+    for action, elem in marc_context:
+        if "record" in elem.tag:
+            record = elem
+            bf_rdf_xml = xslt_transform(
+                record, 
+                baseuri="'{0}'".format(config.get("BASE_URL"))
+            bf_rdf = rdflib.parse(bf_rdf_xml)
+
+
 
 
 if __name__ == '__main__':
