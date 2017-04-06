@@ -16,6 +16,7 @@ except ImportError:
 
 PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
 sys.path.append(PROJECT_BASE)
+from bibcat.rml import processor
 import instance.config as config
 TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
 
@@ -47,9 +48,75 @@ def clean_subjects(graph):
                     graph.remove((subj, pred, subject))
                     graph.add((subj, pred, new_subject))
 
-                    
-                    
-                
+def alliance_processing(**kwargs):
+    """Takes RDF graph of the resulting LOC's marc2bibframe2, replaces BF Instance
+    with uri_minter, generates a BF Item
+
+    """
+    marc_processor = processor.XMLProcessor(
+        rml_rules=os.path.join(PROJECT_BASE, "custom/rml-alliance.ttl"),
+        institution_iri=kwargs.get("institution_iri"))
+    alliance = rdflib.Graph()
+    alliance.parse(os.path.join(PROJECT_BASE, "custom/alliance.ttl"), 
+        format='turtle')
+    loc_bf = kwargs.get('loc_bf')
+    marc_xml = kwargs.get("marc_xml")
+    uri_minter = kwargs.get('uri_minter', slugify)
+    institution_iri = kwargs.get("institution_iri")
+    parent_iri = alliance.value(subject=institution_iri,
+        predicate=processor.NS_MGR.schema.parentOrganization)
+    parent_label = alliance.value(subject=parent_iri,
+        predicate=processor.NS_MGR.rdfs.label)
+    for org_instance_iri in loc_bf.subjects(
+        predicate=rdflib.RDF.type,
+        object=processor.NS_MGR.bf.Instance):
+        org_label = loc_bf.value(subject=org_instance_iri,
+                                 predicate=processor.NS_MGR.rdfs.label)
+        if org_label is None:
+            # No RDFS label for Instance, keep original IRI
+            continue
+        new_instance_iri = rdflib.URIRef(
+            urllib.parse.urljoin(
+                config.BASE_URL,
+                uri_minter(org_label)))
+        replace_iri(loc_bf, org_instance_iri, new_instance_iri)
+        instance_url = "{0}({1})".format(
+            uri_minter(org_label),
+            uri_minter(parent_label))
+
+
+        #! Collapse all Items into a single IRI, should separate out digital
+        #! and other formats as separate URLs
+        new_item_iri = rdflib.URIRef(
+            urllib.parse.urljoin(
+                config.BASE_URL,
+                instance_url))
+        for org_item_iri in loc_bf.subjects(
+            predicate=processor.NS_MGR.bf.itemOf,  
+            object=new_instance_iri):
+            replace_iri(loc_bf, org_item_iri, new_item_iri)
+        marc_processor.run(marc_xml,
+            instance_iri=new_instance_iri,
+            item_iri=new_item_iri)
+        loc_bf += marc_processor.output
+    return loc_bf
+        
+            
+def replace_iri(graph, old_iri, new_iri):
+    """Replaces old IRI with a new IRI in the graph
+
+    Args:
+        graph(rdflib.Graph): RDF Graph
+        old_iri(rdflib.URIRef): Old IRI
+        new_iri(rdflib.URIRef): New IRI
+    """
+    for pred, obj in graph.predicate_objects(subject=old_iri):
+        graph.add((new_iri, pred, obj))
+        graph.remove((old_iri, pred, obj))
+    for subj, pred in graph.subject_predicates(object=old_iri):
+        graph.add((subj, pred, new_iri))
+        graph.remove((subj, pred, old_iri))
+
                 
 def slugify(value):
     """
@@ -59,6 +126,15 @@ def slugify(value):
     """
     value = re.sub('[^\w\s-]', '', value).strip().lower()
     return re.sub('[-\s]+', '-', value)
+
+def wikify(value):
+    """Converts value to wikipedia "style" of URLS, removes non-word characters
+    and converts spaces to hyphens and leaves case of value.
+    """
+    value = re.sub('[^\w\s-]', '', value).strip()
+    return re.sub('[-\s]+', '_', value)
+
+   
 
 @click.command()
 def turtles():
