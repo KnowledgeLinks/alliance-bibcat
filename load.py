@@ -5,6 +5,7 @@ import click
 import datetime
 import logging
 import os
+import requests
 import rdflib
 import re
 import sys
@@ -19,6 +20,200 @@ sys.path.append(PROJECT_BASE)
 from bibcat.rml import processor
 import instance.config as config
 TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
+
+processor.NS_MGR.bf = rdflib.Namespace("http://id.loc.gov/ontologies/bibframe/")
+processor.NS_MGR.rdf = rdflib.RDF
+processor.NS_MGR.rdfs = rdflib.RDFS
+
+# Alliance Preprocessor
+PREFIX = """PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"""
+
+class AlliancePreprocessor(object):
+    MARC_NS = {'marc': 'http://www.loc.gov/MARC21/slim'}
+
+    ALLIANCE_KEY_SPARQL = PREFIX + """
+SELECT DISTINCT ?instance
+WHERE {{
+    ?instance rdf:type bf:Instance .
+    ?instance bf:identifiedBy ?ident .
+    ?ident rdf:value ?value .
+    FILTER(CONTAINS(?value, "{0}"))
+}}"""
+
+    ORG_LABEL_SPARQL = PREFIX + """
+SELECT DISTINCT ?label
+WHERE {{
+    <{0}> rdfs:label ?label .
+}}"""
+
+    MAX_WORK_TRIPLES_SPARQL = PREFIX + """
+SELECT ?work ?count
+WHERE {
+    ?work rdf:type bf:Work .
+    {
+        SELECT ?work (count(*) as ?count)
+        WHERE {
+            ?work ?p ?o .
+        }
+    }
+} ORDER BY DESC(?count) LIMIT 1"""
+
+    WORKS_OF_INSTANCE_SPARQL = PREFIX + """
+SELECT DISTINCT ?work
+WHERE {{
+     <{0}> bf:instanceOf ?work .
+}}"""
+
+    def __init__(self, 
+        bibframe_graph, 
+        marc_xml,
+        institutional_iri,
+        triplestore_url=TRIPLESTORE_URL):
+        """Creates an instance of Alliance Preprocessor
+
+        Args:
+            bibframe_graph(rdflib.Graph): BIBFRAME RDF graph
+            institutional_iri(rdflib.URIRef): Institutional IRI
+            marc_xml (etree.XML): MARC XML
+            triplestore_url (str): URL to Triplestore URL
+        """
+        self.graph = bibframe_graph
+        self.institutional_iri = institutional_iri
+        self.marc_xml = marc_xml
+        self.triplestore_url = triplestore_url
+
+    def __get_create_canonical_item__(self, instance_iri):
+        item_iri = self.graph.value(subject=instance_iri,
+                                    predicate=processor.NS_MGR.bf.hasItem)
+        # Create a stub item if none exists
+        if item_iri is None:
+            base_iri = str(instance_iri).split("#")[0]
+            item_iri = rdflib.URIRef("{}#InstanceStub".format(base_iri))
+            self.graph.add((item_iri, 
+                            processor.NS_MGR.rdf.type, 
+                            processor.NS_MGR.bf.Item))
+            self.graph.add((item_iri, 
+                            processor.NS_MGR.bf.itemOf, 
+                            instance_iri))
+            self.graph.add((instance_iri, 
+                            processor.NS_MGR.bf.hasItem, 
+                            item_iri))
+        return item_iri
+            
+
+    def __get_canonical_instance__(self):
+        """Selects the BF Work with the largest number of triples
+        to use as the canonical entity for Instance"""
+        result = self.graph.query(
+            AlliancePreprocessor.MAX_WORK_TRIPLES_SPARQL)
+        if len(result.bindings) < 1:
+            raise ValueError("Could not extract max work triples")
+        org_work_iri = result.bindings[0]['work']
+        return self.graph.value(subject=org_work_iri, 
+                                predicate=processor.NS_MGR.bf.hasInstance)
+
+    def __get_works__(self, instance_iri):
+        """Attempts to retrieve any existing works from triplestore
+        that match Instance IRI
+
+        Args:
+            instance_iri(rdflib.URIRef): URI of instance
+        """
+        works = []
+        result = requests.post(self.triplestore_url,
+            data={"query": WORKS_OF_INSTANCE_SPARQL.format(instance_iri),
+                  "format": "json"})
+        if result.status_code > 399:
+            return works
+        bindings = result.json().get("results").get("bindings")
+        if len(bindings) < 1:
+            return works
+        for row in bindings:
+            work_uri = row.get("work").get("value")
+            works.append(rdflib.URIRef(work_iri))
+        return works
+        
+
+    def __match_key__(self):
+        match_key = self.marc_xml.find(
+            "marc:datafield[@tag='997']/marc:subfield[@code='a']",
+            AlliancePreprocessor.MARC_NS)
+        if match_key is None:
+            return
+        result = requests.post(self.triplestore_url,
+            data={"query": AlliancePreprocessor.ALLIANCE_KEY_SPARQL.format(
+                               match_key.text),
+                  "format": "json"})
+        if result.status_code > 399:
+            return
+        bindings = result.json().get("results").get("bindings")
+        if len(bindings) < 1:
+            return
+        instance_url = bindings[0].get("instance").get("value")
+        return rdflib.URIRef(instance_url)
+
+    def __mint_instance_iri__(self, instance_iri):
+        """Takes an existing BF Instance IRI, attempts to extract Work label 
+        for minting a new Alliance IRI and replaces instance_iri for all
+        references of in graph.
+
+        Args:
+            instance_iri(rdflib.URIRef): URI of Instance
+        """
+        work_iri = self.graph.value(subject=instance_iri,
+                                    predicate=processor.NS_MGR.bf.instanceOf)
+        work_label = self.graph.value(subject=work_iri,
+                                      predicate=processor.NS_MGR.rdfs.label)
+        if work_label is None:
+            return
+        new_instance_iri = rdflib.URIRef(
+            urllib.parse.urljoin(config.BASE_URL,
+                                 slugify(work_label)))
+        replace_iri(self.graph, instance_iri, new_instance_iri)
+        return new_instance_iri
+
+    def __mint_item_iri__(self, item_iri):
+        """Takes an existing BF Item IRI, extracts it's BF Instance
+        and mints a new IRI based on the Instance IRI and the slugged
+        Institutional RDFS label
+
+        Args:
+            item_iri(rdflib.URIRef): Item IRI
+        """
+        result = requests.post(self.triplestore_url,
+            data={"query": AlliancePreprocessor.ORG_LABEL_SPARQL.format(
+                               self.institutional_iri),
+                  "format": "json"})
+        if result.status_code > 399:
+            return
+        bindings = result.json().get('results').get('bindings')
+        if len(bindings) < 1:
+            return
+        institution_label = bindings[0].get('label').get('value')
+        instance_iri = self.graph.value(subject=item_iri,
+                                        predicate=processor.NS_MGR.bf.itemOf)
+        new_item_iri = rdflib.URIRef("{0}/{1}".format(
+            instance_iri,
+            slugify(institution_label)))
+        replace_iri(self.graph, item_iri, new_item_iri)
+        return new_item_iri
+
+    def run(self):
+        """Runs Alliance Preprocessor"""
+        clean_subjects(self.graph)
+        org_instance_iri = self.__get_canonical_instance__()
+        org_item_iri = self.__get_create_canonical_item__(org_instance_iri)
+        existing_instance_iri = self.__match_key__()
+        if existing_instance_iri is not None:
+            #for work in self.__get_works__(org_instance_iri):
+                # Should replace existing Work IRI
+            replace_iri(self.graph, org_instance_iri, existing_instance_iri)
+            new_instance_iri = existing_instance_iri
+        else:
+            new_instance_iri = self.__mint_instance_iri__(org_instance_iri) 
+        new_item_iri = self.__mint_item_iri__(org_item_iri)
+        return new_instance_iri, new_item_iri 
 
 def clean_subjects(graph):
     """Iterates through all URIRef subjects and attempts to fix any

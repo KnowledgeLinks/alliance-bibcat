@@ -16,6 +16,26 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
 
+<#MARC2BIBFRAME_Instance> a rr:TriplesMap ;
+    
+    rml:logicalSource [
+        rml:source "{marc_record}" ;
+        rml:referenceFormulation ql:XPath ;
+        rml:iterator "."
+
+    ] ;
+
+
+    rr:subjectMap [
+        rr:template "{instance_iri}" ;
+        rr:class bf:Instance 
+    ] ;
+
+    rr:predicateObjectMap [
+        rr:predicate bf:identifier ;
+        rr:parentTriplesMap <#MARC2BIBFRAME_AllianceMatchKey>
+    ] .
+
 <#MARC2BIBFRAME_AllianceMatchKey> a rr:TriplesMap ;
     
     rml:logicalSource [
@@ -27,14 +47,14 @@
 
     rr:subjectMap [
         rr:termType rr:BlankNode ;
-        rr:class bf:Identifier ;
+        rr:class bf:Local ;
     ] ;
 
     rr:predicateObjectMap [
-        rr:predicate rdfs:label ;
+        rr:predicate bf:source ;
         rr:objectMap [
-            rr:constant "Colorado Alliance Match Key"@en ;
-            rr:datetype xsd:string
+            rr:constant <https://www.coalliance.org/> ;
+            rr:datetype xsd:anyURI
         ]
     ] ;
 
@@ -44,6 +64,8 @@
             rr:reference "./marc:subfield[@code='a']"
         ]
     ] .
+
+
 
 <#MARC2BIBFRAME_Item> a rr:TriplesMap ;
 
@@ -81,20 +103,3 @@
             rr:datatype xsd:anyURI
         ]
     ] .
-
-
-<#MARC2BIBFRAME_Person> a rr:TriplesMap ;
-
-    rml:logicalSource [
-        rml:source "{marc_record}" ;
-        rml:iterator "."
-    ] ;
-
-    rr:subjectMap [
-        rr:template "{person_id}" ;
-        rr:class bf:Person ;
-        kds:deduplicate rdfs:label;
-    ] .
-
-
-    
