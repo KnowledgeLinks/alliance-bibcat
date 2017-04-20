@@ -24,6 +24,8 @@ TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
 processor.NS_MGR.bf = rdflib.Namespace("http://id.loc.gov/ontologies/bibframe/")
 processor.NS_MGR.rdf = rdflib.RDF
 processor.NS_MGR.rdfs = rdflib.RDFS
+processor.NS_MGR.schema = rdflib.Namespace("http://schema.org/")
+processor.NS_MGR.owl = rdflib.OWL
 
 # Alliance Preprocessor
 PREFIX = """PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>

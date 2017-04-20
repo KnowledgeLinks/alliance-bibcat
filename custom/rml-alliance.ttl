@@ -4,6 +4,7 @@
 @prefix locn:   <http://www.w3.org/ns/locn#>.
 @prefix kds: <http://knowledgelinks.io/ns/data-structures/> .
 @prefix oslo:   <http://purl.org/oslo/ns/localgov#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix ql:     <http://semweb.mmlab.be/ns/ql#> .
 @prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#>.
@@ -32,8 +33,10 @@
     ] ;
 
     rr:predicateObjectMap [
-        rr:predicate bf:identifier ;
-        rr:parentTriplesMap <#MARC2BIBFRAME_AllianceMatchKey>
+        rr:predicate bf:identifiedBy ;
+        rr:objectMap [
+            rr:parentTriplesMap <#MARC2BIBFRAME_AllianceMatchKey>
+        ]
     ] .
 
 <#MARC2BIBFRAME_AllianceMatchKey> a rr:TriplesMap ;
@@ -97,7 +100,7 @@
     ] ;
 
     rr:predicateObjectMap [
-        rr:predicate schema:sameAs ;
+        rr:predicate owl:sameAs ;
         rr:objectMap [
             rr:template "{ils_url}" ;
             rr:datatype xsd:anyURI

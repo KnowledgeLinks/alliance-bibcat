@@ -39,9 +39,7 @@
         schema:latitude "40.0087 N";
         schema:longitude "105.2709 W"
     ] ;
-    schema:parentOrganization [
-        rdfs:label "University of Colorado Boulder"@en ;
-        schema:sameAs <http://www.colorado.edu/> ] ;
+    schema:parentOrganization <http://www.colorado.edu/>;
     schema:image <http://www.colorado.edu/libraries/sites/default/files/styles/large_wide_thumbnail/public/callout/norlin.jpg> ;
     schema:oclc "COD",
         "CODA" ;
@@ -102,12 +100,15 @@
         schema:latitude "42.5613657 N";
         schema:longitude "78.528573 W"
     ] ;
-    schema:parentOrganization [
-        rdfs:label "SUNY Buffalo State"@en;
-        schema:sameAs <http://suny.buffalostate.edu/>
-    ] ;
+    schema:parentOrganization <http://suny.buffalostate.edu/> ;
     schema:sameAs <https://www.wikidata.org/wiki/Q21328996> .
 
 <https://www.coloradocollege.edu/> a bf:Organization, schema:CollegeOrUniversity ;
         rdfs:label "Colorado College"@en .
+
+<http://www.colorado.edu/> a bf:Organization, schema:CollegeOrUniversity ;
+        rdfs:label "University of Colorado Boulder"@en .
+
+<http://suny.buffalostate.edu/> a bf:Organization, schema:CollegeOrUniversity ;
+        rdfs:label "SUNY Buffalo State"@en .
 
