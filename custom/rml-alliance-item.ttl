@@ -4,7 +4,6 @@
 @prefix locn:   <http://www.w3.org/ns/locn#>.
 @prefix kds: <http://knowledgelinks.io/ns/data-structures/> .
 @prefix oslo:   <http://purl.org/oslo/ns/localgov#>.
-@prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix ql:     <http://semweb.mmlab.be/ns/ql#> .
 @prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#>.
@@ -15,59 +14,6 @@
 @prefix skos:   <http://www.w3.org/2004/02/skos/core#> .
 @prefix vcard:  <http://www.w3.org/2006/vcard/ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-
-
-<#MARC2BIBFRAME_Instance> a rr:TriplesMap ;
-    
-    rml:logicalSource [
-        rml:source "{marc_record}" ;
-        rml:referenceFormulation ql:XPath ;
-        rml:iterator "."
-
-    ] ;
-
-
-    rr:subjectMap [
-        rr:template "{instance_iri}" ;
-        rr:class bf:Instance 
-    ] ;
-
-    rr:predicateObjectMap [
-        rr:predicate bf:identifiedBy ;
-        rr:objectMap [
-            rr:parentTriplesMap <#MARC2BIBFRAME_AllianceMatchKey>
-        ]
-    ] .
-
-<#MARC2BIBFRAME_AllianceMatchKey> a rr:TriplesMap ;
-    
-    rml:logicalSource [
-        rml:source "{marc_record}" ;
-        rml:referenceFormulation ql:XPath ;
-        rml:iterator "marc:datafield[@tag='997']"
-
-    ] ;
-
-    rr:subjectMap [
-        rr:termType rr:BlankNode ;
-        rr:class bf:Local ;
-    ] ;
-
-    rr:predicateObjectMap [
-        rr:predicate bf:source ;
-        rr:objectMap [
-            rr:constant <https://www.coalliance.org/> ;
-            rr:datetype xsd:anyURI
-        ]
-    ] ;
-
-    rr:predicateObjectMap [
-        rr:predicate rdf:value ;
-        rr:objectMap [
-            rr:reference "./marc:subfield[@code='a']"
-        ]
-    ] .
-
 
 
 <#MARC2BIBFRAME_Item> a rr:TriplesMap ;
@@ -92,15 +38,7 @@
     ];
 
     rr:predicateObjectMap [
-        rr:predicate bf:itemOf ;
-        rr:objectMap [
-            rr:template "{instance_iri}" ;
-            rr:datatype xsd:anyURI
-        ]
-    ] ;
-
-    rr:predicateObjectMap [
-        rr:predicate owl:sameAs ;
+        rr:predicate rdfs:seeAlso ;
         rr:objectMap [
             rr:template "{ils_url}" ;
             rr:datatype xsd:anyURI

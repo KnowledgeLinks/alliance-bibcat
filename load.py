@@ -85,11 +85,10 @@ WHERE {{
         self.marc_xml = marc_xml
         self.triplestore_url = triplestore_url
 
-    def __get_create_canonical_item__(self, instance_iri):
-        item_iri = self.graph.value(subject=instance_iri,
-                                    predicate=processor.NS_MGR.bf.hasItem)
+    def __get_create_items__(self, instance_iri):
+         
         # Create a stub item if none exists
-        if item_iri is None:
+        def item_stub():
             base_iri = str(instance_iri).split("#")[0]
             item_iri = rdflib.URIRef("{}#InstanceStub".format(base_iri))
             self.graph.add((item_iri, 
@@ -101,7 +100,14 @@ WHERE {{
             self.graph.add((instance_iri, 
                             processor.NS_MGR.bf.hasItem, 
                             item_iri))
-        return item_iri
+            return item_iri
+        item_iris = []
+        for row in self.graph.objects(subject=instance_iri,
+                                      predicate=processor.NS_MGR.bf.hasItem):
+            item_iris.append(row)
+        if len(item_iris) < 1:
+            item_iris.append(item_stub())
+        return item_iris
             
 
     def __get_canonical_instance__(self):
@@ -175,17 +181,19 @@ WHERE {{
         replace_iri(self.graph, instance_iri, new_instance_iri)
         return new_instance_iri
 
-    def __mint_item_iri__(self, item_iri):
-        """Takes an existing BF Item IRI, extracts it's BF Instance
+    def __mint_item_iris__(self, item_iris, instance_iri):
+        """Takes BF Instance
         and mints a new IRI based on the Instance IRI and the slugged
         Institutional RDFS label
 
         Args:
-            item_iri(rdflib.URIRef): Item IRI
+            item_iri(lists): List of Item IRIs
+            instance_iri(rdflib.URIRef): New instance IRI
         """
+        sparql = AlliancePreprocessor.ORG_LABEL_SPARQL.format(
+            self.institutional_iri)
         result = requests.post(self.triplestore_url,
-            data={"query": AlliancePreprocessor.ORG_LABEL_SPARQL.format(
-                               self.institutional_iri),
+            data={"query": sparql,
                   "format": "json"})
         if result.status_code > 399:
             return
@@ -193,19 +201,23 @@ WHERE {{
         if len(bindings) < 1:
             return
         institution_label = bindings[0].get('label').get('value')
-        instance_iri = self.graph.value(subject=item_iri,
-                                        predicate=processor.NS_MGR.bf.itemOf)
-        new_item_iri = rdflib.URIRef("{0}/{1}".format(
-            instance_iri,
-            slugify(institution_label)))
-        replace_iri(self.graph, item_iri, new_item_iri)
-        return new_item_iri
+        output = []
+        for i, item_iri in enumerate(item_iris):
+            new_url = "{0}/{1}".format(
+                instance_iri,
+                slugify(institution_label))
+            if i > 0:
+                new_url += "-{0}".format(i)
+            new_item_iri = rdflib.URIRef(new_url)
+            replace_iri(self.graph, item_iri, new_item_iri)
+            output.append(new_item_iri)
+        return output
 
     def run(self):
         """Runs Alliance Preprocessor"""
         clean_subjects(self.graph)
         org_instance_iri = self.__get_canonical_instance__()
-        org_item_iri = self.__get_create_canonical_item__(org_instance_iri)
+        org_item_iris = self.__get_create_items__(org_instance_iri)
         existing_instance_iri = self.__match_key__()
         if existing_instance_iri is not None:
             #for work in self.__get_works__(org_instance_iri):
@@ -214,8 +226,8 @@ WHERE {{
             new_instance_iri = existing_instance_iri
         else:
             new_instance_iri = self.__mint_instance_iri__(org_instance_iri) 
-        new_item_iri = self.__mint_item_iri__(org_item_iri)
-        return new_instance_iri, new_item_iri 
+        new_item_iris = self.__mint_item_iris__(org_item_iris, new_instance_iri)
+        return new_instance_iri, new_item_iris 
 
 def clean_subjects(graph):
     """Iterates through all URIRef subjects and attempts to fix any
