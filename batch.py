@@ -7,6 +7,7 @@ import logging
 import os
 import rdflib
 import requests
+import uuid
 import sys 
 import xml.etree.ElementTree as etree
 import lxml.etree
@@ -20,6 +21,7 @@ import bibcat.rml.processor as processor
 from load import AlliancePreprocessor
 
 MARC_NS = {'marc': 'http://www.loc.gov/MARC21/slim'}
+etree.register_namespace("marc", MARC_NS.get("marc"))
 
 def check_init_triplestore():
     """Checks size of triplestore, loads Alliance ttl if empty"""
@@ -39,12 +41,24 @@ def iii_minter(opac_url, marc_xml):
         MARC_NS)
     bib_id = field907a.text[1:-1]
     return rdflib.URIRef(opac_url.format(bib_id))
+
+def summon_minter(discovery_url, marc_xml):
+    field001 = marc_xml.find("marc:controlfield[@tag='001']", MARC_NS)
+    if field001 is None:
+        return discovery_url.format("invalid_{0}".format(uuid.uuid1()))
+    return rdflib.URIRef(discovery_url.format(field001.text))
+
     
 def cc_minter(marc_xml):
     return iii_minter("https://tiger.coloradocollege.edu/record={0}", marc_xml)
 
 def cu_minter(marc_xml):
     return iii_minter("http://libraries.colorado.edu/record={0}", marc_xml)
+
+def suny_buff_minter(marc_xml):
+    return summon_minter(
+        "http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_{0}",
+        marc_xml)
     
 @click.command()
 @click.argument('filepath')
@@ -124,8 +138,21 @@ def process_xml(filepath,
                     institution_iri=institution_iri,
                     ils_url=ils_url)
                 bf_rdf += item_processor.output
+        
+            try:
+                raw_turtle = bf_rdf.serialize(format='turtle')
+            except:
+                print("Error with {}".format(counter))
+                date_stamp = datetime.datetime.utcnow()
+                error_filepath = os.path.join(PROJECT_BASE, 
+                    "errors/bf-{}-{}.xml".format(
+                        date_stamp.toordinal(),
+                        counter))
+                with open(error_filepath, "wb+") as fo: 
+                    fo.write(bf_rdf.serialize())
+                continue 
             result = requests.post(config.TRIPLESTORE_URL,
-                data=bf_rdf.serialize(format='turtle'),
+                data=raw_turtle,
                 headers={"Content-Type": "text/turtle"})
             if output_file is not None:
                 if master_graph is None:
@@ -135,7 +162,7 @@ def process_xml(filepath,
             counter += 1
     if output_file is not None:
         with open(output_file, "wb+") as fo:
-            fo.write(master_graph.serialize(format='turtle'))
+            fo.write(master_graph.serialize(format='turtle', encoding='utf-8'))
     end = datetime.datetime.utcnow()
     end_msg = "Finished at {}, total time={} mins".format(
         end, 

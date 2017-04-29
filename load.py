@@ -215,7 +215,7 @@ WHERE {{
 
     def run(self):
         """Runs Alliance Preprocessor"""
-        clean_subjects(self.graph)
+        clean_uris(self.graph)
         org_instance_iri = self.__get_canonical_instance__()
         org_item_iris = self.__get_create_items__(org_instance_iri)
         existing_instance_iri = self.__match_key__()
@@ -229,33 +229,35 @@ WHERE {{
         new_item_iris = self.__mint_item_iris__(org_item_iris, new_instance_iri)
         return new_instance_iri, new_item_iris 
 
-def clean_subjects(graph):
-    """Iterates through all URIRef subjects and attempts to fix any
+def clean_uris(graph):
+    """Iterates through all URIRef subjects and objects and attempts to fix any
     issues with URL.
 
     Args:
         graph(rdflib.Graph): BIBFRAME RDF Graph
     """
-    for subject in set([s for s in graph.subjects()]):
-        if isinstance(subject, rdflib.URIRef):
-            try:
-                rdflib.util.check_subject(str(subject))
-            except rdflib.exceptions.SubjectTypeError:
-                url_sections = urllib.parse.urlparse(str(subject))
-                new_url = (url_sections.scheme,
-                           url_sections.netloc,
-                           urllib.parse.quote(url_sections.path),
-                           urllib.parse.quote(url_sections.params),
-                           urllib.parse.quote(url_sections.query),
-                           urllib.parse.quote(url_sections.fragment))
-                new_subject = rdflib.URIRef(
-                    str(urllib.parse.urlunparse(new_url)))
-                for pred, obj in graph.predicate_objects(subject=subject):
-                    graph.remove((subject, pred, obj))
-                    graph.add((new_subject, pred, obj)) 
-                for subj, pred in graph.subject_predicates(object=subject):
-                    graph.remove((subj, pred, subject))
-                    graph.add((subj, pred, new_subject))
+    def fix_uri(uri):
+       url_sections = urllib.parse.urlparse(str(uri))
+       new_url = (url_sections.scheme,
+                  url_sections.netloc,
+                  urllib.parse.quote(url_sections.path),
+                  urllib.parse.quote(url_sections.params),
+                  urllib.parse.quote(url_sections.query),
+                  urllib.parse.quote(url_sections.fragment))
+       new_uri = rdflib.URIRef(
+           str(urllib.parse.urlunparse(new_url)))
+       for pred, obj in graph.predicate_objects(subject=uri):
+           graph.remove((uri, pred, obj))
+           graph.add((new_uri, pred, obj)) 
+       for subj, pred in graph.subject_predicates(object=uri):
+           graph.remove((subj, pred, uri))
+           graph.add((subj, pred, new_uri))
+    for iri in graph.query(ALL_URI_SPARQL):
+         try:
+             rdflib.util.check_subject(str(iri))
+         except rdflib.exceptions.SubjectTypeError:
+             fix_uri(iri)
+
 
 def alliance_processing(**kwargs):
     """Takes RDF graph of the resulting LOC's marc2bibframe2, replaces BF Instance
@@ -410,7 +412,7 @@ def marc_xml(marc_filepath, mrc2bf_xsl, shard_size):
                 baseuri="'{0}'".format(config.BASE_URL))
             bf_rdf = rdflib.Graph()
             bf_rdf.parse(data=etree.tostring(bf_rdf_xml))
-            clean_subjects(bf_rdf)
+            clean_uris(bf_rdf)
             if output_graph is not None:
                 output_graph += bf_rdf
             total += 1
@@ -444,6 +446,14 @@ def cli():
 
 cli.add_command(marc_xml)
 cli.add_command(turtles)
+
+ALL_URI_SPARQL = """SELECT DISTINCT ?uri
+WHERE {
+  ?uri ?p ?o .
+  ?s ?p1 ?uri .
+  FILTER(isIRI(?uri))
+}"""
+
 
 if __name__ == '__main__':
     cli()
