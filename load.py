@@ -225,7 +225,7 @@ WHERE {{
             replace_iri(self.graph, org_instance_iri, existing_instance_iri)
             new_instance_iri = existing_instance_iri
         else:
-            new_instance_iri = self.__mint_instance_iri__(org_instance_iri) 
+            new_instance_iri = self.__mint_instance_iri__(org_instance_iri)
         new_item_iris = self.__mint_item_iris__(org_item_iris, new_instance_iri)
         return new_instance_iri, new_item_iris 
 

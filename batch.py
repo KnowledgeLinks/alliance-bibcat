@@ -142,7 +142,11 @@ def process_xml(filepath,
             try:
                 raw_turtle = bf_rdf.serialize(format='turtle')
             except:
-                print("Error with {}".format(counter))
+                msg = "Error with {}".format(counter)
+                try:
+                    click.echo(msg)
+                except io.UnsupportedOperation:
+                    print(msg)
                 date_stamp = datetime.datetime.utcnow()
                 error_filepath = os.path.join(PROJECT_BASE, 
                     "errors/bf-{}-{}.xml".format(
