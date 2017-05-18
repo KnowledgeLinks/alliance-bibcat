@@ -1,0 +1,866 @@
+@prefix bf: <http://id.loc.gov/ontologies/bibframe/> .
+@prefix bflc: <http://id.loc.gov/ontologies/bflc/> .
+@prefix madsrdf: <http://www.loc.gov/mads/rdf/v1#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://bibcat.coalliance.org/spr9789401772426#Agent710-37> a bf:Agent,
+        bf:Organization ;
+    rdfs:label "SpringerLink (Online service)" ;
+    bflc:name10MarcKey "7102 $aSpringerLink (Online service)" ;
+    bflc:name10MatchKey "SpringerLink (Online service)" .
+
+<https://bibcat.coalliance.org/spr9789401772426#Agent700-35> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Michelsen, Gerd." ;
+    bflc:name00MarcKey "7001 $aMichelsen, Gerd.$eeditor." ;
+    bflc:name00MatchKey "Michelsen, Gerd." .
+
+<https://bibcat.coalliance.org/spr932171222#Agent700-33> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Michelsen, Gerd." ;
+    bflc:name00MarcKey "7001 $aMichelsen, Gerd.$eeditor." ;
+    bflc:name00MatchKey "Michelsen, Gerd." .
+
+<https://bibcat.coalliance.org/spr9789401772426#Agent700-34> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Martens, Pim." ;
+    bflc:name00MarcKey "7001 $aMartens, Pim.$eeditor." ;
+    bflc:name00MatchKey "Martens, Pim." .
+
+<https://bibcat.coalliance.org/spr932171222#Agent700-32> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Martens, Pim." ;
+    bflc:name00MarcKey "7001 $aMartens, Pim.$eeditor." ;
+    bflc:name00MatchKey "Martens, Pim." .
+
+<https://bibcat.coalliance.org/spr932171222#Agent700-31> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Heinrichs, Harald." ;
+    bflc:name00MarcKey "7001 $aHeinrichs, Harald.$eeditor." ;
+    bflc:name00MatchKey "Heinrichs, Harald." .
+
+<https://bibcat.coalliance.org/spr9789401772426#Agent700-36> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Wiek, Arnim." ;
+    bflc:name00MarcKey "7001 $aWiek, Arnim.$eeditor." ;
+    bflc:name00MatchKey "Wiek, Arnim." .
+
+
+<https://bibcat.coalliance.org/spr9789401772426#Agent700-33> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Heinrichs, Harald." ;
+    bflc:name00MarcKey "7001 $aHeinrichs, Harald.$eeditor." ;
+    bflc:name00MatchKey "Heinrichs, Harald." .
+
+# SUNY Buffalo State bf:Agents
+<https://bibcat.coalliance.org/000893015#Agent700-30> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Heinrichs, Harald." ;
+    bflc:name00MarcKey "7001 $aHeinrichs, Harald.$eeditor." ;
+    bflc:name00MatchKey "Heinrichs, Harald." .
+
+<https://bibcat.coalliance.org/000893015#Agent700-31> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Martens, Pim." ;
+    bflc:name00MarcKey "7001 $aMartens, Pim.$eeditor." ;
+    bflc:name00MatchKey "Martens, Pim." .
+
+<https://bibcat.coalliance.org/000893015#Agent700-32> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Michelsen, Gerd." ;
+    bflc:name00MarcKey "7001 $aMichelsen, Gerd.$eeditor." ;
+    bflc:name00MatchKey "Michelsen, Gerd." .
+
+<https://bibcat.coalliance.org/000893015#Agent700-33> a bf:Agent,
+        bf:Person ;
+    rdfs:label "Wiek, Arnim." ;
+    bflc:name00MarcKey "7001 $aWiek, Arnim.$eeditor." ;
+    bflc:name00MatchKey "Wiek, Arnim." .
+
+<https://bibcat.coalliance.org/000893015#Agent710-36> a bf:Agent,
+        bf:Organization ;
+    rdfs:label "SpringerLink (Online service)" ;
+    bflc:name10MarcKey "7102 $aSpringerLink (Online service)" ;
+    bflc:name10MatchKey "SpringerLink (Online service)" .
+
+
+# Colorado College Topics
+<https://bibcat.coalliance.org/spr9789401772426#Topic650-24> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Environment." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Environment." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/spr9789401772426#Topic650-25> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Geoecology." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Geoecology." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/spr9789401772426#Topic650-26> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Environmental geology." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Environmental geology." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/spr9789401772426#Topic650-27> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Sustainable development." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Sustainable development." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/spr9789401772426#Topic650-28> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Social sciences." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Social sciences." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/spr9789401772426#Topic650-29> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Environment." ;
+    madsrdf:authoritativeLabel "Environment." .
+
+<https://bibcat.coalliance.org/spr9789401772426#Topic650-30> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Sustainable Development." ;
+    madsrdf:authoritativeLabel "Sustainable Development." .
+
+<https://bibcat.coalliance.org/spr9789401772426#Topic650-31> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Geoecology/Natural Processes." ;
+    madsrdf:authoritativeLabel "Geoecology/Natural Processes." .
+
+<https://bibcat.coalliance.org/spr9789401772426#Topic650-32> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Social Sciences, general." ;
+    madsrdf:authoritativeLabel "Social Sciences, general." .
+
+# University of Colorado Boulder Topics
+<https://bibcat.coalliance.org/spr932171222#Topic650-27> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Environment." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Environment." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/spr932171222#Topic650-28> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Environmental geology." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Environmental geology." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/spr932171222#Topic650-29> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Sustainable development." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Sustainable development." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/spr932171222#Topic650-30> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Social sciences." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Social sciences." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+# SUNY Buffalo State bf:Topics
+<https://bibcat.coalliance.org/000893015#Topic650-21> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Environment." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Environment." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/000893015#Topic650-22> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Geoecology." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Geoecology." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/000893015#Topic650-23> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Environmental geology." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Environmental geology." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/000893015#Topic650-24> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Sustainable development." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Sustainable development." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/000893015#Topic650-25> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Social sciences." ;
+    bf:source [ a bf:Source ;
+            bf:code "lcsh" ] ;
+    madsrdf:authoritativeLabel "Social sciences." ;
+    madsrdf:isMemberofMADSScheme <http://id.loc.gov/authorities/subjects> .
+
+<https://bibcat.coalliance.org/000893015#Topic650-26> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Environment." ;
+    madsrdf:authoritativeLabel "Environment." .
+
+<https://bibcat.coalliance.org/000893015#Topic650-27> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Sustainable Development." ;
+    madsrdf:authoritativeLabel "Sustainable Development." .
+
+<https://bibcat.coalliance.org/000893015#Topic650-28> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Geoecology/Natural Processes." ;
+    madsrdf:authoritativeLabel "Geoecology/Natural Processes." .
+
+<https://bibcat.coalliance.org/000893015#Topic650-29> a bf:Topic,
+        madsrdf:Topic ;
+    rdfs:label "Social Sciences, general." ;
+    madsrdf:authoritativeLabel "Social Sciences, general." .
+
+
+<https://bibcat.coalliance.org/spr9789401772426#Work773-38> a bf:Work ;
+    bf:hasInstance <https://bibcat.coalliance.org/spr9789401772426#Instance773-38> .
+
+<https://bibcat.coalliance.org/spr9789401772426#Instance773-38> a bf:Instance ;
+    bf:instanceOf <https://bibcat.coalliance.org/spr9789401772426#Work773-38> ;
+    bf:title [ a bf:Title ;
+            rdfs:label "Springer eBooks." ] .
+
+# Colorado College's version of bf:Work
+<https://bibcat.coalliance.org/spr9789401772426#Work> a bf:Text,
+        bf:Work ;
+    rdfs:label "Sustainability Science : An Introduction /" ;
+    bf:adminMetadata [ a bf:AdminMetadata ;
+            bflc:encodingLevel [ a bflc:EncodingLevel ;
+                    bf:code "5" ] ;
+            bf:changeDate "2015-11-26T13:07:08"^^xsd:dateTime ;
+            bf:creationDate "2015-11-26"^^xsd:date ;
+            bf:descriptionConventions [ a bf:DescriptionConventions ;
+                    bf:code "isbd" ] ;
+            bf:identifiedBy [ a bf:Local ;
+                    rdf:value "spr9789401772426" ] ;
+            bf:source [ a bf:Source ;
+                    bf:code "DE-He213" ] ;
+            bf:status [ a bf:Status ;
+                    bf:code "c" ] ] ;
+    bf:classification [ a bf:ClassificationDdc ;
+            bf:classificationPortion "338.927" ;
+            bf:edition "23",
+                "full" ] ;
+    bf:content <http://id.loc.gov/vocabulary/contentType/txt> ;
+    bf:contribution [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/spr9789401772426#Agent710-37> ;
+            bf:role <http://id.loc.gov/vocabulary/relators/ctb> ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/spr9789401772426#Agent700-35> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/spr9789401772426#Agent700-34> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/spr9789401772426#Agent700-36> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/spr9789401772426#Agent700-33> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ] ;
+    bf:genreForm <http://id.loc.gov/vocabulary/marcgt/doc> ;
+    bf:hasInstance <https://bibcat.coalliance.org/sustainability-science-an-introduction> ;
+    bf:language <http://id.loc.gov/vocabulary/languages/eng> ;
+    bf:partOf <https://bibcat.coalliance.org/spr9789401772426#Work773-38> ;
+    bf:subject [ a rdfs:Resource ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "bicssc" ] ;
+            rdf:value "RNU" ],
+        [ a rdfs:Resource ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "bisacsh" ] ;
+            rdf:value "SCI026000" ],
+        <https://bibcat.coalliance.org/spr9789401772426#Topic650-24>,
+        <https://bibcat.coalliance.org/spr9789401772426#Topic650-25>,
+        <https://bibcat.coalliance.org/spr9789401772426#Topic650-26>,
+        <https://bibcat.coalliance.org/spr9789401772426#Topic650-27>,
+        <https://bibcat.coalliance.org/spr9789401772426#Topic650-28>,
+        <https://bibcat.coalliance.org/spr9789401772426#Topic650-29>,
+        <https://bibcat.coalliance.org/spr9789401772426#Topic650-30>,
+        <https://bibcat.coalliance.org/spr9789401772426#Topic650-31>,
+        <https://bibcat.coalliance.org/spr9789401772426#Topic650-32> ;
+    bf:summary [ a bf:Summary ;
+            rdfs:label "This textbook provides a comprehensive compilation of conceptual perspectives, methodological approaches and empirical insights of inter- and transdisciplinary sustainability science. Written by an international team of authors from leading sustainability institutions, the textbook covers key perspectives and topics of the scientific discourse on sustainable development. More than two decades after conceptualizing sustainability as societal guiding vision and regulative idea the necessity of concretizing and realizing sustainability in societal praxis is bigger than ever. Sharply improved individual and societal sustainable decision-making and action is necessary for a better future of humankind and the planet. On that account problem- and solution-oriented perspectives and competencies are crucial. The different chapters assemble an encompassing view of essential foundations and specific areas of research and action in sustainability science and practice. The textbook aims at fostering the further establishment of sustainability science in higher education and to enable the next generation of sustainability experts to tackle the challenging and exciting topic of sustainable development." ] ;
+    bf:title [ a bf:Title ;
+            rdfs:label "Sustainability Science : An Introduction /" ;
+            bflc:titleSortKey "Sustainability Science : An Introduction /" ;
+            bf:mainTitle "Sustainability Science" ;
+            bf:subtitle "An Introduction" ] .
+
+# University of Colorado Boulder bf:Work
+<https://bibcat.coalliance.org/spr932171222#Work> a bf:Text,
+        bf:Work ;
+    rdfs:label "Sustainability Science An Introduction /" ;
+    bf:adminMetadata [ a bf:AdminMetadata ;
+            bflc:encodingLevel [ a bflc:EncodingLevel ;
+                    bf:code "u" ] ;
+            bf:changeDate "2016-02-19T06:29:42"^^xsd:dateTime ;
+            bf:creationDate "2015-11-26"^^xsd:date ;
+            bf:descriptionConventions [ a bf:DescriptionConventions ;
+                    bf:code "isbd" ] ;
+            bf:descriptionLanguage <http://id.loc.gov/vocabulary/languages/eng> ;
+            bf:descriptionModifier [ a bf:Agent ;
+                    rdfs:label "OCLCO" ],
+                [ a bf:Agent ;
+                    rdfs:label "AZU" ],
+                [ a bf:Agent ;
+                    rdfs:label "YDXCP" ],
+                [ a bf:Agent ;
+                    rdfs:label "COO" ] ;
+            bf:identifiedBy [ a bf:Local ;
+                    rdf:value "spr932171222" ] ;
+            bf:source [ a bf:Source ;
+                    bf:code "OCoLC" ],
+                [ a bf:Agent,
+                        bf:Source ;
+                    rdfs:label "NUI" ],
+                [ a bf:Agent,
+                        bf:Source ;
+                    rdfs:label "NUI" ] ;
+            bf:status [ a bf:Status ;
+                    bf:code "c" ] ] ;
+    bf:classification [ a bf:ClassificationLcc ;
+            bf:classificationPortion "GE196" ] ;
+    bf:content <http://id.loc.gov/vocabulary/contentType/txt> ;
+    bf:contribution [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/spr932171222#Agent700-33> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/spr932171222#Agent700-32> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/spr932171222#Agent700-34> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/spr932171222#Agent700-31> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ] ;
+    bf:genreForm [ a bf:GenreForm ;
+            rdfs:label "electronic resource" ],
+        <http://id.loc.gov/vocabulary/marcgt/dic>,
+        <http://id.loc.gov/vocabulary/marcgt/doc> ;
+    bf:hasInstance <https://bibcat.coalliance.org/sustainability-science-an-introduction> ;
+    bf:language <http://id.loc.gov/vocabulary/languages/eng> ;
+    bf:subject <https://bibcat.coalliance.org/spr932171222#Topic650-27>,
+        <https://bibcat.coalliance.org/spr932171222#Topic650-28>,
+        <https://bibcat.coalliance.org/spr932171222#Topic650-29>,
+        <https://bibcat.coalliance.org/spr932171222#Topic650-30> ;
+    bf:summary [ a bf:Summary ;
+            rdfs:label "This textbook provides a comprehensive compilation of conceptual perspectives, methodological approaches and empirical insights of inter- and transdisciplinary sustainability science. Written by an international team of authors from leading sustainability institutions, the textbook covers key perspectives and topics of the scientific discourse on sustainable development. More than two decades after conceptualizing sustainability as societal guiding vision and regulative idea the necessity of concretizing and realizing sustainability in societal praxis is bigger than ever. Sharply improved individual and societal sustainable decision-making and action is necessary for a better future of humankind and the planet. On that account problem- and solution-oriented perspectives and competencies are crucial. The different chapters assemble an encompassing view of essential foundations and specific areas of research and action in sustainability science and practice. The textbook aims at fostering the further establishment of sustainability science in higher education and to enable the next generation of sustainability experts to tackle the challenging and exciting topic of sustainable development." ] ;
+    bf:title [ a bf:Title ;
+            rdfs:label "Sustainability Science An Introduction /" ;
+            bflc:titleSortKey "Sustainability Science An Introduction /" ;
+            bf:mainTitle "Sustainability Science" ;
+            bf:subtitle "An Introduction" ] .
+
+# SUNY Buffalo State bf:Works
+<https://bibcat.coalliance.org/000893015#Work> a bf:Text,
+        bf:Work ;
+    rdfs:label "Sustainability Science An Introduction /" ;
+    bf:adminMetadata [ a bf:AdminMetadata ;
+            bflc:encodingLevel [ a bflc:EncodingLevel ;
+                    bf:code "5" ] ;
+            bf:changeDate "2016-09-13T08:58:42"^^xsd:dateTime ;
+            bf:creationDate "2015-11-26"^^xsd:date ;
+            bf:descriptionConventions [ a bf:DescriptionConventions ;
+                    bf:code "isbd" ] ;
+            bf:identifiedBy [ a bf:Local ;
+                    rdf:value "000893015" ] ;
+            bf:source [ a bf:Source ;
+                    bf:code "DE-He213" ] ;
+            bf:status [ a bf:Status ;
+                    bf:code "n" ] ] ;
+    bf:classification [ a bf:ClassificationLcc ;
+            bf:classificationPortion "GE196" ],
+        [ a bf:ClassificationLcc ;
+            bf:classificationPortion "GE195-199" ] ;
+    bf:content <http://id.loc.gov/vocabulary/contentType/txt> ;
+    bf:contribution [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/000893015#Agent700-30> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/000893015#Agent700-31> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/000893015#Agent700-32> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/000893015#Agent710-36> ;
+            bf:role <http://id.loc.gov/vocabulary/relators/ctb> ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/000893015#Agent700-33> ;
+            bf:role [ a bf:Role ;
+                    rdfs:label "editor." ] ] ;
+    bf:genreForm [ a bf:GenreForm ;
+            rdfs:label "electronic resource" ] ;
+    bf:hasInstance <https://bibcat.coalliance.org/sustainability-science-an-introduction> ;
+    bf:language <http://id.loc.gov/vocabulary/languages/eng> ;
+    bf:partOf <https://bibcat.coalliance.org/000893015#Work773-34> ;
+    bf:subject <https://bibcat.coalliance.org/000893015#Topic650-21>,
+        <https://bibcat.coalliance.org/000893015#Topic650-22>,
+        <https://bibcat.coalliance.org/000893015#Topic650-23>,
+        <https://bibcat.coalliance.org/000893015#Topic650-24>,
+        <https://bibcat.coalliance.org/000893015#Topic650-25>,
+        <https://bibcat.coalliance.org/000893015#Topic650-26>,
+        <https://bibcat.coalliance.org/000893015#Topic650-27>,
+        <https://bibcat.coalliance.org/000893015#Topic650-28>,
+        <https://bibcat.coalliance.org/000893015#Topic650-29> ;
+    bf:summary [ a bf:Summary ;
+            rdfs:label "This textbook provides a comprehensive compilation of conceptual perspectives, methodological approaches and empirical insights of inter- and transdisciplinary sustainability science. Written by an international team of authors from leading sustainability institutions, the textbook covers key perspectives and topics of the scientific discourse on sustainable development. More than two decades after conceptualizing sustainability as societal guiding vision and regulative idea the necessity of concretizing and realizing sustainability in societal praxis is bigger than ever. Sharply improved individual and societal sustainable decision-making and action is necessary for a better future of humankind and the planet. On that account problem- and solution-oriented perspectives and competencies are crucial. The different chapters assemble an encompassing view of essential foundations and specific areas of research and action in sustainability science and practice. The textbook aims at fostering the further establishment of sustainability science in higher education and to enable the next generation of sustainability experts to tackle the challenging and exciting topic of sustainable development." ] ;
+    bf:title [ a bf:Title ;
+            rdfs:label "Sustainability Science An Introduction /" ;
+            bflc:titleSortKey "Sustainability Science An Introduction /" ;
+            bf:mainTitle "Sustainability Science" ;
+            bf:subtitle "An Introduction" ] .
+
+<https://bibcat.coalliance.org/000893015#Work773-34> a bf:Work ;
+    bf:hasInstance <https://bibcat.coalliance.org/000893015#Instance773-34> .
+
+
+# Colorado College bf:Instance
+<https://bibcat.coalliance.org/sustainability-science-an-introduction> a bf:Electronic,
+        bf:Instance ;
+    rdfs:label "Sustainability Science : An Introduction /" ;
+    bf:carrier <http://id.loc.gov/vocabulary/carriers/cr> ;
+    bf:digitalCharacteristic [ a bf:FileType ;
+            rdfs:label "text file" ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "rda." ] ],
+        [ a bf:EncodingFormat ;
+            rdfs:label "PDF" ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "rda." ] ],
+        [ a bflc:ImageBitDepth,
+                bf:DigitalCharacteristic ;
+            rdfs:label "008" ],
+        [ a bf:DigitalCharacteristic,
+                bf:EncodingFormat ;
+            rdfs:label "multiple file formats" ] ;
+    bf:editionStatement "1st ed. 2016" ;
+    bf:extent [ a bf:Extent ;
+            rdfs:label "1 online resource (xii, 367 pages)" ] ;
+    bf:generation [ a bf:GenerationProcess ;
+            bf:generationDate "2017-05-11T11:57:40.718850" ;
+            rdf:value """Generated by BIBCAT version 1.8.0
+ from KnowledgeLinks.io"""^^xsd:string ] ;
+    bf:hasItem <https://bibcat.coalliance.org/sustainability-science-an-introduction/colorado-college> ;
+    bf:identifiedBy [ a bf:Local ;
+            bf:source <https://www.coalliance.org/> ;
+            rdf:value "sustainability_science__introduction_____________________________2016____201springer_na___________________________________________________________________________" ],
+        [ a bf:Isbn ;
+            rdf:value "9789401772426" ],
+        [ a bf:Identifier ;
+            rdfs:label "doi" ;
+            rdf:value "10.1007/978-94-017-7242-6" ] ;
+    bf:instanceOf <https://bibcat.coalliance.org/spr9789401772426#Work> ;
+    bf:issuance <http://id.loc.gov/vocabulary/issuance/mono> ;
+    bf:media <http://id.loc.gov/vocabulary/mediaType/c> ;
+    bf:note [ a bf:Note ;
+            rdfs:label "illustrations." ;
+            bf:noteType "Physical details" ] ;
+    bf:otherPhysicalFormat <https://bibcat.coalliance.org/spr9789401772426#Instance776-39> ;
+    bf:provisionActivity [ a bf:ProvisionActivity,
+                bf:Publication ;
+            bf:date "2016"^^<http://id.loc.gov/datatypes/edtf> ;
+            bf:place <http://id.loc.gov/vocabulary/countries/ne> ],
+        [ a bf:ProvisionActivity,
+                bf:Publication ;
+            bf:agent [ a bf:Agent ;
+                    rdfs:label "Imprint: Springer" ],
+                [ a bf:Agent ;
+                    rdfs:label "Springer Netherlands" ] ;
+            bf:date "2016" ;
+            bf:place [ a bf:Place ;
+                    rdfs:label "Dordrecht" ] ] ;
+    bf:provisionActivityStatement "Dordrecht : Springer Netherlands : Imprint: Springer, 2016." ;
+    bf:responsibilityStatement "edited by Harald Heinrichs, Pim Martens, Gerd Michelsen, Arnim Wiek" ;
+    bf:soundContent [ a bf:SoundContent ;
+            rdfs:label "silent" ] ;
+    bf:systemRequirements [ a bf:SystemRequirements ;
+            rdfs:label "Available via Internet,http://www.springerlink.com/openurl.asp?genre=book&id=doi:10.1007/978-94-017-7242-6." ] ;
+    bf:tableOfContents [ a bf:TableOfContents ;
+            rdfs:label "Introduction -- Sustainable Development <U+007f> <U+0013> Background and Context -- Transformational Sustainability.-Research Methodology -- Green and Sustainable Chemistry -- Sustainability and Ecosystems.-Sustainability Assessment of Technologies -- Corporate Sustainability Management -- Sustainable Development in Economics -- Sustainable Development and Law -- Finance and Sustainability.-Sustainability <U+007f> <U+0013> Politics and Governance -- Sustainability Communication -- Sustainability and Science Policy -- Justice and Sustainability -- Sustainability Ethics -- Ocean Space and Sustainability -- Sustainable Landscape Development -- Sustainable Development and Material Flows -- Sustainable Energy Systems.-Sustainability and Health -- Mobility and Sustainability -- International Development and Sustainability.-Tourism and Sustainability -- Consumption and Sustainability -- Climate Change <U+007f> <U+0013> Responding to a Major Challenge for Sustainable Development -- Art and Sustainability -- Teaching and Learning in Sustainability Science -- Education for Sustainable Development -- Problem-based and Project-based Learning for Sustainable Development -- Science for Sustainability <U+007f> <U+0013> A Societal and Political Perspective." ] ;
+    bf:title [ a bf:Title ;
+            rdfs:label "Sustainability Science : An Introduction /" ;
+            bflc:titleSortKey "Sustainability Science : An Introduction /" ;
+            bf:mainTitle "Sustainability Science" ;
+            bf:subtitle "An Introduction" ] .
+
+<https://bibcat.coalliance.org/spr932171222#Instance776-35> a bf:Instance ;
+    bflc:relationship [ a bflc:Relationship ;
+            bflc:relation [ a rdfs:Resource ;
+                    rdfs:label "Printed edition" ] ;
+            bf:relatedTo <https://bibcat.coalliance.org/sustainability-science-an-introduction> ] ;
+    bf:identifiedBy [ a bf:Isbn ;
+            rdf:value "9789401772419." ] ;
+    bf:instanceOf <https://bibcat.coalliance.org/spr932171222#Work> .
+
+<https://bibcat.coalliance.org/spr9789401772426#Instance776-39> a bf:Instance ;
+    bflc:relationship [ a bflc:Relationship ;
+            bflc:relation [ a rdfs:Resource ;
+                    rdfs:label "Printed edition" ] ;
+            bf:relatedTo <https://bibcat.coalliance.org/sustainability-science-an-introduction> ] ;
+    bf:identifiedBy [ a bf:Isbn ;
+            rdf:value "9789401772419." ] ;
+    bf:instanceOf <https://bibcat.coalliance.org/spr9789401772426#Work> .
+
+<https://bibcat.coalliance.org/spr9789401772426#Instance776-39> a bf:Instance ;
+    bflc:relationship [ a bflc:Relationship ;
+            bflc:relation [ a rdfs:Resource ;
+                    rdfs:label "Printed edition" ] ;
+            bf:relatedTo <https://bibcat.coalliance.org/sustainability-science-an-introduction> ] ;
+    bf:identifiedBy [ a bf:Isbn ;
+            rdf:value "9789401772419." ] ;
+    bf:instanceOf <https://bibcat.coalliance.org/spr9789401772426#Work> .
+
+# University of Colorado Boulder bf:Instances
+<https://bibcat.coalliance.org/sustainability-science-an-introduction> a bf:Electronic,
+        bf:Instance ;
+    rdfs:label "Sustainability Science An Introduction /" ;
+    bf:carrier <http://id.loc.gov/vocabulary/carriers/cr> ;
+    bf:digitalCharacteristic [ a bf:EncodingFormat ;
+            rdfs:label "PDF" ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "rda." ] ],
+        [ a bf:FileType ;
+            rdfs:label "text file" ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "rda." ] ] ;
+    bf:editionStatement "1st ed. 2016" ;
+    bf:extent [ a bf:Extent ;
+            rdfs:label "1 online resource (XII, 367 p. 63 illus., 33 illus. in color.)" ] ;
+    bf:generation [ a bf:GenerationProcess ;
+            bf:generationDate "2017-05-10T17:09:46.134112" ;
+            rdf:value """Generated by BIBCAT version 1.8.0
+ from KnowledgeLinks.io"""^^xsd:string ] ;
+    bf:genreForm [ a bf:GenreForm ;
+            rdfs:label "electronic resource" ] ;
+    bf:hasItem <https://bibcat.coalliance.org/sustainability-science-an-introduction/university-of-colorado-boulder>,
+        <https://bibcat.coalliance.org/sustainability-science-an-introduction/university-of-colorado-boulder-1> ;
+    bf:identifiedBy [ a bf:Local ;
+            bf:source <https://www.coalliance.org/> ;
+            rdf:value "sustainability_scienceintroduction__________________________elect2016____201springer_na___________________________________________________________________________" ],
+        [ a bf:Local ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "OCoLC" ] ;
+            rdf:value "932171222" ],
+        [ a bf:Isbn ;
+            rdf:value "9789401772426" ],
+        [ a bf:Isbn ;
+            rdf:value "9789401772419 (print)" ],
+        [ a bf:Isbn ;
+            rdf:value "940177241X (print)" ],
+        [ a bf:Isbn ;
+            rdf:value "9401772428" ],
+        [ a bf:Identifier ;
+            rdf:value "10.1007/978-94-017-7242-6" ] ;
+    bf:instanceOf <https://bibcat.coalliance.org/spr932171222#Work> ;
+    bf:issuance <http://id.loc.gov/vocabulary/issuance/mono> ;
+    bf:media <http://id.loc.gov/vocabulary/mediaType/c> ;
+    bf:note [ a bf:Note ;
+            rdfs:label "online resource." ;
+            bf:noteType "Physical details" ] ;
+    bf:otherPhysicalFormat <https://bibcat.coalliance.org/spr932171222#Instance776-35> ;
+    bf:provisionActivity [ a bf:ProvisionActivity,
+                bf:Publication ;
+            bf:agent [ a bf:Agent ;
+                    rdfs:label "Springer Netherlands" ],
+                [ a bf:Agent ;
+                    rdfs:label "Imprint: Springer" ] ;
+            bf:date "2016" ;
+            bf:place [ a bf:Place ;
+                    rdfs:label "Dordrecht" ] ],
+        [ a bf:ProvisionActivity,
+                bf:Publication ;
+            bf:date "2016"^^<http://id.loc.gov/datatypes/edtf> ;
+            bf:place <http://id.loc.gov/vocabulary/countries/ne> ] ;
+    bf:provisionActivityStatement "Dordrecht : Springer Netherlands : Imprint: Springer, 2016." ;
+    bf:responsibilityStatement "edited by Harald Heinrichs, Pim Martens, Gerd Michelsen, Arnim Wiek" ;
+    bf:tableOfContents [ a bf:TableOfContents ;
+            rdfs:label "Introduction -- Sustainable Development -- Background and Context -- Transformational Sustainability.-Research Methodology -- Green and Sustainable Chemistry -- Sustainability and Ecosystems.-Sustainability Assessment of Technologies -- Corporate Sustainability Management -- Sustainable Development in Economics -- Sustainable Development and Law -- Finance and Sustainability.-Sustainability -- Politics and Governance -- Sustainability Communication -- Sustainability and Science Policy -- Justice and Sustainability -- Sustainability Ethics -- Ocean Space and Sustainability -- Sustainable Landscape Development -- Sustainable Development and Material Flows -- Sustainable Energy Systems.-Sustainability and Health -- Mobility and Sustainability -- International Development and Sustainability.-Tourism and Sustainability -- Consumption and Sustainability -- Climate Change -- Responding to a Major Challenge for Sustainable Development -- Art and Sustainability -- Teaching and Learning in Sustainability Science -- Education for Sustainable Development -- Problem-based and Project-based Learning for Sustainable Development -- Science for Sustainability -- A Societal and Political Perspective." ] ;
+    bf:title [ a bf:Title ;
+            rdfs:label "Sustainability Science An Introduction /" ;
+            bflc:titleSortKey "Sustainability Science An Introduction /" ;
+            bf:mainTitle "Sustainability Science" ;
+            bf:subtitle "An Introduction" ] .
+
+<https://bibcat.coalliance.org/spr932171222#Instance776-35> a bf:Instance ;
+    bflc:relationship [ a bflc:Relationship ;
+            bflc:relation [ a rdfs:Resource ;
+                    rdfs:label "Printed edition" ] ;
+            bf:relatedTo <https://bibcat.coalliance.org/sustainability-science-an-introduction> ] ;
+    bf:identifiedBy [ a bf:Isbn ;
+            rdf:value "9789401772419." ] ;
+    bf:instanceOf <https://bibcat.coalliance.org/spr932171222#Work> .
+
+# SUNY Buffalo State bf:Instances
+
+<https://bibcat.coalliance.org/000893015#Instance776-35> a bf:Instance ;
+    bflc:relationship [ a bflc:Relationship ;
+            bflc:relation [ a rdfs:Resource ;
+                    rdfs:label "Printed edition" ] ;
+            bf:relatedTo <https://bibcat.coalliance.org/sustainability-science-an-introduction> ] ;
+    bf:identifiedBy [ a bf:Isbn ;
+            rdf:value "9789401772419" ] ;
+    bf:instanceOf <https://bibcat.coalliance.org/000893015#Work> .
+
+
+<https://bibcat.coalliance.org/000893015#Instance773-34> a bf:Instance ;
+    bf:instanceOf <https://bibcat.coalliance.org/000893015#Work773-34> ;
+    bf:title [ a bf:Title ;
+            rdfs:label "Springer eBooks" ] .
+
+<https://bibcat.coalliance.org/000893015#Instance776-35> a bf:Instance ;
+    bflc:relationship [ a bflc:Relationship ;
+            bflc:relation [ a rdfs:Resource ;
+                    rdfs:label "Printed edition" ] ;
+            bf:relatedTo <https://bibcat.coalliance.org/sustainability-science-an-introduction> ] ;
+    bf:identifiedBy [ a bf:Isbn ;
+            rdf:value "9789401772419" ] ;
+    bf:instanceOf <https://bibcat.coalliance.org/000893015#Work> .
+
+# SUNY Buffalo State bf:Instances
+<https://bibcat.coalliance.org/sustainability-science-an-introduction> a bf:Electronic,
+        bf:Instance ;
+    rdfs:label "Sustainability Science An Introduction /" ;
+    bf:carrier [ a bf:Carrier ;
+            rdfs:label "electronic" ],
+        <http://id.loc.gov/vocabulary/carriers/cr> ;
+    bf:digitalCharacteristic [ a bf:FileType ;
+            rdfs:label "text file" ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "rda" ] ],
+        [ a bf:FileType ;
+            rdfs:label "text file" ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "rda." ] ],
+        [ a bf:EncodingFormat ;
+            rdfs:label "PDF" ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "rda" ] ],
+        [ a bflc:ImageBitDepth,
+                bf:DigitalCharacteristic ;
+            rdfs:label "008" ],
+        [ a bf:EncodingFormat ;
+            rdfs:label "PDF" ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "rda." ] ],
+        [ a bf:DigitalCharacteristic,
+                bf:EncodingFormat ;
+            rdfs:label "multiple file formats" ] ;
+    bf:editionStatement "1st ed. 2016" ;
+    bf:extent [ a bf:Extent ;
+            rdfs:label "XII, 367 p. 63 illus., 33 illus. in color." ],
+        [ a bf:Extent ;
+            rdfs:label "1 online resource (XII, 367 p. 63 illus., 33 illus. in color.)" ] ;
+    bf:generation [ a bf:GenerationProcess ;
+            bf:generationDate "2017-05-10T19:19:39.641001" ;
+            rdf:value """Generated by BIBCAT version 1.8.0
+ from KnowledgeLinks.io"""^^xsd:string ],
+        [ a bf:GenerationProcess ;
+            bf:generationDate "2017-05-10T19:19:53.110695" ;
+            rdf:value """Generated by BIBCAT version 1.8.0
+ from KnowledgeLinks.io"""^^xsd:string ] ;
+    bf:genreForm [ a bf:GenreForm ;
+            rdfs:label "electronic resource" ],
+        [ a bf:GenreForm ;
+            rdfs:label "electronic resource" ] ;
+    bf:hasItem <https://bibcat.coalliance.org/sustainability-science-an-introduction/suny-buffalo-state>,
+        <https://bibcat.coalliance.org/sustainability-science-an-introduction/suny-buffalo-state-1>,
+        <https://bibcat.coalliance.org/sustainability-science-an-introduction/suny-buffalo-state-2>,
+        <https://bibcat.coalliance.org/sustainability-science-an-introduction/suny-buffalo-state-3> ;
+    bf:identifiedBy [ a bf:Isbn ;
+            rdf:value "9789401772426" ],
+        [ a bf:Local ;
+            bf:source <https://www.coalliance.org/> ;
+            rdf:value "sustainability_scienceintroduction__________________________elect2016____201springer_na___________________________________________________________________________" ],
+        [ a bf:Isbn ;
+            rdf:value "9789401772419 (print)" ],
+        [ a bf:Local ;
+            bf:source [ a bf:Source ;
+                    rdfs:label "OCoLC" ] ;
+            rdf:value "932171222" ],
+        [ a bf:Isbn ;
+            rdf:value "9401772428" ],
+        [ a bf:Identifier ;
+            rdfs:label "doi" ;
+            rdf:value "10.1007/978-94-017-7242-6" ],
+        [ a bf:Isbn ;
+            rdf:value "9789401772426" ],
+        [ a bf:Isbn ;
+            rdf:value "940177241X (print)" ],
+        [ a bf:Local ;
+            bf:source <https://www.coalliance.org/> ;
+            rdf:value "sustainability_scienceintroduction__________________________elect2016____201springer_na___________________________________________________________________________" ],
+        [ a bf:Identifier ;
+            rdf:value "10.1007/978-94-017-7242-6" ] ;
+    bf:instanceOf <https://bibcat.coalliance.org/000893015#Work>,
+        <https://bibcat.coalliance.org/spr932171222#Work> ;
+    bf:issuance <http://id.loc.gov/vocabulary/issuance/mono> ;
+    bf:media <http://id.loc.gov/vocabulary/mediaType/c> ;
+    bf:note [ a bf:Note ;
+            rdfs:label "online resource." ;
+            bf:noteType "Physical details" ],
+        [ a bf:Note ;
+            rdfs:label "online resource." ;
+            bf:noteType "Physical details" ] ;
+    bf:otherPhysicalFormat <https://bibcat.coalliance.org/000893015#Instance776-35>,
+        <https://bibcat.coalliance.org/spr932171222#Instance776-35> ;
+    bf:provisionActivity [ a bf:ProvisionActivity,
+                bf:Publication ;
+            bf:agent [ a bf:Agent ;
+                    rdfs:label "Springer Netherlands" ],
+                [ a bf:Agent ;
+                    rdfs:label "Imprint: Springer" ] ;
+            bf:date "2016" ;
+            bf:place [ a bf:Place ;
+                    rdfs:label "Dordrecht" ] ],
+        [ a bf:ProvisionActivity,
+                bf:Publication ;
+            bf:agent [ a bf:Agent ;
+                    rdfs:label "Springer Netherlands" ],
+                [ a bf:Agent ;
+                    rdfs:label "Imprint: Springer" ] ;
+            bf:date "2016" ;
+            bf:place [ a bf:Place ;
+                    rdfs:label "Dordrecht" ] ],
+        [ a bf:ProvisionActivity,
+                bf:Publication ;
+            bf:date "2016"^^<http://id.loc.gov/datatypes/edtf> ;
+            bf:place <http://id.loc.gov/vocabulary/countries/ne> ],
+        [ a bf:ProvisionActivity,
+                bf:Publication ;
+            bf:date "2016"^^<http://id.loc.gov/datatypes/edtf> ;
+            bf:place <http://id.loc.gov/vocabulary/countries/ne> ] ;
+    bf:provisionActivityStatement "Dordrecht : Springer Netherlands : Imprint: Springer, 2016." ;
+    bf:responsibilityStatement "edited by Harald Heinrichs, Pim Martens, Gerd Michelsen, Arnim Wiek" ;
+    bf:soundContent [ a bf:SoundContent ;
+            rdfs:label "silent" ] ;
+    bf:tableOfContents [ a bf:TableOfContents ;
+            rdfs:label "Introduction -- Sustainable Development -- Background and Context -- Transformational Sustainability.-Research Methodology -- Green and Sustainable Chemistry -- Sustainability and Ecosystems.-Sustainability Assessment of Technologies -- Corporate Sustainability Management -- Sustainable Development in Economics -- Sustainable Development and Law -- Finance and Sustainability.-Sustainability -- Politics and Governance -- Sustainability Communication -- Sustainability and Science Policy -- Justice and Sustainability -- Sustainability Ethics -- Ocean Space and Sustainability -- Sustainable Landscape Development -- Sustainable Development and Material Flows -- Sustainable Energy Systems.-Sustainability and Health -- Mobility and Sustainability -- International Development and Sustainability.-Tourism and Sustainability -- Consumption and Sustainability -- Climate Change -- Responding to a Major Challenge for Sustainable Development -- Art and Sustainability -- Teaching and Learning in Sustainability Science -- Education for Sustainable Development -- Problem-based and Project-based Learning for Sustainable Development -- Science for Sustainability -- A Societal and Political Perspective." ],
+        [ a bf:TableOfContents ;
+            rdfs:label "Introduction -- Sustainable Development – Background and Context -- Transformational Sustainability.-Research Methodology -- Green and Sustainable Chemistry -- Sustainability and Ecosystems.-Sustainability Assessment of Technologies -- Corporate Sustainability Management -- Sustainable Development in Economics -- Sustainable Development and Law -- Finance and Sustainability.-Sustainability – Politics and Governance -- Sustainability Communication -- Sustainability and Science Policy -- Justice and Sustainability -- Sustainability Ethics -- Ocean Space and Sustainability -- Sustainable Landscape Development -- Sustainable Development and Material Flows -- Sustainable Energy Systems.-Sustainability and Health -- Mobility and Sustainability -- International Development and Sustainability.-Tourism and Sustainability -- Consumption and Sustainability -- Climate Change – Responding to a Major Challenge for Sustainable Development -- Art and Sustainability -- Teaching and Learning in Sustainability Science -- Education for Sustainable Development -- Problem-based and Project-based Learning for Sustainable Development -- Science for Sustainability – A Societal and Political Perspective." ] ;
+    bf:title [ a bf:Title ;
+            rdfs:label "Sustainability Science An Introduction /" ;
+            bflc:titleSortKey "Sustainability Science An Introduction /" ;
+            bf:mainTitle "Sustainability Science" ;
+            bf:subtitle "An Introduction" ],
+        [ a bf:Title ;
+            rdfs:label "Sustainability Science An Introduction /" ;
+            bflc:titleSortKey "Sustainability Science An Introduction /" ;
+            bf:mainTitle "Sustainability Science" ;
+            bf:subtitle "An Introduction" ] .
+
+
+<https://bibcat.coalliance.org/000893015#Instance773-34> a bf:Instance ;
+    bf:instanceOf <https://bibcat.coalliance.org/000893015#Work773-34> ;
+    bf:title [ a bf:Title ;
+            rdfs:label "Springer eBooks" ] .
+
+# Colorado College bf:Item
+<https://bibcat.coalliance.org/sustainability-science-an-introduction/colorado-college> a bf:Item ;
+    bf:electronicLocator [ a rdfs:Resource ;
+            bflc:locator <http://0-www.springerlink.com.tiger.coloradocollege.edu/openurl.asp?genre=book&id=doi:10.1007/978-94-017-7242-6> ;
+            bf:note [ a bf:Note ;
+                    rdfs:label "View online" ] ] ;
+    bf:heldBy <https://www.coloradocollege.edu/> ;
+    bf:itemOf <https://bibcat.coalliance.org/sustainability-science-an-introduction> ;
+    rdfs:seeAlso <https://tiger.coloradocollege.edu/record=b2417374> .
+
+# University of Colorado bf:Items
+<https://bibcat.coalliance.org/sustainability-science-an-introduction/university-of-colorado-boulder> a bf:Item ;
+    bf:electronicLocator [ a rdfs:Resource ;
+            bflc:locator <https://colorado.idm.oclc.org/login?url=http://dx.doi.org/10.1007/978-94-017-7242-6> ;
+            bf:note [ a bf:Note ;
+                    rdfs:label "Connect to online resource via Springer" ] ] ;
+    bf:heldBy <http://www.colorado.edu/> ;
+    bf:itemOf <https://bibcat.coalliance.org/sustainability-science-an-introduction> ;
+    rdfs:seeAlso <http://libraries.colorado.edu/record=b8524050> .
+
+<https://bibcat.coalliance.org/sustainability-science-an-introduction/university-of-colorado-boulder-1> a bf:Item ;
+    bf:heldBy <http://www.colorado.edu/> ;
+    bf:itemOf <https://bibcat.coalliance.org/sustainability-science-an-introduction> ;
+    bf:shelfMark [ a bf:ShelfMarkLcc ;
+            rdfs:label "GE196" ] ;
+    rdfs:seeAlso <http://libraries.colorado.edu/record=b8524050> .
+
+# SUNY Buffalo State bf:Items
+<https://bibcat.coalliance.org/sustainability-science-an-introduction/suny-buffalo-state> a bf:Item ;
+    bf:electronicLocator [ a rdfs:Resource ;
+            bflc:locator <http://proxy.buffalostate.edu:2048/login?url=http://dx.doi.org/10.1007/978-94-017-7242-6> ;
+            bf:note [ a bf:Note ;
+                    rdfs:label "Click here to view ebook" ] ] ;
+    bf:heldBy <http://suny.buffalostate.edu/> ;
+    bf:itemOf <https://bibcat.coalliance.org/sustainability-science-an-introduction> ;
+    bf:shelfMark [ a bf:ShelfMarkLcc ;
+            rdfs:label "GE196" ] ;
+    rdfs:seeAlso <http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_000893015>,
+        <http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_spr932171222> .
+
+<https://bibcat.coalliance.org/sustainability-science-an-introduction/suny-buffalo-state-1> a bf:Item ;
+    bf:electronicLocator [ a rdfs:Resource ;
+            bflc:locator <https://colorado.idm.oclc.org/login?url=http://dx.doi.org/10.1007/978-94-017-7242-6> ;
+            bf:note [ a bf:Note ;
+                    rdfs:label "Connect to online resource via Springer" ] ] ;
+    bf:heldBy <http://suny.buffalostate.edu/> ;
+    bf:itemOf <https://bibcat.coalliance.org/sustainability-science-an-introduction> ;
+    bf:shelfMark [ a bf:ShelfMarkLcc ;
+            rdfs:label "GE195-199" ] ;
+    rdfs:seeAlso <http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_000893015>,
+        <http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_spr932171222> .
+
+<https://bibcat.coalliance.org/sustainability-science-an-introduction/suny-buffalo-state-2> a bf:Item ;
+    bf:heldBy <http://id.loc.gov/vocabulary/organizations/BSC>,
+        <http://suny.buffalostate.edu/> ;
+    bf:itemOf <https://bibcat.coalliance.org/sustainability-science-an-introduction> ;
+    bf:subLocation [ a bf:SubLocation ;
+            rdfs:label "BSCMN" ] ;
+    rdfs:seeAlso <http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_000893015> .
+
+<https://bibcat.coalliance.org/sustainability-science-an-introduction/suny-buffalo-state-3> a bf:Item ;
+    bf:heldBy <http://suny.buffalostate.edu/> ;
+    bf:itemOf <https://bibcat.coalliance.org/sustainability-science-an-introduction> ;
+    bf:shelfMark [ a bf:ShelfMarkLcc ;
+            rdfs:label "GE196" ] ;
+    rdfs:seeAlso <http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_000893015> .
+
