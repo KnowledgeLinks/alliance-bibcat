@@ -1,4 +1,4 @@
-__author__ = "Jeremy Nelson"
+__author__ = "Jeremy Nelson, Jay Peterson"
 
 import datetime
 import json
@@ -54,7 +54,6 @@ def __run_query__(sparql):
 def home():
     triples_store_stats = {}
     bf_counts = {}
-    print("Before simple")
     if len(LIBRARIES) < 1:
         set_libraries()
     for iri, info in LIBRARIES.items():
@@ -223,6 +222,10 @@ def sitemap(offset=0):
     xml = render_template("sitemap_template.xml", instances=instances)
     return Response(xml, mimetype="text/xml")
 
+    
+@app.route("/instance")
+def bf_instance():
+    return render_template("instance.html", site_title = "Woogylamprey", site_body = "Hello!")
 
 PREFIX = """PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
