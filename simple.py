@@ -224,9 +224,15 @@ def sitemap(offset=0):
 
     
 @app.route("/instance")
-def bf_instance():
-    return render_template("instance.html", site_title = "Woogylamprey", site_body = "Hello!")
 
+
+def bf_instance():
+    return render_template("instance.html", site_title = "Welcome!", instance_title = "Environment Sustainibility for Boring People", authors = ["Jerome Nielsen", "Jaye Pietrson", "Felix Colgrave"], pubdate = "2016", blurb = LOREM, subjects = ["Maths", "Sciences", "Underwater basketweaving for the narcoleptic"], item_list = ["We've got a copy down at Joe's Pizza.", "There's one duct-taped to my chair.", "Cambridge library, 5012 N Avenue."])
+
+LOREM = """
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit tortor quis elit ullamcorper, in congue odio placerat. Pellentesque quis gravida odio. Fusce tempor ex quam. Fusce et vestibulum velit. Maecenas magna diam, eleifend in feugiat vitae, eleifend quis neque. Vivamus egestas sapien vitae velit facilisis, et aliquam erat ultrices. Quisque purus nunc, gravida eget blandit eu, sollicitudin sit amet erat. Nullam blandit urna ut convallis placerat. Phasellus lectus neque, efficitur quis volutpat nec, laoreet nec velit. In interdum ipsum eget turpis tincidunt posuere. Nam pretium, eros quis aliquet egestas, nisl neque aliquet risus, ut cursus tellus sapien ac leo. Ut gravida diam et odio porttitor, vel vehicula massa malesuada. Fusce ornare commodo elit tincidunt venenatis.
+"""
+    
 PREFIX = """PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX relators: <http://id.loc.gov/vocabulary/relators/>
