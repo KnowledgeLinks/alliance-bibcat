@@ -2,27 +2,27 @@
 
 {% block main %}
 <div class="container">
-  <h1>{{instance_title}}</h1>
+  <h1>{{instance.name}}</h1>
   <div class="row">
     <div class="col-8">
-      {% if authors %}
+      {% if instance.authors %}
       <div class="row">
         <div class="col-12">
-          <h4>Edited by {% for auth in authors %}{{auth}}, {% endfor %}</h4>
+          <h4>Edited by {% for auth in instance.authors %}{{auth}}{% if not loop.last %}, {% endif %}{% endfor %}</h4>
         </div>
       </div>
       {% endif %}
-      {% if pubdate %}
+      {% if instance.datePublished %}
       <div class="row">
         <div class="col-12">
-          <h3>{{pubdate}}</h3>
+          <h3>{{instance.datePublished}}</h3>
         </div>
       </div>
       {% endif %}
-      {% if blurb %}
+      {% if instance.description %}
       <div class="row">
         <div class="col-12">
-          <p>{{blurb}}</p>
+          <p>{{instance.description}}</p>
         </div>
       </div>
       {% endif %}
@@ -42,14 +42,23 @@
     </div>
   </div>
   <div class="row">
-  {% if item_list %}
-    {% for single_item in item_list %}
-      <div class="col-12 itemLister">
-        <h3>{{single_item}}</h3>
+  {% if instance.workExample %}
+    {% for location, refnumber, availability in instance.workExample %}
+      <div class="col-12 card">
+        <div class="row card-block">
+          <div class="col-4">
+            <img src="{{url_for('static', filename='img/Nowhere_img.png')}}"></img>
+          </div>
+          <div class="col-8">
+            <h3>{{location}}</h3>
+            <p>Reference Number: {{refnumber}}</p>
+            <p>Availability: {{availability}}</p>
+          </div>
+        </div>
       </div>
     {% endfor %}
   {% else %}
-    <div class="col-12">
+    <div class="col-12 card">
       <h2>There doesn't seem to be anything here...</h2>
     </div>
   {% endif %}

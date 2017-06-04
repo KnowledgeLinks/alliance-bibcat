@@ -12,6 +12,8 @@ from flask import Flask, render_template, request
 from flask import abort, jsonify, flash, Response
 from flask_cache import Cache
 
+from types import SimpleNamespace
+
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
@@ -203,32 +205,39 @@ def site_index():
     count = int(bindings[0].get('count').get('value'))
     shards = math.ceil(count/50000)
     mod_date = app.config.get('MOD_DATE')
-    if mod_date is None:
+    if mod_date is None: 
         mod_date=datetime.datetime.utcnow().strftime("%Y-%m-%d")
     xml = render_template("siteindex.xml", 
             count=range(1, shards+1), 
             last_modified=mod_date)
     return Response(xml, mimetype="text/xml")
 
-@app.route("/sitemap<offset>.xml", methods=["GET"])
+@app.route("/sitemap<offset>.xml", methods=["GET"]) 
 @cache.cached(timeout=86400)
 def sitemap(offset=0):
     offset = (int(offset)*50000) - 50000
     sparql = INSTANCES.format(offset)
-    result = requests.post(app.config.get("TRIPLESTORE_URL"),
+    result = requests.post(app.config.get("TRIPLESTORE_URL"), 
         data={"query": sparql,
               "format": "json"})
     instances = result.json().get('results').get('bindings')
-    xml = render_template("sitemap_template.xml", instances=instances)
+    xml = render_template("sitemap_template.xml", instances=instances) 
     return Response(xml, mimetype="text/xml")
 
-    
+TEST_INSTANCE = SimpleNamespace()
+TEST_INSTANCE.name="Environment Sustainibility for Boring People"
+TEST_INSTANCE.authors=["Jerome Nielsen", "Jaye Pietrson", "Felix Colgrave"]
+TEST_INSTANCE.editors=["Qwert Yuiop", "As Def", "Ghy Jikl"]
+TEST_INSTANCE.datePublished="Apr. 1, 3000" 
+TEST_INSTANCE.description="A book about environments, sustainability, more environments, and oh whatever lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit tortor quis elit ullamcorper, in congue odio placerat. Pellentesque quis gravida odio. Fusce tempor ex quam. Fusce et vestibulum velit. Maecenas magna diam, eleifend in feugiat vitae, eleifend quis neque. Vivamus egestas sapien vitae velit facilisis, et aliquam erat ultrices. Quisque purus nunc, gravida eget blandit eu, sollicitudin sit amet erat. Nullam blandit urna ut convallis placerat. Phasellus lectus neque, efficitur quis volutpat nec, laoreet nec velit. In interdum ipsum eget turpis tincidunt posuere. Nam pretium, eros quis aliquet egestas, nisl neque aliquet risus, ut cursus tellus sapien ac leo. Ut gravida diam et odio porttitor, vel vehicula massa malesuada. Fusce ornare commodo elit tincidunt venenatis."
+TEST_INSTANCE.about=["Science", "Environment", "Sustenence"]
+TEST_INSTANCE.workExample=[("WSCU", "EX-12345", "available"), ("Colorado Springs Generic University", "XE-54321", "unavailable")] 
 @app.route("/instance")
-
-
 def bf_instance():
-    return render_template("instance.html", site_title = "Welcome!", instance_title = "Environment Sustainibility for Boring People", authors = ["Jerome Nielsen", "Jaye Pietrson", "Felix Colgrave"], pubdate = "2016", blurb = LOREM, subjects = ["Maths", "Sciences", "Underwater basketweaving for the narcoleptic"], item_list = ["We've got a copy down at Joe's Pizza.", "There's one duct-taped to my chair.", "Cambridge library, 5012 N Avenue."])
-
+    return render_template("instance.html", instance=TEST_INSTANCE)
+    
+    
+#site_title = "Welcome!", instance_title = "Environment Sustainibility for Boring People", authors = ["Jerome Nielsen", "Jaye Pietrson", "Felix Colgrave"], pubdate = "2016", blurb = LOREM, subjects = ["Maths", "Sciences", "Underwater basketweaving for the narcoleptic"], item_list = ["We've got a copy down at Joe's Pizza.", "There's one duct-taped to my chair.", "Cambridge library, 5012 N Avenue."]
 LOREM = """
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit tortor quis elit ullamcorper, in congue odio placerat. Pellentesque quis gravida odio. Fusce tempor ex quam. Fusce et vestibulum velit. Maecenas magna diam, eleifend in feugiat vitae, eleifend quis neque. Vivamus egestas sapien vitae velit facilisis, et aliquam erat ultrices. Quisque purus nunc, gravida eget blandit eu, sollicitudin sit amet erat. Nullam blandit urna ut convallis placerat. Phasellus lectus neque, efficitur quis volutpat nec, laoreet nec velit. In interdum ipsum eget turpis tincidunt posuere. Nam pretium, eros quis aliquet egestas, nisl neque aliquet risus, ut cursus tellus sapien ac leo. Ut gravida diam et odio porttitor, vel vehicula massa malesuada. Fusce ornare commodo elit tincidunt venenatis.
 """
