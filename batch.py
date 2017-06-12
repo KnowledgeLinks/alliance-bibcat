@@ -57,7 +57,7 @@ def cu_minter(marc_xml):
 
 def suny_buff_minter(marc_xml):
     return summon_minter(
-        "http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_{0}",
+        "http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_{0}2",
         marc_xml)
     
 @click.command()
