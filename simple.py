@@ -143,17 +143,37 @@ def __construct_schema__(iri):
     --------
         SimpleNamespace
     """
-    entity = SimpleNamespace()
-    entity.iri = str(iri)
-    SCHEMA_PROCESSOR.run(instance=entity.iri, limit=1, offset=0)
-    for pred, obj in SCHEMA_PROCESSOR.output.predicate_objects(
-        subject=iri):
-        pred_str = str(pred)
-        if "schema.org" in pred_str:
-            property_name = pred_str.split("/")[-1]
-            print(iri, property_name, obj)
-            setattr(entity, property_name, str(obj))
-    return entity
+    def __add_properties__(entity, entity_iri):
+        for pred, obj in SCHEMA_PROCESSOR.output.predicate_objects(
+            subject=entity_iri):
+            pred_str = str(pred)
+            if "schema.org" in pred_str:
+                property_name = pred_str.split("/")[-1]
+                if hasattr(entity, property_name):
+                    object_ = getattr(entity, property_name)
+                    # Not a singleton, convert to a list for this property
+                    if isinstance(object_, list):
+                        object_.append(str(obj))
+                    else:
+                        setattr(entity, property_name, [object_,])
+                else:        
+                    setattr(entity, property_name, str(obj))
+    instance = SimpleNamespace()
+    instance.iri = str(iri)
+    SCHEMA_PROCESSOR.run(instance=instance.iri, limit=1, offset=0)
+    #print(SCHEMA_PROCESSOR.output.serialize(format='turtle').decode())
+    __add_properties__(instance, iri)
+    # Repopulate Items as Namespaces
+    if not isinstance(instance.workExample, list):
+        instance.workExample = [instance.workExample, ]
+    items = []
+    for item_iri in instance.workExample:
+        item = SimpleNamespace()
+        item.iri = item_iri
+        __add_properties__(item, rdflib.URIRef(item_iri))
+        items.append(item)
+    instance.workExample = items
+    return instance
 
 @app.route("/<path:title>/<path:institution>")
 def display_item(title, institution):
@@ -255,11 +275,6 @@ TEST_ITEM.fileFormat="pdf"
 def bf_item():
     return render_template("item.html", instance=TEST_ITEM)
     
-    
-#site_title = "Welcome!", instance_title = "Environment Sustainibility for Boring People", authors = ["Jerome Nielsen", "Jaye Pietrson", "Felix Colgrave"], pubdate = "2016", blurb = LOREM, subjects = ["Maths", "Sciences", "Underwater basketweaving for the narcoleptic"], item_list = ["We've got a copy down at Joe's Pizza.", "There's one duct-taped to my chair.", "Cambridge library, 5012 N Avenue."]
-LOREM = """
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit tortor quis elit ullamcorper, in congue odio placerat. Pellentesque quis gravida odio. Fusce tempor ex quam. Fusce et vestibulum velit. Maecenas magna diam, eleifend in feugiat vitae, eleifend quis neque. Vivamus egestas sapien vitae velit facilisis, et aliquam erat ultrices. Quisque purus nunc, gravida eget blandit eu, sollicitudin sit amet erat. Nullam blandit urna ut convallis placerat. Phasellus lectus neque, efficitur quis volutpat nec, laoreet nec velit. In interdum ipsum eget turpis tincidunt posuere. Nam pretium, eros quis aliquet egestas, nisl neque aliquet risus, ut cursus tellus sapien ac leo. Ut gravida diam et odio porttitor, vel vehicula massa malesuada. Fusce ornare commodo elit tincidunt venenatis.
-"""
     
 PREFIX = """PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

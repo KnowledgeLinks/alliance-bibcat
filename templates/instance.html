@@ -43,7 +43,7 @@
   </div>
   <div class="row">
   {% if instance.workExample %}
-    {% for location, refnumber, availability in instance.workExample %}
+    {% for item in instance.workExample %}
       <div class="col-12 card">
         <div class="row">
           <div class="col-lg-auto">
@@ -56,9 +56,9 @@
           </iframe>
         </div>
           <div class="col">
-            <h3>{{location}}</h3>
-            <p>Reference Number: {{refnumber}}</p>
-            <p>Availability: {{availability}}</p>
+            <h3>{% item.location.name %}</h3>
+            <p>Reference Number: {{ item.refnumber}}</p>
+            <p>Availability: {{ item.availability}}</p>
           </div>
         </div>
       </div>
