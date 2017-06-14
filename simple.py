@@ -6,24 +6,31 @@ import math
 import os
 import requests
 import threading
+import rdflib
 import sys
 import time
+from types import SimpleNamespace
+
 from flask import Flask, render_template, request
 from flask import abort, jsonify, flash, Response
 from flask_cache import Cache
-
-from types import SimpleNamespace
+from bibcat.rml.processor import SPARQLProcessor
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
 LIBRARIES = dict()
-PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
 
+PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
 cache = Cache(app, config={"CACHE_TYPE": "filesystem",
                            "CACHE_DIR": os.path.join(PROJECT_BASE, "cache")})
 
 BACKGROUND_THREAD = None
+
+SCHEMA_PROCESSOR = SPARQLProcessor(
+    rml_rules=[os.path.join(PROJECT_BASE,
+        "bibcat/rdfw-definitions/rml-bibcat-bf-to-schema.ttl")],
+    triplestore_url=app.config.get("TRIPLESTORE_URL"))
 
 def set_libraries():
     global LIBRARIES
@@ -102,20 +109,6 @@ def get_date_published(uri):
         dates.append(row.get('date').get('value'))
     return dates
  
-def get_isbns(uri):
-    isbns = []
-    bindings = __run_query__(ISBNS.format(uri))
-    for row in bindings:
-        isbns.append(row.get('isbn').get('value'))
-    return isbns
-
-def get_item(uri):
-    item = None
-    sparql = ITEM.format(uri)
-    bindings = __run_query__(sparql)
-    if len(bindings) == 1:
-        item = bindings[0].get('item').get('value')    
-    return item
 
 def get_place(uri):
     output = {"@type": "Library", "priceRange" : "0"}
@@ -138,62 +131,84 @@ def get_place(uri):
     return output
         
 
-def get_title(uri):
-    sparql = TITLE.format(uri)
-    bindings = __run_query__(sparql)
-    title = ''
-    for row in bindings:
-        title += row.get('main').get('value')
-        if 'subtitle' in row:
-            title += row.get('subtitle').get('value')
-    return title 
+def __construct_schema__(iri):
+    """Constructs a simple Python object populated from rdflib.Graph
+    schema.org triples and an bf:Instance IRI
 
-def get_types(uuid):
-    return "CreativeWork"
-                            
+    Args:
+    -----
+        iri: rdflib.URIRef of Instance 
 
-@app.route("/<uuid>")
-def instance(uuid):
-    # Hack for Google verification
-    if uuid.startswith("google"):
-        return render_template(uuid)
-    uri = "http://bibcat.coalliance.org/{}".format(uuid)
-    bindings = __run_query__(GET_CLASS.format(uri))
-    if len(bindings) < 1:
-        abort(404)
-    if request.args.get("vocab") == "bibframe":
-        return jsonify({"@context": "http://id.loc.gov/ontologies/bibframe/",
-            "@id": uri,
-            "title": {"@type": "InstanceTitle",
-                      "mainTitle": get_title(uri)}
-        })
-    output = {"@context": "http://schema.org",
-        "@type": get_types(uuid),
-        "name": get_title(uri),
-        "datePublished": get_date_published(uri),
-        "author": get_authors(uri),
-        "isbn": get_isbns(uri),
-        "mainEntityOfPage": {
-            "@type": "CreativeWork", 
-            "@id": get_item(uri),
-            "contentLocation": get_place(uri)
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "Colorado Alliance of Research Libraries",
-            "logo": {
-                  "@type": "ImageObject",
-                  "url": "https://www.coalliance.org/sites/all/themes/minim/logo.png",
-                  "height": "90px",
-                  "width": "257px"
-             }
-        },
-        "version": "0.7.0"
-    }
-    if len(output['isbn']) > 0:
-        output.pop("@type")
-        output['@type'] = 'Book' 
-    return render_template('detail.html', info=output)
+    Returns:
+    --------
+        SimpleNamespace
+    """
+    def __add_properties__(entity, entity_iri):
+        for pred, obj in SCHEMA_PROCESSOR.output.predicate_objects(
+            subject=entity_iri):
+            pred_str = str(pred)
+            if "schema.org" in pred_str:
+                property_name = pred_str.split("/")[-1]
+                if hasattr(entity, property_name):
+                    object_ = getattr(entity, property_name)
+                    # Not a singleton, convert to a list for this property
+                    if isinstance(object_, list):
+                        object_.append(str(obj))
+                    else:
+                        setattr(entity, property_name, [object_,])
+                else:        
+                    setattr(entity, property_name, str(obj))
+    instance = SimpleNamespace()
+    instance.iri = str(iri)
+    SCHEMA_PROCESSOR.run(instance=instance.iri, limit=1, offset=0)
+    #print(SCHEMA_PROCESSOR.output.serialize(format='turtle').decode())
+    __add_properties__(instance, iri)
+    # Repopulate Items as Namespaces
+    if not isinstance(instance.workExample, list):
+        instance.workExample = [instance.workExample, ]
+    items = []
+    for item_iri in instance.workExample:
+        item = SimpleNamespace()
+        item.iri = item_iri
+        __add_properties__(item, rdflib.URIRef(item_iri))
+        items.append(item)
+    instance.workExample = items
+    return instance
+
+@app.route("/<path:title>/<path:institution>")
+def display_item(title, institution):
+    """Displays different views of bf:Item 
+
+    Args:
+    -----
+        title: path, Slugified title of Instance
+        institution: path, Slugified institution name
+    """
+    item_iri = rdflib.URLRef("/{0}/{1}".format(
+        str(instance_iri),
+        institution))
+    
+
+    
+    item = __construct_schema__(item_iri, 
+        schema_processor.output)
+    return render_template("item.html",
+        item=item)
+
+
+@app.route("/<path:title>")
+def display_instance(title):
+    """Displays different views of bf:Instance 
+
+    Args:
+        title(path): Slugified title of Instance
+    """
+    instance_iri = rdflib.URIRef("{0}{1}".format(
+        app.config.get("BASE_URL"),
+        title))
+    instance = __construct_schema__(instance_iri)
+    return render_template("instance.html",
+        instance=instance)
     
 @app.route("/siteindex.xml")
 @cache.cached(timeout=86400) # Cached for 1 day
@@ -224,6 +239,8 @@ def sitemap(offset=0):
     xml = render_template("sitemap_template.xml", instances=instances) 
     return Response(xml, mimetype="text/xml")
 
+
+
 TEST_INSTANCE = SimpleNamespace()
 TEST_INSTANCE.name="Environment Sustainibility for Boring People"
 TEST_INSTANCE.authors=["Jerome Nielsen", "Jaye Pietrson", "Felix Colgrave"]
@@ -232,11 +249,13 @@ TEST_INSTANCE.datePublished="Apr. 1, 3000"
 TEST_INSTANCE.description="A book about environments, sustainability, more environments, and oh whatever lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit tortor quis elit ullamcorper, in congue odio placerat. Pellentesque quis gravida odio. Fusce tempor ex quam. Fusce et vestibulum velit. Maecenas magna diam, eleifend in feugiat vitae, eleifend quis neque. Vivamus egestas sapien vitae velit facilisis, et aliquam erat ultrices. Quisque purus nunc, gravida eget blandit eu, sollicitudin sit amet erat. Nullam blandit urna ut convallis placerat. Phasellus lectus neque, efficitur quis volutpat nec, laoreet nec velit. In interdum ipsum eget turpis tincidunt posuere. Nam pretium, eros quis aliquet egestas, nisl neque aliquet risus, ut cursus tellus sapien ac leo. Ut gravida diam et odio porttitor, vel vehicula massa malesuada. Fusce ornare commodo elit tincidunt venenatis."
 TEST_INSTANCE.keywords = ["Maths", "Sciences", "Underwater basketweaving for the narcoleptic"]
 TEST_INSTANCE.about=["Science", "Environment", "Sustenence"]
-TEST_INSTANCE.workExample = SimpleNamespace() #I think that's how it works?
-TEST_INSTANCE.workExample.identifier = SimpleNamespace() #One more for the road?
-TEST_INSTANCE.workExample.identifier.propertyID = "1a2b3c-4d5e9z"
+#TEST_INSTANCE.workExample = SimpleNamespace() #I think that's how it works?
+#TEST_INSTANCE.workExample.identifier = SimpleNamespace() #One more for the road?
+#TEST_INSTANCE.workExample.identifier.propertyID = "1a2b3c-4d5e9z"
 TEST_INSTANCE.location="western state colorado university"
+TEST_INSTANCE.workExample=[("WSCU", "EX-12345", "available"), ("Colorado Springs Generic University", "XE-54321", "unavailable")] 
 @app.route("/instance")
+@app.route("/instance_test")
 def bf_instance():
     return render_template("instance.html", instance=TEST_INSTANCE)
     
@@ -261,11 +280,6 @@ TEST_ITEM.fileFormat="pdf"
 def bf_item():
     return render_template("item.html", instance=TEST_ITEM)
     
-    
-#site_title = "Welcome!", instance_title = "Environment Sustainibility for Boring People", authors = ["Jerome Nielsen", "Jaye Pietrson", "Felix Colgrave"], pubdate = "2016", blurb = LOREM, subjects = ["Maths", "Sciences", "Underwater basketweaving for the narcoleptic"], item_list = ["We've got a copy down at Joe's Pizza.", "There's one duct-taped to my chair.", "Cambridge library, 5012 N Avenue."]
-LOREM = """
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit tortor quis elit ullamcorper, in congue odio placerat. Pellentesque quis gravida odio. Fusce tempor ex quam. Fusce et vestibulum velit. Maecenas magna diam, eleifend in feugiat vitae, eleifend quis neque. Vivamus egestas sapien vitae velit facilisis, et aliquam erat ultrices. Quisque purus nunc, gravida eget blandit eu, sollicitudin sit amet erat. Nullam blandit urna ut convallis placerat. Phasellus lectus neque, efficitur quis volutpat nec, laoreet nec velit. In interdum ipsum eget turpis tincidunt posuere. Nam pretium, eros quis aliquet egestas, nisl neque aliquet risus, ut cursus tellus sapien ac leo. Ut gravida diam et odio porttitor, vel vehicula massa malesuada. Fusce ornare commodo elit tincidunt venenatis.
-"""
     
 PREFIX = """PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

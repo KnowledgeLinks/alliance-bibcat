@@ -56,10 +56,11 @@
               &q={{instance.location}}" allowfullscreen>
           </iframe>
         </div>
-        <div class="col">
-          {% if instance.workExample.identifier.propertyID %}
-            <p>Reference Number: {{item.identifier.propertyID}}</p>
-          {% endif %}
+          <div class="col">
+            <h3>{{ item.location.name }}</h3>
+            <p>Reference Number: {{ item.refnumber}}</p>
+            <p>Availability: {{ item.availability}}</p>
+          </div>
         </div>
       </div>
     </div>
