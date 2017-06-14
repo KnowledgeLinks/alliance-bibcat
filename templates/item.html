@@ -12,6 +12,25 @@
         </div>
       </div>
       {% endif %}
+      
+      
+      <div class="row">
+        <div class="col-lg-auto">
+          <iframe
+            width="200"
+            height="200"
+            frameborder="0" style="border:0"
+            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCuODt2VKs726Htc3hVNDga2UP1AAOdDZs
+              &q=Space+Needle,Seattle+WA" allowfullscreen>
+          </iframe>
+        </div>
+        <div class="col">
+          <h3>{{instance.location}}</h3>
+          <p>Reference Number: {{instance.refnumber}}</p>
+          <p>Availability: {{instance.availability}}</p>
+        </div>
+      </div>
+      
       {% if instance.datePublished %}
       <div class="row">
         <div class="col-12">
@@ -26,13 +45,13 @@
         </div>
       </div>
       {% endif %}
-      {% if instance.keywords %}
+      {% if subjects %}
       <div class="row">
         <div class="col-2">
-          <p><b>Keywords:</b></p>
+          <p><b>Subjects:</b></p>
         </div>
         <div class="col-10">
-          <ul>{% for keyword in instance.keywords %}<li>{{keyword}}</li>{% endfor %}</ul>
+          <ul>{% for sub in subjects %}<li>{{sub}}</li>{% endfor %}</ul>
         </div>
       </div>
       {% endif %}
@@ -41,35 +60,15 @@
       <img src="{{url_for('static', filename='img/Sample-cover.png')}}"></img>
     </div>
   </div>
+  {% if instance.url %}
   <div class="row">
-  {% if instance.workExample %}
-    {% for location, refnumber, availability in instance.workExample %}
-      <div class="col-12 card">
-        <div class="row">
-          <div class="col-lg-auto">
-          <iframe
-            width="200"
-            height="200"
-            frameborder="0" style="border:0"
-            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCuODt2VKs726Htc3hVNDga2UP1AAOdDZs
-              &q=Space+Needle,Seattle+WA" allowfullscreen>
-          </iframe>
-        </div>
-          <div class="col">
-            <h3>{{location}}</h3>
-            <p>Reference Number: {{refnumber}}</p>
-            <p>Availability: {{availability}}</p>
-          </div>
-        </div>
-      </div>
-    {% endfor %}
-  {% else %}
-    <div class="col-12 card">
-      <h2>There doesn't seem to be anything here...</h2>
-    </div>
-  {% endif %}
+    <p><h4>Library catalogue link:</h4></p>
+    <p><a href="{{instance.url}}">{{instance.url}}</a></p>
   </div>
+  {% endif %}
+  <div class="row">
   
+  </div>
   
 </div>
 
