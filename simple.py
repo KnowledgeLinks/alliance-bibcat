@@ -232,7 +232,10 @@ TEST_INSTANCE.datePublished="Apr. 1, 3000"
 TEST_INSTANCE.description="A book about environments, sustainability, more environments, and oh whatever lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit tortor quis elit ullamcorper, in congue odio placerat. Pellentesque quis gravida odio. Fusce tempor ex quam. Fusce et vestibulum velit. Maecenas magna diam, eleifend in feugiat vitae, eleifend quis neque. Vivamus egestas sapien vitae velit facilisis, et aliquam erat ultrices. Quisque purus nunc, gravida eget blandit eu, sollicitudin sit amet erat. Nullam blandit urna ut convallis placerat. Phasellus lectus neque, efficitur quis volutpat nec, laoreet nec velit. In interdum ipsum eget turpis tincidunt posuere. Nam pretium, eros quis aliquet egestas, nisl neque aliquet risus, ut cursus tellus sapien ac leo. Ut gravida diam et odio porttitor, vel vehicula massa malesuada. Fusce ornare commodo elit tincidunt venenatis."
 TEST_INSTANCE.keywords = ["Maths", "Sciences", "Underwater basketweaving for the narcoleptic"]
 TEST_INSTANCE.about=["Science", "Environment", "Sustenence"]
-TEST_INSTANCE.workExample=[("WSCU", "EX-12345", "available"), ("Colorado Springs Generic University", "XE-54321", "unavailable")] 
+TEST_INSTANCE.workExample = SimpleNamespace() #I think that's how it works?
+TEST_INSTANCE.workExample.identifier = SimpleNamespace() #One more for the road?
+TEST_INSTANCE.workExample.identifier.propertyID = "1a2b3c-4d5e9z"
+TEST_INSTANCE.location="western state colorado university"
 @app.route("/instance")
 def bf_instance():
     return render_template("instance.html", instance=TEST_INSTANCE)

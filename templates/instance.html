@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block main %}
+<script src="https://use.fontawesome.com/f0e99862c1.js"></script>
 <div class="container">
   <h1>{{instance.name}}</h1>
   <div class="row">
@@ -43,25 +44,25 @@
   </div>
   <div class="row">
   {% if instance.workExample %}
-    {% for location, refnumber, availability in instance.workExample %}
-      <div class="col-12 card">
-        <div class="row">
-          <div class="col-lg-auto">
+    {% for item in instance.workExample %}
+    <div class="col-12 card">
+      <div class="row">
+        <div class="col-lg-auto">
           <iframe
             width="200"
             height="200"
             frameborder="0" style="border:0"
             src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCuODt2VKs726Htc3hVNDga2UP1AAOdDZs
-              &q=Space+Needle,Seattle+WA" allowfullscreen>
+              &q={{instance.location}}" allowfullscreen>
           </iframe>
         </div>
-          <div class="col">
-            <h3>{{location}}</h3>
-            <p>Reference Number: {{refnumber}}</p>
-            <p>Availability: {{availability}}</p>
-          </div>
+        <div class="col">
+          {% if instance.workExample.identifier.propertyID %}
+            <p>Reference Number: {{item.identifier.propertyID}}</p>
+          {% endif %}
         </div>
       </div>
+    </div>
     {% endfor %}
   {% else %}
     <div class="col-12 card">
