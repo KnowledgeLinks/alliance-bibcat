@@ -190,18 +190,18 @@ WHERE {{
             item_iri(lists): List of Item IRIs
             instance_iri(rdflib.URIRef): New instance IRI
         """
+        output = []
         sparql = AlliancePreprocessor.ORG_LABEL_SPARQL.format(
             self.institutional_iri)
         result = requests.post(self.triplestore_url,
             data={"query": sparql,
                   "format": "json"})
         if result.status_code > 399:
-            return
+            return output
         bindings = result.json().get('results').get('bindings')
         if len(bindings) < 1:
-            return
+            return output
         institution_label = bindings[0].get('label').get('value')
-        output = []
         for i, item_iri in enumerate(item_iris):
             new_url = "{0}/{1}".format(
                 instance_iri,
