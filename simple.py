@@ -253,24 +253,24 @@ wex1 = SimpleNamespace() #No way am I putting these into the array first. Declar
 wex1.identifier = SimpleNamespace() 
 wex1.identifier.propertyID = "1a2b3c-4d5e9z"
 wex1.identifier.value = True
-wex1.location = SimpleNamespace()
-wex1.location.name = "Majestic Theatre"
+wex1.provider = SimpleNamespace()
+wex1.provider.name = "Majestic Theatre"
 wex1.fileFormat = "pdf"
 
 wex2 = SimpleNamespace()
 wex2.identifier = SimpleNamespace() 
 wex2.identifier.propertyID = "aabbccddee"
 wex2.identifier.value = False
-wex2.location = SimpleNamespace()
-wex2.location.name = "Ruby Cinema"
+wex2.provider = SimpleNamespace()
+wex2.provider.name = "Ruby Cinema"
 wex2.fileFormat = "print"
 
 wex3 = SimpleNamespace()
 wex3.identifier = SimpleNamespace() 
 wex3.identifier.propertyID = "aabbccddee"
 wex3.identifier.value = False
-wex3.location = SimpleNamespace()
-wex3.location.name = "Ruby Cinema"
+wex3.provider = SimpleNamespace()
+wex3.provider.name = "Ruby Cinema"
 wex3.fileFormat = "audio"
 
 TEST_INSTANCE.workExample = [wex1, wex2, wex3] #I think that's how it works?
