@@ -44,7 +44,7 @@
   </div>
   <div class="row">
   {% if instance.workExample %}
-    {% for item in instance.workExample %}
+    {% for loc, items in instance.workExample|groupby('location.name') %} <!-- The idea here is to snag all 'items' that are held at the same location and display little symbols for every available format. Each 'item' may or may not have a different format. -->
     <div class="col-12 card">
       <div class="row">
         <div class="col-lg-auto">
@@ -53,14 +53,16 @@
             height="200"
             frameborder="0" style="border:0"
             src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCuODt2VKs726Htc3hVNDga2UP1AAOdDZs
-              &q={{instance.location}}" allowfullscreen>
+              &q={{loc}}" allowfullscreen>
           </iframe>
         </div>
-          <div class="col">
-            <h3>{{ item.location.name }}</h3>
-            <p>Reference Number: {{ item.refnumber}}</p>
-            <p>Availability: {{ item.availability}}</p>
-          </div>
+        <div class="col">
+         <h3>{{ loc }}</h3>
+          <p>Formats: {% for indivItem in items %}
+          {% if   indivItem.fileFormat == "pdf" %}<i class="fa fa-file-pdf-o fa-2x"></i>
+          {% elif indivItem.fileFormat == "audio" %}<i class="fa fa-music fa-2x"></i>
+          {% elif indivItem.fileFormat == "print" %}<i class="fa fa-book fa-2x"></i>
+          {% endif %} {% endfor %}</p>
         </div>
       </div>
     </div>
