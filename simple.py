@@ -161,7 +161,7 @@ def __construct_schema__(iri):
     instance = SimpleNamespace()
     instance.iri = str(iri)
     SCHEMA_PROCESSOR.run(instance=instance.iri, limit=1, offset=0)
-    #print(SCHEMA_PROCESSOR.output.serialize(format='turtle').decode())
+    print(SCHEMA_PROCESSOR.output.serialize(format='turtle').decode())
     __add_properties__(instance, iri)
     # Repopulate Items as Namespaces
     if not isinstance(instance.workExample, list):
