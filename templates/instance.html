@@ -4,6 +4,11 @@
 <script src="https://use.fontawesome.com/f0e99862c1.js"></script>
 <div class="container">
   <h1>{{instance.name}}</h1>
+  <button type="button" class="btn btn-lg btn-danger" 
+        data-toggle="popover" title="Popover title" 
+        data-content="And here's some amazing content. It's very engaging. Right?">
+  Click to toggle popover
+</button>
   <div class="row">
     <div class="col-8">
       {% if instance.authors %}
@@ -44,7 +49,7 @@
   </div>
   <div class="row">
   {% if instance.workExample %}
-    {% for loc, items in instance.workExample|groupby('provider.name') %} <!-- The idea here is to snag all 'items' that are held at the same location and display little symbols for every available format. Each 'item' may or may not have a different format. -->
+    {% for loc, items in instance.workExample|groupby('provider.name') %} 
     <div class="col-12 card">
       <div class="row">
         <div class="col-lg-auto">
@@ -59,7 +64,7 @@
         <div class="col">
          <h3>{{ loc }}</h3>
           <p>Formats: {% for indivItem in items %}
-          {% if   indivItem.fileFormat == "pdf" %}<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
+          {% if   indivItem.fileFormat == "pdf" %}<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="top" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
             CLICK MY FACE <i class="fa fa-file-pdf-o fa-2x"></i>
           </button>
           {% elif indivItem.fileFormat == "audio" %}<i class="fa fa-music fa-2x"></i>
@@ -75,15 +80,13 @@
     </div>
   {% endif %}
   </div>
-  
+  <button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
+            CLICK MY FACE <i class="fa fa-file-pdf-o fa-2x"></i>
+          </button>
   
 </div>
 
 {% endblock main %}
 {% block more_js %}
-<script>
-  $(function () {
-    $('[data-toggle="popover"]').popover()
-  })
-</script>
+<script> $("[data-toggle=popover]").popover(); </script>
 {% endblock more_js %}
