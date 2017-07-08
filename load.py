@@ -10,26 +10,21 @@ import rdflib
 import re
 import sys
 import urllib.request
+
+from types import SimpleNamespace
 try:
     from lxml import etree
 except ImportError:
     import xml.etree.ElementTree as etree
 
-
 from bibcat.rml import processor
+PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
+sys.path.append(PROJECT_BASE)
 try:
     import instance.config as config
 except ImportError:
-
-try:
-    from bibcat.rml import processor
-except ImportError: # Try to import from local bibcat module
-    PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
-    sys.path.append(PROJECT_BASE)
-    from bibcat.bibcat.rml import processor
-import instance.config as config
-
-TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
+    config = SimpleNamespace()
+    config.TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
 
 processor.NS_MGR.bf = rdflib.Namespace("http://id.loc.gov/ontologies/bibframe/")
 processor.NS_MGR.rdf = rdflib.RDF
@@ -93,7 +88,7 @@ WHERE {{
         bibframe_graph, 
         marc_xml,
         institutional_iri,
-        triplestore_url=TRIPLESTORE_URL):
+        triplestore_url=config.TRIPLESTORE_URL):
         """Creates an instance of Alliance Preprocessor
 
         Args:
@@ -273,7 +268,7 @@ class AlliancePostProcessor(object):
             processor.NS_MGR.bf.Organization 
         ]
         
-        
+
     def __get_or_mint__(self, old_iri, iri_class, label):
         """Attempts to retrieve any existing IRIs that match the label
         if not found, mints a new IRI. Returns an existing or new
@@ -293,12 +288,14 @@ class AlliancePostProcessor(object):
         SELECT DISTINCT ?entity ?label
         WHERE {{
             ?entity rdf:type <{0}> ;
-                    rdfs:label ?label .
+            OPTIONAL {{ ?entity rdfs:label ?label . }}
+            OPTIONAL {{ ?entity rdf:value ?label . }}
             FILTER(CONTAINS(?label, \"""{1}\"""))
         }}""".format(iri_class, label)
         result = requests.post(self.triplestore_url,
             data={"query": sparql,
                   "format": "json"})
+        import pdb; pdb.set_trace()
         if result.status_code > 399:
             return
         bindings = result.json().get('results').get('bindings')
@@ -312,12 +309,12 @@ class AlliancePostProcessor(object):
         else:
             class_name = str(iri_class).split("/")[-1].lower()
             # Mint new IRI based on class and slugged label
-            new_url = "{0}/{1}/{2}".format(config.BASE_URL,
+            new_url = "{0}{1}/{2}".format(config.BASE_URL,
                 class_name,
                 slugify(label))
             entity_iri = rdflib.URIRef(new_url)
             self.output.add((entity_iri, rdflib.RDFS.label, label))
-        replace_iris(old_iri, entity_iri)
+        replace_iri(self.output, old_iri, entity_iri)
         return entity_iri
 
     def run(self, graph, more_classes=[]):

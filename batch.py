@@ -18,8 +18,9 @@ with open(os.path.join(PROJECT_BASE, "bibcat/VERSION")) as fo:
 sys.path.append(PROJECT_BASE)
 import instance.config as config
 import bibcat.rml.processor as processor
-from load import AlliancePreprocessor
+import load
 
+BF = rdflib.Namespace("http://id.loc.gov/ontologies/bibframe/")
 MARC_NS = {'marc': 'http://www.loc.gov/MARC21/slim'}
 etree.register_namespace("marc", MARC_NS.get("marc"))
 
@@ -35,7 +36,7 @@ def check_init_triplestore():
             requests.post(config.TRIPLESTORE_URL,
                 data=fo.read(),
                 headers={"Content-Type": "text/turtle"}) 
-
+        
 def iii_minter(opac_url, marc_xml):
     field907a = marc_xml.find("marc:datafield[@tag='907']/marc:subfield[@code='a']", 
         MARC_NS)
@@ -175,6 +176,117 @@ def process_xml(filepath,
         click.echo(end_msg)
     except io.UnsupportedOperation:
         print(end_msg)
+
+class AllianceWorkflow(object):
+    """This class encapsulates a multi-step work-flow"""
+
+    def __init__(self, **kwargs):
+        self.institution_iri = rdflib.URIRef(kwargs.get('institution'))
+        self.ils_minter = kwargs.get("ils_minter")
+        self.base_url = kwargs.get("base_url",
+                                   config.BASE_URL)
+        self.triplestore_url = kwargs.get("triplestore_url",
+                                          config.TRIPLESTORE_URL)
+        marc2bibframe2_xslt = kwargs.get("marc2bibframe2")
+        if not os.path.exists(marc2bibframe2_xslt):
+            raise FileNotFoundError("{} not found".format(marc2bibframe2_xslt))
+        self.loc_bf_xslt = lxml.etree.XSLT(
+            lxml.etree.parse(marc2bibframe2_xslt))
+        self.marc_ns = {'marc': 'http://www.loc.gov/MARC21/slim'}
+        self.instance_processor = kwargs.get("instance_processor",
+            processor.XMLProcessor(
+                rml_rules=['bibcat-base.ttl',
+                    os.path.abspath(
+                        os.path.join(PROJECT_BASE, "custom/rml-alliance-instance.ttl"))],
+                namespaces=self.marc_ns))
+        self.item_processor = kwargs.get("item_processor",
+            processor.XMLProcessor(
+                rml_rules=[os.path.abspath(
+                    os.path.join(PROJECT_BASE, "custom/rml-alliance-item.ttl"))]))
+        self.lean_processor = processor.SPARQLProcessor(
+            rml_rules="bibcat-loc-bf-to-lean-bf.ttl")
+        self.record, self.output_graph, self.lean_graph = None, None, None
+
+    def __ils_link__(self):
+        ils_url = self.ils_minter(self.record)
+        check_exists = requests.get(str(ils_url))
+        if check_exists.status_code > 399:
+            raise ValueError("{} not found".format(ils_url))
+        return ils_url
+
+    def __alliance_dedup__(self):
+        processor = load.AlliancePostProcessor(triplestore_url=self.triplestore_url)
+        processor.run(self.lean_graph, more_classes=[BF.Agent])
+        self.lean_graph = processor.output
+
+    def __alliance_updates__(self):
+        processor = load.AlliancePreprocessor(
+            self.output_graph,
+            self.record,
+            self.institution_iri,
+            self.triplestore_url)
+        return processor.run()
+
+    def __marc2loc__(self):
+        bf_xml = self.loc_bf_xslt(self.record,
+            baseuri="'{}'".format(self.base_url))
+        self.output_graph = rdflib.Graph().parse(data=lxml.etree.tostring(bf_xml))
+
+    def __produce_lean__(self):
+        self.lean_processor.triplestore = self.output_graph
+        self.lean_processor.run()
+        self.lean_graph = self.lean_processor.output
+        
+        
+    def run(self, record):
+        """Takes a record and runs workflow to ingest into a RDF 
+        triplestore
+        
+        Args:
+            record: String, lxml.etree.Element, etree.Element
+        """
+        try:
+            self.record = lxml.etree.XML(record)
+        except ValueError:
+            self.record = lxml.etree.XML(etree.tostring(record))
+        # Step one -- run marc2bibframe2 XSLT transform on record
+        self.__marc2loc__()
+
+        # Step two -- create Alliance updates including replacing bf:Instance
+        # and bf:Item iris with SEO friendly URLs
+        instance_iri, item_iris = self.__alliance_updates__()
+
+        # Step three: run instance processor with Alliance Instance Processor
+        self.instance_processor.run(self.record, instance_iri=instance_iri)
+        self.output_graph += self.instance_processor.output
+
+        # Step four: generates link to ILS or Discovery layer
+        ils_url = self.__ils_link__()
+
+        # Step five: run Alliance Item processor on each  bf:item
+        for item in item_iris:
+            self.item_processor.run(
+                self.record,
+                item_iri=item,
+                institution_iri=self.institution_iri,
+                ils_url=ils_url)
+            self.output_graph += self.item_processor.output
+
+        # Step six: run LOC BIBFRAME to BIBFRAME Lean for ingestion into
+        # production triplestore
+        self.__produce_lean__()
+
+        # Step seven: run Alliance Deduplication on Lean Graph 
+        self.__alliance_dedup__()
+
+        # Step eight: Ingest Lean Graph into triplstore
+        ingest_result = requests.post(self.triplestore_url,
+            data=self.lean_graph.serialize(format='turtle'),
+            headers={"Content-type": "text/turtle"})
+        if ingest_result.status_code < 399:
+            return True
+        else:
+            raise ValueError("Ingestion failed")
 
 if __name__ == "__main__":
     check_init_triplestore()
