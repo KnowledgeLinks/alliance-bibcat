@@ -15,12 +15,19 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
-#PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
-#sys.path.append(PROJECT_BASE)
+
 from bibcat.rml import processor
 try:
     import instance.config as config
 except ImportError:
+
+try:
+    from bibcat.rml import processor
+except ImportError: # Try to import from local bibcat module
+    PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
+    sys.path.append(PROJECT_BASE)
+    from bibcat.bibcat.rml import processor
+import instance.config as config
 
 TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
 
@@ -63,6 +70,18 @@ WHERE {
         }
     }
 } ORDER BY DESC(?count) LIMIT 1"""
+
+    MAX_INSTANCE_TRIPLES_SPARQL = PREFIX + """
+SELECT ?instance ?count
+WHERE {{
+    <{work}> bf:hasInstance ?instance .
+    {{
+        SELECT ?instance (count(*) as ?count)
+        WHERE {{
+            ?instance ?p ?o .
+        }}
+    }}
+}} ORDER BY DESC(?count) LIMIT 1"""
 
     WORKS_OF_INSTANCE_SPARQL = PREFIX + """
 SELECT DISTINCT ?work
@@ -121,8 +140,14 @@ WHERE {{
         if len(result.bindings) < 1:
             raise ValueError("Could not extract max work triples")
         org_work_iri = result.bindings[0]['work']
-        return self.graph.value(subject=org_work_iri, 
-                                predicate=processor.NS_MGR.bf.hasInstance)
+        # Extract
+        instance_result = self.graph.query(
+            AlliancePreprocessor.MAX_INSTANCE_TRIPLES_SPARQL.format(
+                work=org_work_iri))
+        return rdflib.URIRef(instance_result.bindings[0]['instance'])
+
+
+         
 
     def __get_works__(self, instance_iri):
         """Attempts to retrieve any existing works from triplestore
@@ -193,18 +218,18 @@ WHERE {{
             item_iri(lists): List of Item IRIs
             instance_iri(rdflib.URIRef): New instance IRI
         """
+        output = []
         sparql = AlliancePreprocessor.ORG_LABEL_SPARQL.format(
             self.institutional_iri)
         result = requests.post(self.triplestore_url,
             data={"query": sparql,
                   "format": "json"})
         if result.status_code > 399:
-            return
+            return output
         bindings = result.json().get('results').get('bindings')
         if len(bindings) < 1:
-            return
+            return output
         institution_label = bindings[0].get('label').get('value')
-        output = []
         for i, item_iri in enumerate(item_iris):
             new_url = "{0}/{1}".format(
                 instance_iri,
@@ -215,6 +240,7 @@ WHERE {{
             replace_iri(self.graph, item_iri, new_item_iri)
             output.append(new_item_iri)
         return output
+
 
     def run(self):
         """Runs Alliance Preprocessor"""
@@ -231,6 +257,89 @@ WHERE {{
             new_instance_iri = self.__mint_instance_iri__(org_instance_iri)
         new_item_iris = self.__mint_item_iris__(org_item_iris, new_instance_iri)
         return new_instance_iri, new_item_iris 
+
+
+class AlliancePostProcessor(object):
+    """Class de-duplicates and generates IRIs for common BF classes"""
+
+    def __init__(self, **kwargs):
+        self.triplestore_url = kwargs.get(
+            'triplestore_url', 
+
+           'http://localhost:9999/blazegraph/sparql/')
+        self.default_classes = [
+            processor.NS_MGR.bf.Topic, 
+            processor.NS_MGR.bf.Person, 
+            processor.NS_MGR.bf.Organization 
+        ]
+        
+        
+    def __get_or_mint__(self, old_iri, iri_class, label):
+        """Attempts to retrieve any existing IRIs that match the label
+        if not found, mints a new IRI. Returns an existing or new
+        entity IRI
+
+        Args:
+
+        -----
+            old_iri: rdflib.URIRef IRI 
+            iri_class: rdflib.URIRef predicate IRI
+            label: string of rdflib.Literal for the RDFS label
+        """
+        sparql = """prefix bf: <http://id.loc.gov/ontologies/bibframe/>
+        prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT DISTINCT ?entity ?label
+        WHERE {{
+            ?entity rdf:type <{0}> ;
+                    rdfs:label ?label .
+            FILTER(CONTAINS(?label, \"""{1}\"""))
+        }}""".format(iri_class, label)
+        result = requests.post(self.triplestore_url,
+            data={"query": sparql,
+                  "format": "json"})
+        if result.status_code > 399:
+            return
+        bindings = result.json().get('results').get('bindings')
+        if len(bindings) > 0:
+            # Use first binding
+            entity_iri = rdflib.URIRef(bindings[0].get('entity').get('value'))
+            existing_label = rdflib.Literal(bindings[0].get('label').get('value'))
+            if existing_label != label:
+                # Add label as an skos:altLabel
+                self.output.add((entity_iri, NS_MGR.skos.altLabel, label))
+        else:
+            class_name = str(iri_class).split("/")[-1].lower()
+            # Mint new IRI based on class and slugged label
+            new_url = "{0}/{1}/{2}".format(config.BASE_URL,
+                class_name,
+                slugify(label))
+            entity_iri = rdflib.URIRef(new_url)
+            self.output.add((entity_iri, rdflib.RDFS.label, label))
+        replace_iris(old_iri, entity_iri)
+        return entity_iri
+
+    def run(self, graph, more_classes=[]):
+        """Takes a graph and deduplicates various BF classes 
+
+        Args:
+
+        -----
+            graph: rdlfib.Graph
+        """
+        self.output = graph
+        all_classes = self.default_classes + more_classes
+        for bf_class in all_classes:
+            for entity in self.output.subjects(
+                predicate=processor.NS_MGR.rdf.type,
+                object=bf_class):
+                label = self.output.value(subject=entity, 
+                    predicate=processor.NS_MGR.rdfs.label)
+                if label is None:
+                    continue
+                self.__get_or_mint__(entity, bf_class, label)
+                
 
 def clean_uris(graph):
     """Iterates through all URIRef subjects and objects and attempts to fix any
