@@ -15,10 +15,13 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
-PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
-sys.path.append(PROJECT_BASE)
+#PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
+#sys.path.append(PROJECT_BASE)
 from bibcat.rml import processor
-import instance.config as config
+try:
+    import instance.config as config
+except ImportError:
+
 TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
 
 processor.NS_MGR.bf = rdflib.Namespace("http://id.loc.gov/ontologies/bibframe/")
