@@ -67,12 +67,14 @@ def suny_buff_minter(marc_xml):
 @click.option('--size', default=5000)
 @click.option('--offset', default=0)
 @click.option('--ils_minter')
+@click.option('--marc2bibframe2')
 @click.option('--output_file', default=None)
 def process_xml(filepath,
     institution_iri,
     size,
     offset,
     ils_minter,
+    marc2bibframe2,
     output_file):
     """Processes a MARC XML file using Python standard ElementTree iterparse to
     avoid memory issues with lxml etree iterparse, each MARC XML is converted 
@@ -81,24 +83,12 @@ def process_xml(filepath,
     SEO friendly URLs along with additional triples that are added with the 
     BF Instance and BF Item RML processors."""
     logging.getLogger('rdflib').setLevel(logging.CRITICAL)
-    transform = lxml.etree.XSLT(lxml.etree.parse(config.MARC2BIBFRAME_XSL))
-    institution_iri = rdflib.URIRef(institution_iri)
-    ils_minter = getattr(sys.modules[__name__], ils_minter)
-
-    instance_processor = processor.XMLProcessor(
-        rml_rules=[os.path.join(PROJECT_BASE, 
-                       "custom/rml-alliance-instance.ttl"),
-                   os.path.join(PROJECT_BASE, 
-                       "bibcat/rdfw-definitions/rml-bibcat-base.ttl")],
-        version=BIBCAT_VERSION,
-        namespaces=MARC_NS)
-    item_processor = processor.XMLProcessor(
-        rml_rules=os.path.join(PROJECT_BASE, "custom/rml-alliance-item.ttl"),
-        institution_iri=institution_iri,
-        namespaces=MARC_NS)
     counter, master_graph = 0, None
     start = datetime.datetime.utcnow()
     start_msg = 'Started at {} for {} size {}'.format(start, filepath, size)
+    institutional_workflow = AllianceWorkflow(institution=institution_iri,
+        ils_minter=ils_minter,
+        marc2bibframe2=marc2bibframe2)
     try:
         click.echo(start_msg)
     except io.UnsupportedOperation:
@@ -120,45 +110,7 @@ def process_xml(filepath,
                     click.echo(counter, nl=False)
                 except io.UnsupportedOperation:
                     print(counter, end="")
-            raw_marc = etree.tostring(element)
-            lxml_mrc = lxml.etree.XML(raw_marc)
-            bf_xml = transform(lxml_mrc, baseuri="'https://bibcat.coalliance.org/'")
-            bf_rdf = rdflib.Graph().parse(data=lxml.etree.tostring(bf_xml))
-            preprocessor = AlliancePreprocessor(
-                bf_rdf,
-                element,
-                institution_iri)
-            instance_iri, item_iris = preprocessor.run()
-            ils_url = ils_minter(element)
-            instance_processor.run(element,
-                instance_iri=instance_iri)
-            bf_rdf += instance_processor.output
-            for item in item_iris:
-                item_processor.run(element,
-                    item_iri=item,
-                    institution_iri=institution_iri,
-                    ils_url=ils_url)
-                bf_rdf += item_processor.output
-        
-            try:
-                raw_turtle = bf_rdf.serialize(format='turtle')
-            except:
-                msg = "Error with {}".format(counter)
-                try:
-                    click.echo(msg)
-                except io.UnsupportedOperation:
-                    print(msg)
-                date_stamp = datetime.datetime.utcnow()
-                error_filepath = os.path.join(PROJECT_BASE, 
-                    "errors/bf-{}-{}.xml".format(
-                        date_stamp.toordinal(),
-                        counter))
-                with open(error_filepath, "wb+") as fo: 
-                    fo.write(bf_rdf.serialize())
-                continue 
-            result = requests.post(config.TRIPLESTORE_URL,
-                data=raw_turtle,
-                headers={"Content-Type": "text/turtle"})
+            instance_processor.run(element)
             if output_file is not None:
                 if master_graph is None:
                     master_graph = bf_rdf
@@ -216,7 +168,7 @@ class AllianceWorkflow(object):
 
     def __alliance_dedup__(self):
         processor = load.AlliancePostProcessor(triplestore_url=self.triplestore_url)
-        processor.run(self.lean_graph, more_classes=[BF.Agent])
+        processor.run(self.lean_graph, rdf_classes=[BF.Agent])
         self.lean_graph = processor.output
 
     def __alliance_updates__(self):
@@ -227,6 +179,32 @@ class AllianceWorkflow(object):
             self.triplestore_url)
         return processor.run()
 
+    def __ingest_to_triplestore__(self):
+        try:
+            raw_turtle = self.lean_graph.serialize(
+                    format='turtle')
+        except:
+            msg = "Error with {}".format(counter)
+            try:
+                click.echo(msg)
+            except io.UnsupportedOperation:
+                print(msg)
+            date_stamp = datetime.datetime.utcnow()
+            error_filepath = os.path.join(PROJECT_BASE, 
+                "errors/bf-{}-{}.xml".format(
+                    date_stamp.toordinal(),
+                    counter))
+            with open(error_filepath, "wb+") as fo: 
+                fo.write(bf_rdf.serialize())
+            raise ValueError("Error with serializing lean_graph to turtle")
+        result = requests.post(self.triplestore_url,
+            data=raw_turtle,
+            headers={"Content-Type": "text/turtle"})
+        if result.status_code < 399:
+            return True
+        else:
+            raise ValueError("Ingestion failed")
+
     def __marc2loc__(self):
         bf_xml = self.loc_bf_xslt(self.record,
             baseuri="'{}'".format(self.base_url))
@@ -236,6 +214,8 @@ class AllianceWorkflow(object):
         self.lean_processor.triplestore = self.output_graph
         self.lean_processor.run()
         self.lean_graph = self.lean_processor.output
+        # Register OWL namespace
+        self.lean_graph.namespace_manager.bind("owl", rdflib.OWL)
         
         
     def run(self, record):
@@ -280,13 +260,7 @@ class AllianceWorkflow(object):
         self.__alliance_dedup__()
 
         # Step eight: Ingest Lean Graph into triplstore
-        ingest_result = requests.post(self.triplestore_url,
-            data=self.lean_graph.serialize(format='turtle'),
-            headers={"Content-type": "text/turtle"})
-        if ingest_result.status_code < 399:
-            return True
-        else:
-            raise ValueError("Ingestion failed")
+        self.__ingest_to_triplestore__()
 
 if __name__ == "__main__":
     check_init_triplestore()

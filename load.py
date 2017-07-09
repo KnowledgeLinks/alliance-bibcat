@@ -17,7 +17,10 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
+from bibcat import clean_uris, replace_iri, slugify
 from bibcat.rml import processor
+from bibcat.linkers.deduplicate import Deduplicator
+
 PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
 sys.path.append(PROJECT_BASE)
 try:
@@ -254,7 +257,7 @@ WHERE {{
         return new_instance_iri, new_item_iris 
 
 
-class AlliancePostProcessor(object):
+class AlliancePostProcessor(Deduplicator):
     """Class de-duplicates and generates IRIs for common BF classes"""
 
     def __init__(self, **kwargs):
@@ -262,199 +265,14 @@ class AlliancePostProcessor(object):
             'triplestore_url', 
 
            'http://localhost:9999/blazegraph/sparql/')
-        self.default_classes = [
+        kwargs["classes"] = [
             processor.NS_MGR.bf.Topic, 
             processor.NS_MGR.bf.Person, 
             processor.NS_MGR.bf.Organization 
         ]
-        
+        super(AlliancePostProcessor, self).__init__(**kwargs) 
 
-    def __get_or_mint__(self, old_iri, iri_class, label):
-        """Attempts to retrieve any existing IRIs that match the label
-        if not found, mints a new IRI. Returns an existing or new
-        entity IRI
-
-        Args:
-
-        -----
-            old_iri: rdflib.URIRef IRI 
-            iri_class: rdflib.URIRef predicate IRI
-            label: string of rdflib.Literal for the RDFS label
-        """
-        sparql = """prefix bf: <http://id.loc.gov/ontologies/bibframe/>
-        prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-        prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-        SELECT DISTINCT ?entity ?label
-        WHERE {{
-            ?entity rdf:type <{0}> ;
-            OPTIONAL {{ ?entity rdfs:label ?label . }}
-            OPTIONAL {{ ?entity rdf:value ?label . }}
-            FILTER(CONTAINS(?label, \"""{1}\"""))
-        }}""".format(iri_class, label)
-        result = requests.post(self.triplestore_url,
-            data={"query": sparql,
-                  "format": "json"})
-        import pdb; pdb.set_trace()
-        if result.status_code > 399:
-            return
-        bindings = result.json().get('results').get('bindings')
-        if len(bindings) > 0:
-            # Use first binding
-            entity_iri = rdflib.URIRef(bindings[0].get('entity').get('value'))
-            existing_label = rdflib.Literal(bindings[0].get('label').get('value'))
-            if existing_label != label:
-                # Add label as an skos:altLabel
-                self.output.add((entity_iri, NS_MGR.skos.altLabel, label))
-        else:
-            class_name = str(iri_class).split("/")[-1].lower()
-            # Mint new IRI based on class and slugged label
-            new_url = "{0}{1}/{2}".format(config.BASE_URL,
-                class_name,
-                slugify(label))
-            entity_iri = rdflib.URIRef(new_url)
-            self.output.add((entity_iri, rdflib.RDFS.label, label))
-        replace_iri(self.output, old_iri, entity_iri)
-        return entity_iri
-
-    def run(self, graph, more_classes=[]):
-        """Takes a graph and deduplicates various BF classes 
-
-        Args:
-
-        -----
-            graph: rdlfib.Graph
-        """
-        self.output = graph
-        all_classes = self.default_classes + more_classes
-        for bf_class in all_classes:
-            for entity in self.output.subjects(
-                predicate=processor.NS_MGR.rdf.type,
-                object=bf_class):
-                label = self.output.value(subject=entity, 
-                    predicate=processor.NS_MGR.rdfs.label)
-                if label is None:
-                    continue
-                self.__get_or_mint__(entity, bf_class, label)
-                
-
-def clean_uris(graph):
-    """Iterates through all URIRef subjects and objects and attempts to fix any
-    issues with URL.
-
-    Args:
-        graph(rdflib.Graph): BIBFRAME RDF Graph
-    """
-    def fix_uri(uri):
-       url_sections = urllib.parse.urlparse(str(uri))
-       new_url = (url_sections.scheme,
-                  url_sections.netloc,
-                  urllib.parse.quote(url_sections.path),
-                  urllib.parse.quote(url_sections.params),
-                  urllib.parse.quote(url_sections.query),
-                  urllib.parse.quote(url_sections.fragment))
-       new_uri = rdflib.URIRef(
-           str(urllib.parse.urlunparse(new_url)))
-       for pred, obj in graph.predicate_objects(subject=uri):
-           graph.remove((uri, pred, obj))
-           graph.add((new_uri, pred, obj)) 
-       for subj, pred in graph.subject_predicates(object=uri):
-           graph.remove((subj, pred, uri))
-           graph.add((subj, pred, new_uri))
-    for iri in graph.query(ALL_URI_SPARQL):
-         try:
-             rdflib.util.check_subject(str(iri))
-         except rdflib.exceptions.SubjectTypeError:
-             fix_uri(iri)
-
-
-def alliance_processing(**kwargs):
-    """Takes RDF graph of the resulting LOC's marc2bibframe2, replaces BF Instance
-    with uri_minter, generates a BF Item
-
-    """
-    marc_processor = processor.XMLProcessor(
-        rml_rules=os.path.join(PROJECT_BASE, "custom/rml-alliance.ttl"),
-        institution_iri=kwargs.get("institution_iri"))
-    alliance = rdflib.Graph()
-    alliance.parse(os.path.join(PROJECT_BASE, "custom/alliance.ttl"), 
-        format='turtle')
-    loc_bf = kwargs.get('loc_bf')
-    marc_xml = kwargs.get("marc_xml")
-    uri_minter = kwargs.get('uri_minter', slugify)
-    institution_iri = kwargs.get("institution_iri")
-    parent_iri = alliance.value(subject=institution_iri,
-        predicate=processor.NS_MGR.schema.parentOrganization)
-    parent_label = alliance.value(subject=parent_iri,
-        predicate=processor.NS_MGR.rdfs.label)
-    for org_instance_iri in loc_bf.subjects(
-        predicate=rdflib.RDF.type,
-        object=processor.NS_MGR.bf.Instance):
-        org_label = loc_bf.value(subject=org_instance_iri,
-                                 predicate=processor.NS_MGR.rdfs.label)
-        if org_label is None:
-            # No RDFS label for Instance, keep original IRI
-            continue
-        new_instance_iri = rdflib.URIRef(
-            urllib.parse.urljoin(
-                config.BASE_URL,
-                uri_minter(org_label)))
-        replace_iri(loc_bf, org_instance_iri, new_instance_iri)
-        instance_url = "{0}({1})".format(
-            uri_minter(org_label),
-            uri_minter(parent_label))
-
-
-        #! Collapse all Items into a single IRI, should separate out digital
-        #! and other formats as separate URLs
-        new_item_iri = rdflib.URIRef(
-            urllib.parse.urljoin(
-                config.BASE_URL,
-                instance_url))
-        for org_item_iri in loc_bf.subjects(
-            predicate=processor.NS_MGR.bf.itemOf,  
-            object=new_instance_iri):
-            replace_iri(loc_bf, org_item_iri, new_item_iri)
-        marc_processor.run(marc_xml,
-            instance_iri=new_instance_iri,
-            item_iri=new_item_iri)
-        loc_bf += marc_processor.output
-    return loc_bf
-        
-            
-def replace_iri(graph, old_iri, new_iri):
-    """Replaces old IRI with a new IRI in the graph
-
-    Args:
-        graph(rdflib.Graph): RDF Graph
-        old_iri(rdflib.URIRef): Old IRI
-        new_iri(rdflib.URIRef): New IRI
-    """
-    for pred, obj in graph.predicate_objects(subject=old_iri):
-        graph.add((new_iri, pred, obj))
-        graph.remove((old_iri, pred, obj))
-    for subj, pred in graph.subject_predicates(object=old_iri):
-        graph.add((subj, pred, new_iri))
-        graph.remove((subj, pred, old_iri))
-
-                
-def slugify(value):
-    """
-    Converts to lowercase, removes non-word characters (alphanumerics and
-    underscores) and converts spaces to hyphens. Also strips leading and
-    trailing whitespace.
-    """
-    value = re.sub('[^\w\s-]', '', value).strip().lower()
-    return re.sub('[-\s]+', '-', value)
-
-def wikify(value):
-    """Converts value to wikipedia "style" of URLS, removes non-word characters
-    and converts spaces to hyphens and leaves case of value.
-    """
-    value = re.sub('[^\w\s-]', '', value).strip()
-    return re.sub('[-\s]+', '_', value)
-
-   
+  
 
 @click.command()
 def turtles():
@@ -556,12 +374,7 @@ def cli():
 cli.add_command(marc_xml)
 cli.add_command(turtles)
 
-ALL_URI_SPARQL = """SELECT DISTINCT ?uri
-WHERE {
-  ?uri ?p ?o .
-  ?s ?p1 ?uri .
-  FILTER(isIRI(?uri))
-}"""
+
 
 
 if __name__ == '__main__':
