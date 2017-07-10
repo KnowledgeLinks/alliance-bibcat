@@ -268,7 +268,10 @@ class AlliancePostProcessor(Deduplicator):
         kwargs["classes"] = [
             processor.NS_MGR.bf.Topic, 
             processor.NS_MGR.bf.Person, 
-            processor.NS_MGR.bf.Organization 
+            processor.NS_MGR.bf.Organization,
+            processor.NS_MGR.bf.Role,
+            processor.NS_MGR.bf.Source
+
         ]
         super(AlliancePostProcessor, self).__init__(**kwargs) 
 

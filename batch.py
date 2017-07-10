@@ -2,6 +2,7 @@ __author__ = "Jeremy Nelson"
 
 import click
 import datetime
+import gzip
 import io
 import logging
 import os
@@ -17,6 +18,7 @@ with open(os.path.join(PROJECT_BASE, "bibcat/VERSION")) as fo:
     BIBCAT_VERSION = fo.read()
 sys.path.append(PROJECT_BASE)
 import instance.config as config
+from bibcat import clean_uris
 import bibcat.rml.processor as processor
 import load
 
@@ -83,8 +85,9 @@ def process_xml(filepath,
     SEO friendly URLs along with additional triples that are added with the 
     BF Instance and BF Item RML processors."""
     logging.getLogger('rdflib').setLevel(logging.CRITICAL)
-    counter, master_graph = 0, None
+    counter, master_graph, loc_graph = 0, None, None
     start = datetime.datetime.utcnow()
+    ils_minter = getattr(sys.modules[__name__], ils_minter)
     start_msg = 'Started at {} for {} size {}'.format(start, filepath, size)
     institutional_workflow = AllianceWorkflow(institution=institution_iri,
         ils_minter=ils_minter,
@@ -110,16 +113,28 @@ def process_xml(filepath,
                     click.echo(counter, nl=False)
                 except io.UnsupportedOperation:
                     print(counter, end="")
-            instance_processor.run(element)
+            try:
+                institutional_workflow.run(element, counter)
+            except ValueError:
+               continue
             if output_file is not None:
                 if master_graph is None:
-                    master_graph = bf_rdf
+                    master_graph = institutional_workflow.lean_graph
+                    loc_graph = institutional_workflow.output_graph
                 else:
-                    master_graph += bf_rdf
+                    master_graph += institutional_workflow.lean_graph
+                    loc_graph += institutional_workflow.output_graph
+
+                            
             counter += 1
     if output_file is not None:
         with open(output_file, "wb+") as fo:
             fo.write(master_graph.serialize(format='turtle', encoding='utf-8'))
+        with gzip.open("{}-loc.gz".format(output_file[:-4]), "wb") as loc_fo:
+            loc_fo.write(loc_graph.serialize())
+
+
+
     end = datetime.datetime.utcnow()
     end_msg = "Finished at {}, total time={} mins".format(
         end, 
@@ -179,23 +194,25 @@ class AllianceWorkflow(object):
             self.triplestore_url)
         return processor.run()
 
-    def __ingest_to_triplestore__(self):
+    def __ingest_to_triplestore__(self, counter=None):
+        if not counter:
+            counter = -1
         try:
             raw_turtle = self.lean_graph.serialize(
                     format='turtle')
         except:
             msg = "Error with {}".format(counter)
             try:
-                click.echo(msg)
+                click.echo(msg, nl=False)
             except io.UnsupportedOperation:
-                print(msg)
+                print(msg, end="")
             date_stamp = datetime.datetime.utcnow()
             error_filepath = os.path.join(PROJECT_BASE, 
                 "errors/bf-{}-{}.xml".format(
                     date_stamp.toordinal(),
                     counter))
             with open(error_filepath, "wb+") as fo: 
-                fo.write(bf_rdf.serialize())
+                fo.write(self.lean_graph.serialize())
             raise ValueError("Error with serializing lean_graph to turtle")
         result = requests.post(self.triplestore_url,
             data=raw_turtle,
@@ -216,9 +233,11 @@ class AllianceWorkflow(object):
         self.lean_graph = self.lean_processor.output
         # Register OWL namespace
         self.lean_graph.namespace_manager.bind("owl", rdflib.OWL)
+        # Clean any URIs
+        clean_uris(self.lean_graph)
         
         
-    def run(self, record):
+    def run(self, record, counter=None):
         """Takes a record and runs workflow to ingest into a RDF 
         triplestore
         
@@ -260,7 +279,8 @@ class AllianceWorkflow(object):
         self.__alliance_dedup__()
 
         # Step eight: Ingest Lean Graph into triplstore
-        self.__ingest_to_triplestore__()
+        self.__ingest_to_triplestore__(counter)
+
 
 if __name__ == "__main__":
     check_init_triplestore()
