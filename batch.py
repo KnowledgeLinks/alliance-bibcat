@@ -13,6 +13,8 @@ import sys
 import xml.etree.ElementTree as etree
 import lxml.etree
 
+import asyncio
+
 PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
 sys.path.append(PROJECT_BASE)
 import instance.config as config
@@ -60,7 +62,13 @@ def suny_buff_minter(marc_xml):
     return summon_minter(
         "http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_{0}2",
         marc_xml)
-    
+
+@asyncio.coroutine
+def run_workflow(workflow, element, counter, master_graph, loc_graph):
+    lean, loc = workflow.run(element, counter)
+    master_graph += lean
+    loc_graph += loc
+   
 @click.command()
 @click.argument('filepath')
 @click.argument('institution_iri')
@@ -83,7 +91,7 @@ def process_xml(filepath,
     SEO friendly URLs along with additional triples that are added with the 
     BF Instance and BF Item RML processors."""
     logging.getLogger('rdflib').setLevel(logging.CRITICAL)
-    counter, master_graph, loc_graph = 0, None, None
+    counter, master_graph, loc_graph = 0, rdflib.Graph(), rdflib.Graph()
     start = datetime.datetime.utcnow()
     ils_minter = getattr(sys.modules[__name__], ils_minter)
     start_msg = 'Started at {} for {} size {}'.format(start, filepath, size)
@@ -94,6 +102,8 @@ def process_xml(filepath,
         click.echo(start_msg)
     except io.UnsupportedOperation:
         print(start_msg)
+    tasks = []
+    loop = asyncio.get_event_loop()
     for action, element in etree.iterparse(filepath):
         if "record" in element.tag:
             if counter < offset:# and counter > 0:
@@ -106,25 +116,29 @@ def process_xml(filepath,
                     click.echo(".", nl=False)
                 except io.UnsupportedOperation:
                     print(".", end="")
+                loop.run_until_complete(asyncio.gather(*tasks))
+                tasks = []
             if not counter%100:
                 try:
                     click.echo(counter, nl=False)
                 except io.UnsupportedOperation:
                     print(counter, end="")
             try:
-                institutional_workflow.run(element, counter)
+                tasks.append(
+                    asyncio.ensure_future(
+                        run_workflow(institutional_workflow,
+                            element,
+                            counter,
+                            master_graph,
+                            loc_graph)))
+                
+               # institutional_workflow.run(element, counter)
             except ValueError:
-               continue
-            if output_file is not None:
-                if master_graph is None:
-                    master_graph = institutional_workflow.lean_graph
-                    loc_graph = institutional_workflow.output_graph
-                else:
-                    master_graph += institutional_workflow.lean_graph
-                    loc_graph += institutional_workflow.output_graph
+                continue
 
                             
             counter += 1
+    loop.close()
     if output_file is not None:
         with open(output_file, "wb+") as fo:
             fo.write(master_graph.serialize(format='turtle', encoding='utf-8'))
@@ -220,7 +234,11 @@ class AllianceWorkflow(object):
         else:
             raise ValueError("Ingestion failed")
 
-    def __marc2loc__(self):
+    def marc2loc_bf(self, record):
+        try:
+            self.record = lxml.etree.XML(record)
+        except ValueError:
+            self.record = lxml.etree.XML(etree.tostring(record))
         bf_xml = self.loc_bf_xslt(self.record,
             baseuri="'{}'".format(self.base_url))
         self.output_graph = rdflib.Graph().parse(data=lxml.etree.tostring(bf_xml))
@@ -233,26 +251,22 @@ class AllianceWorkflow(object):
         self.lean_graph.namespace_manager.bind("owl", rdflib.OWL)
         # Clean any URIs
         clean_uris(self.lean_graph)
-        
-        
-    def run(self, record, counter=None):
+       
+    def run(self, record, counter):
         """Takes a record and runs workflow to ingest into a RDF 
         triplestore
         
         Args:
             record: String, lxml.etree.Element, etree.Element
         """
-        try:
-            self.record = lxml.etree.XML(record)
-        except ValueError:
-            self.record = lxml.etree.XML(etree.tostring(record))
+        
         # Step one -- run marc2bibframe2 XSLT transform on record
-        self.__marc2loc__()
+        self.marc2loc_bf(record)
 
         # Step two -- create Alliance updates including replacing bf:Instance
         # and bf:Item iris with SEO friendly URLs
         instance_iri, item_iris = self.__alliance_updates__()
-
+        
         # Step three: run instance processor with Alliance Instance Processor
         self.instance_processor.run(self.record, instance_iri=instance_iri)
         self.output_graph += self.instance_processor.output
@@ -278,6 +292,9 @@ class AllianceWorkflow(object):
 
         # Step eight: Ingest Lean Graph into triplstore
         self.__ingest_to_triplestore__(counter)
+        
+        return self.lean_graph, self.output_graph
+        
 
 
 if __name__ == "__main__":

@@ -28,8 +28,7 @@ cache = Cache(app, config={"CACHE_TYPE": "filesystem",
 BACKGROUND_THREAD = None
 
 SCHEMA_PROCESSOR = SPARQLProcessor(
-    rml_rules=[os.path.join(PROJECT_BASE,
-        "bibcat/rdfw-definitions/rml-bibcat-bf-to-schema.ttl")],
+    rml_rules=["bibcat-bf-to-schema.ttl"],
     triplestore_url=app.config.get("TRIPLESTORE_URL"))
 
 def set_libraries():
@@ -184,14 +183,13 @@ def display_item(title, institution):
         title: path, Slugified title of Instance
         institution: path, Slugified institution name
     """
-    item_iri = rdflib.URLRef("/{0}/{1}".format(
-        str(instance_iri),
+    item_iri = rdflib.URIRef("/{0}/{1}".format(
+        str(title),
         institution))
     
 
     
-    item = __construct_schema__(item_iri, 
-        schema_processor.output)
+    item = __construct_schema__(item_iri)
     return render_template("item.html",
         item=item)
 
