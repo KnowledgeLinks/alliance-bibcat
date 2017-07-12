@@ -14,8 +14,6 @@ import xml.etree.ElementTree as etree
 import lxml.etree
 
 PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(PROJECT_BASE, "bibcat/VERSION")) as fo:
-    BIBCAT_VERSION = fo.read()
 sys.path.append(PROJECT_BASE)
 import instance.config as config
 from bibcat import clean_uris
