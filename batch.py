@@ -5,6 +5,8 @@ import datetime
 import gzip
 import io
 import logging
+import multiprocessing
+import copyreg
 import os
 import rdflib
 import requests
@@ -13,7 +15,7 @@ import sys
 import xml.etree.ElementTree as etree
 import lxml.etree
 
-import asyncio
+from io import BytesIO
 
 PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
 sys.path.append(PROJECT_BASE)
@@ -63,12 +65,47 @@ def suny_buff_minter(marc_xml):
         "http://buffalostate.summon.serialssolutions.com/search?id=FETCHMERGED-buffalostate_catalog_{0}2",
         marc_xml)
 
-@asyncio.coroutine
-def run_workflow(workflow, element, counter, master_graph, loc_graph):
-    lean, loc = workflow.run(element, counter)
-    master_graph += lean
-    loc_graph += loc
-   
+#@asyncio.coroutine
+#def run_workflow(workflow, element, counter, master_graph, loc_graph):
+#    lean, loc = workflow.run(element, counter)
+#    master_graph += lean
+#    loc_graph += loc
+
+def lxml_elementtree_unpickler(data):
+    return lxml.etree.parse(BytesIO(data))
+
+def lxml_xslt_unpickler(data):
+    return lxml.etree.XSLT(
+        lxml.etree.parse(BytesIO(data)))
+
+def lxml_elementtree_pickler(tree):
+    return lxml_elementtree_unpickler, (lxml.etree.tostring(tree),)
+
+def lxml_xslt_pickler(xslt):
+    return lxml_xslt_unpickler, (lxml.etree.XSLT(
+                                    lxml.etree.parse(BytesIO(xslt))), )
+
+
+
+def run_workflow(**kwargs):
+    workflow = kwargs.get('workflow')
+    raw_xml = kwargs.get('raw')
+    counter = kwargs.get('counter')
+    logging.getLogger('rdflib').setLevel(logging.CRITICAL)
+    record = etree.XML(raw_xml)
+    workflow.run(record, counter)
+    return workflow.lean_graph, workflow.output_graph
+    
+def pool_init(queue):
+    run_workflow.queue = queue
+
+#copyreg.pickle(lxml.etree._ElementTree,
+#    lxml_elementtree_pickler,
+#    lxml_elementtree_unpickler)
+#copyreg.pickle(lxml.etree.XSLT,
+#    lxml_xslt_pickler,
+#    lxml_xslt_unpickler)
+ 
 @click.command()
 @click.argument('filepath')
 @click.argument('institution_iri')
@@ -102,8 +139,11 @@ def process_xml(filepath,
         click.echo(start_msg)
     except io.UnsupportedOperation:
         print(start_msg)
-    tasks = []
-    loop = asyncio.get_event_loop()
+    #queue = multiprocessing.Queue()
+    #pool = multiprocessing.Pool(processes=3,
+    #    initializer=pool_init,
+    #    initargs=(queue,))
+        
     for action, element in etree.iterparse(filepath):
         if "record" in element.tag:
             if counter < offset:# and counter > 0:
@@ -111,34 +151,34 @@ def process_xml(filepath,
                 continue
             if counter >= offset+size:
                 break
+            if not counter%5 and counter >0:
+                tasks = []
             if not counter%10 and counter > 0:
                 try:
                     click.echo(".", nl=False)
                 except io.UnsupportedOperation:
                     print(".", end="")
-                loop.run_until_complete(asyncio.gather(*tasks))
-                tasks = []
             if not counter%100:
                 try:
                     click.echo(counter, nl=False)
                 except io.UnsupportedOperation:
                     print(counter, end="")
             try:
-                tasks.append(
-                    asyncio.ensure_future(
-                        run_workflow(institutional_workflow,
-                            element,
-                            counter,
-                            master_graph,
-                            loc_graph)))
-                
-               # institutional_workflow.run(element, counter)
-            except ValueError:
+                lean, loc = institutional_workflow.run(element, counter) 
+                if not master_graph:
+                    master_graph = lean
+                    loc_graph = loc
+                else:
+                    master_graph += lean
+                    loc_graph += loc
+            except:
+                err_msg = "E{}".format(counter)
+                try:
+                    click.echo(err_msg, nl=False)
+                except io.UnsupportedOperation:
+                    print(err_msg, end="")
                 continue
-
-                            
             counter += 1
-    loop.close()
     if output_file is not None:
         with open(output_file, "wb+") as fo:
             fo.write(master_graph.serialize(format='turtle', encoding='utf-8'))
@@ -295,6 +335,46 @@ class AllianceWorkflow(object):
         
         return self.lean_graph, self.output_graph
         
+
+def asynco_approach():
+    tasks = []
+    loop = asyncio.get_event_loop()
+    for action, element in etree.iterparse(filepath):
+        if "record" in element.tag:
+            if counter < offset:# and counter > 0:
+                counter += 1
+                continue
+            if counter >= offset+size:
+                break
+            if not counter%5 and counter >0:
+                loop.run_until_complete(asyncio.gather(*tasks))
+                tasks = []
+            if not counter%10 and counter > 0:
+                try:
+                    click.echo(".", nl=False)
+                except io.UnsupportedOperation:
+                    print(".", end="")
+            if not counter%100:
+                try:
+                    click.echo(counter, nl=False)
+                except io.UnsupportedOperation:
+                    print(counter, end="")
+            try:
+                tasks.append(
+                    asyncio.ensure_future(
+                        run_workflow(institutional_workflow,
+                            element,
+                            counter,
+                            master_graph,
+                            loc_graph)))
+                
+               # institutional_workflow.run(element, counter)
+            except ValueError:
+                continue
+
+                            
+            counter += 1
+    loop.close()
 
 
 if __name__ == "__main__":

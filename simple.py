@@ -56,7 +56,18 @@ def __run_query__(sparql):
     bindings = result.json().get('results').get('bindings')
     return bindings
 
-
+@app.template_filter('cover_art')
+def retrieve_cover_art(instance):
+    cover_template = "http://covers.openlibrary.org/b/isbn/{}-M.jpg"
+    if not hasattr(instance, 'isbn'):
+        return
+    for isbn in instance.isbn:
+        cover_url = cover_template.format(isbn)
+        result = requests.get(cover_url)
+        print(cover_url, result.status_code)
+        if result.status_code < 400:
+            return """<img src="{}" alt="{} Cover Art" />""".format(cover_url,
+                instance.name)
 
 @app.route("/")
 def home():
@@ -183,15 +194,23 @@ def display_item(title, institution):
         title: path, Slugified title of Instance
         institution: path, Slugified institution name
     """
-    item_iri = rdflib.URIRef("/{0}/{1}".format(
-        str(title),
+    instance_iri = rdflib.URIRef("{0}{1}".format(
+        app.config.get("BASE_URL"),
+        str(title)))
+    item_iri = rdflib.URIRef("{0}/{1}".format(
+        instance_iri,
         institution))
     
-
-    
-    item = __construct_schema__(item_iri)
+    item = None
+    instance = __construct_schema__(instance_iri)
+    for row in instance.workExample:
+        if row.iri == str(item_iri):
+            item = row
+    if not item:
+        abort(404)
     return render_template("item.html",
-        item=item)
+        item=item,
+        instance=instance)
 
 
 @app.route("/<path:title>")
@@ -226,7 +245,7 @@ def site_index():
     return Response(xml, mimetype="text/xml")
 
 @app.route("/sitemap<offset>.xml", methods=["GET"]) 
-@cache.cached(timeout=86400)
+#@cache.cached(timeout=86400)
 def sitemap(offset=0):
     offset = (int(offset)*50000) - 50000
     sparql = INSTANCES.format(offset)
@@ -353,8 +372,9 @@ INSTANCES = PREFIX + """
 SELECT DISTINCT ?instance ?date
 WHERE {{
     ?instance rdf:type bf:Instance .
-    ?instance bf:generationProcess ?process .
-    ?process bf:generationDate ?date .
+    OPTIONAL {{ ?instance bf:generationProcess ?process .
+                ?process bf:generationDate ?date }} 
+    FILTER(isIRI(?instance))
 }} ORDER BY ?instance
 LIMIT 50000
 OFFSET {0}"""
