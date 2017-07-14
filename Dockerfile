@@ -20,8 +20,8 @@ RUN git clone  https://github.com/KnowledgeLinks/alliance-bibcat.git /opt/allian
     cd /opt && \
     ls -ltra && \
     cd $BIBCAT_HOME && \
-    git checkout -b development \
-    git pull origin development \
+    git checkout -b development &&\
+    git pull origin development &&\
     #git submodule init && \
     #git submodule update && \
     mkdir instance && \
