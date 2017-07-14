@@ -41,7 +41,8 @@
       {% endif %}
     </div>
     <div class="col-4">
-      <img src="{{url_for('static', filename='img/Sample-cover.png')}}"></img>
+      {# <img src="{{url_for('static', filename='img/Sample-cover.png')}}"></img> #}
+        {{ instance|cover_art|safe }}
     </div>
   </div>
   <div class="row">
