@@ -23,6 +23,53 @@
                 <li><a href="{{ url_for('site_index') }}">XML Siteindex</a></li>
             </ul>
         </section>
+        <article class="col-md-8">
+            <h2 id="bml-iteration-1">Build-Measure-Learn Iteration Two</h2>
+            <p class="lead">
+                
+            </p> 
+            <h4>Build Workflow</h4>
+            <ol>
+                <li>Run <a href="https://github.com/lcnetdev/marc2bibframe2">marc2bibframe2</a> XSLT transform on XML record</li>
+                <li>Add Alliance updates including replacing bf:Instance
+                    and bf:Item iris with SEO friendly URLs</li>
+                <li>Run Alliance specific Instance Processor</li>
+                <li>Generates link to institution's ILS or Discovery layer</li>
+                <li>Run Alliance Item processor on each bf:Item</li>
+                <li>Run LOC BIBFRAME to BIBFRAME Lean RML Map</li>
+                <li>Run Alliance Deduplication on Lean BIBFRAME Graph</li> 
+                <li>Ingest Lean BIBFRAME Graph into RDF triplestore</li>
+
+  
+            </ol>
+            <h3>Pilot Triplestore Statistics</h3>
+            <table class="table" id="bml-iteration-1-triplestore">
+                <thead class="thead-inverse">
+                    <tr>
+                        <th>Library</th>
+                        <th># Source MARC</th>
+                        <th># Triples</th>
+                    <tr>
+                 </thead>
+                 <tbody>
+                    <tr>
+                        <td>University of Colorado Boulder</td>
+                        <td>54,007</td>
+                     </tr>
+                    <tr>
+                        <td>Colorado College</td>
+                        <td>57,471</td>   
+                    </tr>
+                    <tr>
+                        <td>SUNY - Buffalo</td>
+                        <td>15,650</td>
+                    </tr>
+                </tbody> 
+             </table>   
+        </article>
+    </div>
+    <hr>
+    <div class="row">
         <section class="col-md-8">
             <h2 id="bml-iteration-1">Build-Measure-Learn Iteration One</h2>
             <p class="lead">This first iteration is to build a sitemap interface for 

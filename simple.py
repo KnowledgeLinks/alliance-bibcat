@@ -171,7 +171,6 @@ def __construct_schema__(iri):
     instance = SimpleNamespace()
     instance.iri = str(iri)
     SCHEMA_PROCESSOR.run(instance=instance.iri, limit=1, offset=0)
-    print(SCHEMA_PROCESSOR.output.serialize(format='turtle').decode())
     __add_properties__(instance, iri)
     # Repopulate Items as Namespaces
     if not isinstance(instance.workExample, list):
@@ -184,6 +183,13 @@ def __construct_schema__(iri):
         items.append(item)
     instance.workExample = items
     return instance
+
+@app.route("/agent/<path:name>")
+def display_agent(name):
+    """Displays bf:Agent view"""
+    agent_iri = rdflib.URIRef("{}agent/{}".format(name))
+    
+    return "Agent Display for {}".format(agent_iri)
 
 @app.route("/<path:title>/<path:institution>")
 def display_item(title, institution):
