@@ -128,4 +128,8 @@
 
 {% endblock main %}
 {% block more_js %}
+<script type="application/ld+json">
+ {{ instance|get_jsonld|safe }}
+
+</script>
 {% endblock more_js %}
