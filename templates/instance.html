@@ -2,13 +2,10 @@
 
 {% block main %}
 <script src="https://use.fontawesome.com/f0e99862c1.js"></script>
-<div class="container">
+  <div class="container">
+
+
   <h1>{{instance.name}}</h1>
-  <button type="button" class="btn btn-lg btn-danger" 
-        data-toggle="popover" title="Popover title" 
-        data-content="And here's some amazing content. It's very engaging. Right?">
-  Click to toggle popover
-</button>
   <div class="row">
     <div class="col-8">
       {% if instance.authors %}
@@ -63,13 +60,59 @@
         </div>
         <div class="col">
          <h3>{{ loc }}</h3>
-          <p>Formats: {% for indivItem in items %}
-          {% if   indivItem.fileFormat == "pdf" %}<button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="top" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
-            CLICK MY FACE <i class="fa fa-file-pdf-o fa-2x"></i>
-          </button>
-          {% elif indivItem.fileFormat == "audio" %}<i class="fa fa-music fa-2x"></i>
-          {% elif indivItem.fileFormat == "print" %}<i class="fa fa-book fa-2x"></i>
+          <p>Formats: 
+          <div id="accordion" role="tablist" aria-multiselectable="true">
+          {% for indivItem in items %}
+          {% if   indivItem.fileFormat == "pdf" %}
+          <div class="card">
+            <div class="card-header" role="tab" id="heading{{loc}}Pdf">
+              <h5 class="mb-0">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{loc}}Pdf" aria-expanded="false" aria-controls="collapse{{loc}}Pdf">
+                  Ima PDF <i class="fa fa-file-pdf-o fa-2x"></i>
+                </a>
+              </h5>
+            </div>
+
+            <div id="collapse{{loc}}Pdf" class="collapse" role="tabpanel" aria-labelledby="heading{{loc}}Pdf">
+              <div class="card-block">
+                See my PDF glory.
+              </div>
+            </div>
+          </div>
+          {% elif indivItem.fileFormat == "audio" %}
+          <div class="card">
+            <div class="card-header" role="tab" id="heading{{loc}}Audio">
+              <h5 class="mb-0">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{loc}}Audio" aria-expanded="false" aria-controls="collapse{{loc}}Audio">
+                  Ima audio <i class="fa fa-music fa-2x"></i>
+                </a>
+              </h5>
+            </div>
+
+            <div id="collapse{{loc}}Audio" class="collapse" role="tabpanel" aria-labelledby="heading{{loc}}Audio">
+              <div class="card-block">
+                Heer me
+              </div>
+            </div>
+          </div>
+          {% elif indivItem.fileFormat == "print" %}
+          <div class="card">
+            <div class="card-header" role="tab" id="heading{{loc}}Print">
+              <h5 class="mb-0">
+                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{loc}}Print" aria-expanded="false" aria-controls="collapse{{loc}}Print">
+                  Ima book <i class="fa fa-book fa-2x"></i>
+                </a>
+              </h5>
+            </div>
+
+            <div id="collapse{{loc}}Print" class="collapse" role="tabpanel" aria-labelledby="heading{{loc}}Print">
+              <div class="card-block">
+                Reed me
+              </div>
+            </div>
+          </div>
           {% endif %} {% endfor %}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -80,13 +123,8 @@
     </div>
   {% endif %}
   </div>
-  <button type="button" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
-            CLICK MY FACE <i class="fa fa-file-pdf-o fa-2x"></i>
-          </button>
-  
 </div>
 
 {% endblock main %}
 {% block more_js %}
-<script> $("[data-toggle=popover]").popover(); </script>
 {% endblock more_js %}
