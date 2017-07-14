@@ -28,8 +28,7 @@ cache = Cache(app, config={"CACHE_TYPE": "filesystem",
 BACKGROUND_THREAD = None
 
 SCHEMA_PROCESSOR = SPARQLProcessor(
-    rml_rules=[os.path.join(PROJECT_BASE,
-        "bibcat/rdfw-definitions/rml-bibcat-bf-to-schema.ttl")],
+    rml_rules=["bibcat-bf-to-schema.ttl"],
     triplestore_url=app.config.get("TRIPLESTORE_URL"))
 
 def set_libraries():
