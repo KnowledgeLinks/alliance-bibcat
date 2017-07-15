@@ -77,27 +77,31 @@ def output_jsonld(instance):
             instance_ld[name] = getattr(instance, name)
     instance_ld = { "@context": "http://schema.org",
         "@type": "CreativeWork",
-        "name": instance.name,
-        "description": instance.description,
         "author": [],
         "contributor": [],
         "workExample": []
     }
-    if isinstance(instance.datePublished, list):
-        instance_ld['datePublished'] = ",".join(instance.datePublished)
-    else:
-        instance_ld['datePublished'] = instance.datePublished
+    if hasattr(instance, 'name'):
+        instance_ld['name'] = instance.name
+    if hasattr(instance, 'description'):
+        instance_ld['description'] = instance.description
+    if hasattr(instance, 'datePublished'):
+        if isinstance(instance.datePublished, list):
+            instance_ld['datePublished'] = ",".join(instance.datePublished)
+        else:
+            instance_ld['datePublished'] = instance.datePublished
     test_add_simple('author')
     test_add_simple('contributor')
-    for item in instance.workExample:
-        item_example = {"@type": "CreativeWork",
-            "url": item.iri,
-            "name": instance.name,
-            "provider": {
-                "url": item.provider
+    if hasattr(instance, 'workExample'):
+        for item in instance.workExample:
+            item_example = {"@type": "CreativeWork",
+                "url": item.iri,
+                "name": instance.name,
+                "provider": {
+                    "url": item.provider
+                }
             }
-        }
-        instance_ld['workExample'].append(item_example)
+            instance_ld['workExample'].append(item_example)
     return json.dumps(instance_ld, indent=2, sort_keys=True)
 
 @app.route("/")
@@ -204,24 +208,50 @@ def __construct_schema__(iri):
     SCHEMA_PROCESSOR.run(instance=instance.iri, limit=1, offset=0)
     __add_properties__(instance, iri)
     # Repopulate Items as Namespaces
-    if not isinstance(instance.workExample, list):
-        instance.workExample = [instance.workExample, ]
-    items = []
-    for item_iri in instance.workExample:
-        item = SimpleNamespace()
-        item.iri = item_iri
-        __add_properties__(item, rdflib.URIRef(item_iri))
-        items.append(item)
-    instance.workExample = items
+    
+    if hasattr(instance, "workExample"):
+        if not isinstance(instance.workExample, list):
+            instance.workExample = [instance.workExample, ]
+        items = []
+        for item_iri in instance.workExample:
+            item = SimpleNamespace()
+            item.iri = item_iri
+            __add_properties__(item, rdflib.URIRef(item_iri))
+            items.append(item)
+        instance.workExample = items
     return instance
 
 @app.route("/agent/<path:name>")
 def display_agent(name):
     """Displays bf:Agent view"""
-    agent_iri = rdflib.URIRef("{}agent/{}".format(name))
-    
-    return "Agent Display for {}".format(agent_iri)
+    agent_iri = rdflib.URIRef("{}agent/{}".format(
+        app.config.get('BASE_URL'),
+        name))
+    sparql = AGENT_DETAIL.format(agent=agent_iri)
+    bindings = __run_query__(sparql)
+    if len(bindings) < 1:
+        abort(404)
+    return render_template("collections.html",
+        collection_type="BIBFRAME Agents",
+        collection_name=bindings[0].get('name').get('value'),
+        instances=bindings)
 
+@app.route("/topic/<path:name>")
+def display_topic(name):
+    """bf:Topic view"""
+    topic_iri = rdflib.URIRef("{}topic/{}".format(
+        app.config.get('BASE_URL'),
+        name))
+    sparql = TOPIC_DETAIL.format(topic=topic_iri)
+    bindings = __run_query__(sparql) 
+    if len(bindings) < 1:
+        abort(404)
+    return render_template('collections.html',
+        collection_type='BIBFRAME Topic',
+        collection_name=bindings[0].get('name').get('value'),
+        instances=bindings)
+
+    
 @app.route("/<path:title>/<path:institution>")
 def display_item(title, institution):
     """Displays different views of bf:Item 
@@ -362,6 +392,18 @@ PREFIX relators: <http://id.loc.gov/vocabulary/relators/>
 PREFIX schema: <http://schema.org/>
 """
 
+AGENT_DETAIL = PREFIX + """
+SELECT ?name ?instance ?instance_name
+WHERE {{
+    <{agent}> rdfs:label ?name .
+    ?work bf:contribution ?contrib .
+    ?contrib bf:agent <{agent}> .
+    ?instance bf:instanceOf ?work ;
+        rdfs:label ?instance_name .
+}} ORDER BY ?label
+LIMIT 100
+"""
+
 BIBFRAME_COUNTS = PREFIX + """
 
 SELECT DISTINCT (count(?work) as ?work_count) (count(?instance) as ?instance_count) (count(?item) as ?item_count)
@@ -480,6 +522,17 @@ WHERE {{
    ?title bf:mainTitle ?main .
    OPTIONAL {{ ?title bf:subtitle ?subtitle }}
 }}"""
+
+TOPIC_DETAIL = PREFIX + """
+SELECT ?name ?instance ?instance_name
+WHERE {{
+    <{topic}> rdfs:label ?name .
+    ?work bf:subject <{topic}> .
+    ?instance bf:instanceOf ?work ;
+        rdfs:label ?instance_name .
+}} ORDER BY ?label
+LIMIT 100
+"""
 
 TRIPLESTORE_COUNT = """SELECT (count(*) as ?count) WHERE {
    ?s ?p ?o .

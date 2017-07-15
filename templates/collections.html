@@ -1,0 +1,20 @@
+{% extends 'simple.html' %}
+
+{% block head_title %}{{ collection_name }}{% endblock head_title %}
+
+{% block body %}
+<div class="container">
+    <div class="row">
+        <section class="col-8">
+            <h2>{{ collection_type }}</h2>
+            <h3>{{ collection_name }}</h3>
+            <h4>Found in:</h4>
+            <ul>
+            {% for row in instances %}
+                <li><a href="{{ row.instance.value }}"> {{ row.instance_name.value }}</a></li>
+            {% endfor %}
+            </ul>
+        </section>
+    </div>
+</div>
+{% endblock %}
