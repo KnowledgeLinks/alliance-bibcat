@@ -69,6 +69,37 @@ def retrieve_cover_art(instance):
             return """<img src="{}" alt="{} Cover Art" />""".format(cover_url,
                 instance.name)
 
+@app.template_filter('get_jsonld')
+def output_jsonld(instance):
+    print(instance)
+    def test_add_simple(name):
+        if hasattr(instance, name):
+            instance_ld[name] = getattr(instance, name)
+    instance_ld = { "@context": "http://schema.org",
+        "@type": "CreativeWork",
+        "name": instance.name,
+        "description": instance.description,
+        "author": [],
+        "contributor": [],
+        "workExample": []
+    }
+    if isinstance(instance.datePublished, list):
+        instance_ld['datePublished'] = ",".join(instance.datePublished)
+    else:
+        instance_ld['datePublished'] = instance.datePublished
+    test_add_simple('author')
+    test_add_simple('contributor')
+    for item in instance.workExample:
+        item_example = {"@type": "CreativeWork",
+            "url": item.iri,
+            "name": instance.name,
+            "provider": {
+                "url": item.provider
+            }
+        }
+        instance_ld['workExample'].append(item_example)
+    return json.dumps(instance_ld, indent=2, sort_keys=True)
+
 @app.route("/")
 def home():
     triples_store_stats = {}
@@ -259,6 +290,7 @@ def sitemap(offset=0):
         data={"query": sparql,
               "format": "json"})
     instances = result.json().get('results').get('bindings')
+    print("Number of instances {}".format(len(instances)))
     xml = render_template("sitemap_template.xml", instances=instances) 
     return Response(xml, mimetype="text/xml")
 
