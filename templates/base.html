@@ -24,6 +24,7 @@
     {% endblock %}  
     {% block footer %}
     <footer class="container">
+        {% block rdf_export %}{% endblock %}
         <img src="{{ url_for('static', filename='img/alliance-logo.png') }}"
              alt="Colorado Alliance of Research Libraries"
              class="pull-right">

@@ -44,7 +44,13 @@
           <p><b>Keywords:</b></p>
         </div>
         <div class="col-10">
-          <ul>{% for keyword in instance.keywords|sort %}<li>{{keyword}}</li>{% endfor %}</ul>
+          <ul>
+              {% if instance.keywords|is_list %}
+              {% for keyword in instance.keywords|sort %}<li>{{keyword}}</li>{% endfor %}
+              {% else %}
+                <li>{{ instance.keywords }}</li>
+              {% endif %}
+          </ul>
         </div>
       </div>
       {% endif %}
@@ -68,6 +74,7 @@
           </iframe>
         </div>
         <div class="col">
+         <img src="{{ url_for('static', filename='img/' + loc.logo) }}">
          <h3>{{ loc.name }}</h3>
           <p>Formats: 
           <div id="accordion" role="tablist" aria-multiselectable="true">
@@ -139,9 +146,19 @@
 </div>
 
 {% endblock main %}
+
+{% block rdf_export %}
+    <strong>RDF Exports</strong><br>
+    <a href="{{ instance.iri }}.json">
+        <img src="{{ url_for('static', filename='img/schema-org-logo.png') }}"> 
+    </a>
+{% endblock %}
+
 {% block more_js %}
 <script type="application/ld+json">
  {{ instance|get_jsonld|safe }}
 
 </script>
 {% endblock more_js %}
+
+

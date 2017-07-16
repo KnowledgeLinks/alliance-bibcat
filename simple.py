@@ -12,7 +12,7 @@ import time
 from types import SimpleNamespace
 
 from flask import Flask, render_template, request
-from flask import abort, jsonify, flash, Response
+from flask import abort, jsonify, flash, Response, url_for
 from flask_cache import Cache
 from bibcat.rml.processor import SPARQLProcessor
 
@@ -99,6 +99,12 @@ def output_jsonld(instance):
                 "url": item.iri,
                 "name": instance.name,
                 "provider": {
+                    "@type": "Organization",
+                    "name": item.provider.name,
+                    "logo": "{}{}".format(app.config.get("BASE_URL")[:-1],
+                                          url_for('static', 
+                                              filename="img/{}".format(
+                                                  item.provider.logo))),
                     "url": item.provider.iri,
                     "address": {
                         "@type": "PostalAddress",
@@ -129,41 +135,6 @@ def home():
         ts_stats=triples_store_stats,
         bf_counts=bf_counts)
 
-def get_address(uri):
-    address = {"@type": "PostalAddress"}
-    sparql = LIBRARY_ADDRESS.format(uri)
-    bindings = __run_query__(sparql)
-    for row in bindings:
-        address["streetAddress"] = row.get('streetAddr').get('value')
-        address["addressLocality"] = row.get('city').get('value')
-        address["addressRegion"] = row.get('state').get('value')
-        address["postalCode"] = row.get('zip').get('value')
-        break
-    return address 
-        
-
-def get_authors(uri):
-    authors = []
-    sparql = CREATORS.format(uri)
-    bindings = __run_query__(sparql)
-    for row in bindings:
-        raw_type = row.get('type_of').get('value')
-        if raw_type.endswith("Organization"):
-            type_of = "Organization"
-        else:
-            type_of = "Person"
-        authors.append({"@type": type_of,
-                        "name": row.get('name').get('value')})
-    return authors
-  
-def get_date_published(uri):
-    sparql = WORK_DATE.format(uri)
-    bindings = __run_query__(sparql)
-    dates = []
-    for row in bindings:
-        dates.append(row.get('date').get('value'))
-    return dates
- 
 
 def get_place(uri):
     output = {"@type": "Library", "priceRange" : "0"}
@@ -242,6 +213,26 @@ def __construct_schema__(iri):
             setattr(entity, key, val)
     return entity 
 
+def __check_exists__(iri):
+    """Internal function takes an iri and queries triplestore for
+    it's existence, returns True if found, False otherwise
+
+    Args:
+
+    ----
+        iri: A rdflib.URIRef
+    """
+    sparql = PREFIX +"""
+    SELECT DISTINCT ?iri
+                     WHERE {{ OPTIONAL {{ ?iri rdf:type bf:Instance . }}
+                              OPTIONAL {{ ?iri rdf:type bf:Item . }}
+                              FILTER (sameTerm(?iri, <{iri}>))
+                    }}""".format(iri=iri)
+    bindings = __run_query__(sparql)
+    if len(bindings) > 0:
+        return True
+    return False
+
 @app.route("/agent/<path:name>")
 def display_agent(name):
     """Displays bf:Agent view"""
@@ -304,7 +295,7 @@ def display_item(title, institution):
         item=item,
         instance=instance)
 
-
+@app.route("/<path:title>.json")
 @app.route("/<path:title>")
 def display_instance(title):
     """Displays different views of bf:Instance 
@@ -318,8 +309,13 @@ def display_instance(title):
     instance_iri = rdflib.URIRef("{0}{1}".format(
         app.config.get("BASE_URL"),
         title))
+    if not __check_exists__(instance_iri):
+        abort(404)
     instance = __construct_schema__(instance_iri)
     instance.workExample = [instance.workExample,]
+    if request.path.endswith(".json"):
+        raw_json = output_jsonld(instance)
+        return jsonify(json.loads(raw_json))
     return render_template("instance.html",
         instance=instance)
     
@@ -575,5 +571,5 @@ WHERE {{
 }}"""
 
 if __name__ == '__main__':
-    set_libraries()
+    #set_libraries()
     app.run(host='0.0.0.0', debug=True)
