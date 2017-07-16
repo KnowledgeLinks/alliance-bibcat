@@ -22,6 +22,18 @@
     <h1></h1>
     </div>
     {% endblock %}  
+    {% block footer %}
+    <footer class="container">
+        <img src="{{ url_for('static', filename='img/alliance-logo.png') }}"
+             alt="Colorado Alliance of Research Libraries"
+             class="pull-right">
+
+        <div class="pull-right" style="font-size: .8em">
+            <br><em>a library linked-data service of</em><br>
+                powered by <a href="http://bibcat.org/">BIBCAT</a>
+        </div>
+    </footer>
+    {% endblock %}
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
    <script src="{{ url_for('static', filename='js/tether.min.js') }}"></script>

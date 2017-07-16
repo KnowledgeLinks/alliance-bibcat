@@ -5,15 +5,16 @@
 <div class="container">
   <h1>{{instance.name}}</h1>
   <div class="row">
-    <div class="col-8">
+    <div class="col-12">
       {% if instance.authors %}
-      <div class="row">
-        <div class="col-12">
-          <h4>Edited by {% for auth in instance.authors %}{{auth}}{% if not loop.last %}, {% endif %}{% endfor %}</h4>
+          <h4>by {% for auth in instance.authors %}{{auth}}{% if not loop.last %}, {% endif %}{% endfor %}</h4>
         </div>
-      </div>
       {% endif %}
-      
+      {% if instance.contributor %}
+          <h4>by {% for auth in instance.contributor %}{{auth}}{% if not loop.last %}, {% endif %}{% endfor %}</h4>
+     {% endif %}
+    </div>
+  </div>   
       
       <div class="row">
         <div class="col-lg-auto">
@@ -22,14 +23,21 @@
             height="200"
             frameborder="0" style="border:0"
             src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCuODt2VKs726Htc3hVNDga2UP1AAOdDZs
-              &q=Space+Needle,Seattle+WA" allowfullscreen>
+            &q={{ item.provider.address.streetAddress }}" allowfullscreen>
           </iframe>
         </div>
         <div class="col">
-          <h3>{{instance.location}}</h3>
-          <p>Reference Number: {{instance.refnumber}}</p>
-          <p>Availability: {{instance.availability}}</p>
+          <img src="{{ url_for('static', filename='img/' + item.provider.logo) }}">
+          <h3>{{item.provider.name }}</h3>
+          {% if item.identifier %}
+          <p>{{ item.identifier.propertyID }}<strong>{{item.identifier.value}}</strong></p>
+          {% endif %}
+          {# <p>Availability: {{instance.availability}}</p> #}
         </div>
+        <div class="col">
+            {{ instance|cover_art|safe }}
+        </div>
+
       </div>
       
       {% if instance.datePublished %}
@@ -39,38 +47,54 @@
         </div>
       </div>
       {% endif %}
-      {% if instance.description %}
       <div class="row">
-        <div class="col-12">
-          <p>{{instance.description}}</p>
+        <div class="col-8">
+            {% if instance.description %}
+                {% if instance.description|is_list %}
+                    {% for row in instance.description %}<p>{{ row }}</p>{% endfor %}
+                {% else %}
+                    <p>{{instance.description}}</p>
+                {% endif %}
+            {% endif %}
         </div>
-      </div>
-      {% endif %}
-      {% if subjects %}
-      <div class="row">
-        <div class="col-2">
-          <p><b>Subjects:</b></p>
-        </div>
-        <div class="col-10">
-          <ul>{% for sub in subjects %}<li>{{sub}}</li>{% endfor %}</ul>
-        </div>
-      </div>
-      {% endif %}
+        {% if instance.keywords %}
+        <div class="col-4">
+            <strong>Subjects:</strong>
+            <ul>{% for sub in instance.keywords %}<li>{{sub}}</li>{% endfor %}</ul>
+        </div> 
+        {% endif %}
     </div>
-    <div class="col-4">
-      <img src="{{url_for('static', filename='img/Sample-cover.png')}}"></img>
-    </div>
-  </div>
-  {% if instance.url %}
+  {% if item.url %}
   <div class="row">
     <p><h4>Library catalogue link:</h4></p>
     <p><a href="{{instance.url}}">{{instance.url}}</a></p>
   </div>
   {% endif %}
   <div class="row">
-  
+        <div class="col-6">
+            <dl>
+            {% if instance.publisher %}
+                <dt>Publisher:</dt>
+                <dd class="p-1">{{ instance.publisher }}</dd>
+            {% endif %}
+            {% if instance.isbn %}
+                <dt>ISBN</dt>
+                <dd>{% for isbn in instanc.isbn %}{{ isbn }}<br>{% endfor %}
+                </dd>
+            {% endif %}
+            </dl>
+        </div>
+        <div class="col-6">
+            {% if instance.tableOfContents %}
+                <strong>Table of Contents</strong>
+                <ul>
+                    {% for row in instance.tableOfContents %}
+                    <li>{{ row }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
   </div>
   
 </div>
-
 {% endblock main %}

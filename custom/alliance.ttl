@@ -67,25 +67,6 @@
     schema:oclc "COCA" ;
     schema:telephone "719-389-6184" .
 
-<https://www.coloradocollege.edu/library/seay/> a bf:Organization,
-        schema:Library ;
-    rdfs:label "Colorado College Seay Music Library"@en ;
-    schema:address [ a schema:PostalAddress ;
-        schema:streetAddress "5 W. Cache La Poudre Street"@en ;
-        schema:postalCode "80903" ;
-        schema:addressCountry "US" ;
-        schema:addressLocality "Colorado Springs"@en ;
-        schema:addressRegion "Colorado"@en 
-    ] ;
-    schema:geo [ a schema:GeoCoordinates ;
-        schema:latitude "38.8463 N";
-        schema:longitude "104.8256 W"
-    ] ;
-    schema:image <https://www.coloradocollege.edu/dotAsset/466fb386-021d-4ea5-87e5-0d03432c0bcc.jpg> ;
-    schema:parentOrganization <https://www.coloradocollege.edu/> ; 
-    schema:oclc "CJJA" ;
-    schema:telephone "719-389-6560" .
-
 <http://library.buffalostate.edu/home> a bf:Organization,
         schema:Library ;
     rdfs:label "SUNY Buffalo State Library"@en ;
@@ -104,11 +85,15 @@
     schema:sameAs <https://www.wikidata.org/wiki/Q21328996> .
 
 <https://www.coloradocollege.edu/> a bf:Organization, schema:CollegeOrUniversity ;
-        rdfs:label "Colorado College"@en .
+        rdfs:label "Colorado College"@en ;
+        schema:logo "cc-logo.png" .
 
 <http://www.colorado.edu/> a bf:Organization, schema:CollegeOrUniversity ;
-        rdfs:label "University of Colorado Boulder"@en .
+        rdfs:label "University of Colorado Boulder"@en ;
+        schema:logo "cu-logo.png".
 
 <http://suny.buffalostate.edu/> a bf:Organization, schema:CollegeOrUniversity ;
-        rdfs:label "SUNY Buffalo State"@en .
+        rdfs:label "SUNY Buffalo State"@en ;
+        schema:logo "suny-buffalo-logo.png".
+
 

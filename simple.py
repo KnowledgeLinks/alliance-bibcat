@@ -60,18 +60,19 @@ def __run_query__(sparql):
 def retrieve_cover_art(instance):
     cover_template = "http://covers.openlibrary.org/b/isbn/{}-M.jpg"
     if not hasattr(instance, 'isbn'):
-        return
+        return ''
     for isbn in instance.isbn:
         cover_url = cover_template.format(isbn)
         result = requests.get(cover_url)
-        print(cover_url, result.status_code)
+        #print(cover_url, result.status_code)
         if result.status_code < 400:
             return """<img src="{}" alt="{} Cover Art" />""".format(cover_url,
                 instance.name)
+    return ''
 
 @app.template_filter('get_jsonld')
 def output_jsonld(instance):
-    print(instance)
+    #print(instance)
     def test_add_simple(name):
         if hasattr(instance, name):
             instance_ld[name] = getattr(instance, name)
@@ -98,11 +99,20 @@ def output_jsonld(instance):
                 "url": item.iri,
                 "name": instance.name,
                 "provider": {
-                    "url": item.provider
+                    "url": item.provider.iri,
+                    "address": {
+                        "@type": "PostalAddress",
+                        "streetAddress": item.provider.address.streetAddress,
+                        "postalCode": item.provider.address.postalCode
+                    }
                 }
             }
             instance_ld['workExample'].append(item_example)
     return json.dumps(instance_ld, indent=2, sort_keys=True)
+
+@app.template_filter("is_list")
+def test_for_list(is_list):
+    return isinstance(is_list, list)
 
 @app.route("/")
 def home():
@@ -188,57 +198,49 @@ def __construct_schema__(iri):
     --------
         SimpleNamespace
     """
-    def get_object(rdf_obj, entity):
-        if isinstance(rdf_obj, rdflib.BNode):
-            for pred, obj in SCHEMA_PROCESSOR.output.predicate_objects(
-                subject=rdf_obj):
-                pred_str = str(pred)
-                if "schema.org" in pred_str:
-                    property_name = pred_str.split("/")[-1]
-                elif pred == rdflib.RDF.value or pred == rdflib.RDFS.label:
-                    property_name = pred_str.split("#")[-1]
-                if not isinstance(obj, rdflib.BNode):
-                    setattr(entity, property_name, str(obj))
-                else:
-                    get_object(obj, entity)
-        else:
-            return str(rdf_obj)
-
-    def __add_properties__(entity, entity_iri):
-        for pred, obj in SCHEMA_PROCESSOR.output.predicate_objects(
-            subject=entity_iri):
-            pred_str = str(pred)
-            if "schema.org":
-                property_name = pred_str.split("/")[-1]
-                if hasattr(entity, property_name):
-                    object_ = getattr(entity, property_name)
-                    value_of = get_object(obj, entity)
-                    # Not a singleton, convert to a list for this property
-                    if isinstance(object_, list):
-                        object_.append(value_of)
-                    else:
-                        setattr(entity, property_name, [value_of,])
-                else:        
-                    setattr(entity, property_name, get_object(obj, entity))
-            if pred == rdflib.RDF.value or pred == rdflib.RDFS.label:
-                property_name = str(pred).split("#")[-1]
-                setattr(entity, property_name, str(obj))
-    instance = SimpleNamespace()
-    instance.iri = str(iri)
-    SCHEMA_PROCESSOR.run(instance=instance.iri, limit=1, offset=0)
-    __add_properties__(instance, iri)
-    # Repopulate Items as Namespaces
-    if hasattr(instance, "workExample"):
-        if not isinstance(instance.workExample, list):
-            instance.workExample = [instance.workExample, ]
-        items = []
-        for item_iri in instance.workExample:
-            item = SimpleNamespace()
-            item.iri = item_iri
-            __add_properties__(item, rdflib.URIRef(item_iri))
-            items.append(item)
-        instance.workExample = items
-    return instance
+    def build_entity(entity_dict):
+        if not '@id' in entity_dict:
+            return
+        entity = SimpleNamespace()
+        entity.iri = entity_dict['@id']
+        for key, val in instance_vars[entity_dict['@id']].items():
+            for row in val:
+                if '@id' in row:
+                    setattr(entity, key, build_entity(row))
+            if not hasattr(entity, key): 
+                setattr(entity, key, val)
+        return entity
+    SCHEMA_PROCESSOR.run(instance=iri, limit=1, offset=0)
+    instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld'))
+    instance_vars = dict()
+    for row in instance_listing:
+        entity_url = row['@id']
+        instance_vars[entity_url] = {}
+        for key, val in row.items():
+            if key.startswith('@id'):
+                continue
+            if key.startswith('@type'):
+                instance_vars[entity_url]['class'] = val
+            else:
+                output = []
+                if isinstance(val, list):
+                    for list_item in val:
+                        if '@value' in list_item:
+                            output.append(list_item.get('@value'))
+                        else:
+                            output.append(list_item)
+                if len(output) == 1 and not isinstance(output[0], dict):
+                    output = ''.join(output)
+                instance_vars[entity_url][key.split("/")[-1]] = output
+    entity = SimpleNamespace()
+    entity.iri = iri
+    for key, val in instance_vars.get(str(iri)).items():
+        for row in val:
+            if '@id' in row:
+                setattr(entity, key, build_entity(row))
+        if not hasattr(entity , key):
+            setattr(entity, key, val)
+    return entity 
 
 @app.route("/agent/<path:name>")
 def display_agent(name):
@@ -291,7 +293,9 @@ def display_item(title, institution):
     
     item = None
     instance = __construct_schema__(instance_iri)
+    instance.workExample = [instance.workExample,]
     for row in instance.workExample:
+        print(row.iri, item_iri, row.iri == item_iri, type(row.iri), type(item_iri))
         if row.iri == str(item_iri):
             item = row
     if not item:
@@ -315,6 +319,7 @@ def display_instance(title):
         app.config.get("BASE_URL"),
         title))
     instance = __construct_schema__(instance_iri)
+    instance.workExample = [instance.workExample,]
     return render_template("instance.html",
         instance=instance)
     
@@ -344,7 +349,7 @@ def sitemap(offset=0):
         data={"query": sparql,
               "format": "json"})
     instances = result.json().get('results').get('bindings')
-    print("Number of instances {}".format(len(instances)))
+    #print("Number of instances {}".format(len(instances)))
     xml = render_template("sitemap_template.xml", instances=instances) 
     return Response(xml, mimetype="text/xml")
 

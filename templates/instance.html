@@ -3,15 +3,20 @@
 {% block main %}
 <script src="https://use.fontawesome.com/f0e99862c1.js"></script>
   <div class="container">
-
-    {{ instance }}
-  <h1>{{instance.name}}</h1>
+  <h1>{{ instance.name }}</h1>
   <div class="row">
     <div class="col-8">
       {% if instance.authors %}
       <div class="row">
         <div class="col-12">
-          <h4>Edited by {% for auth in instance.authors %}{{auth}}{% if not loop.last %}, {% endif %}{% endfor %}</h4>
+          <h4>by {% for auth in instance.authors %}{{auth}}{% if not loop.last %}, {% endif %}{% endfor %}</h4>
+        </div>
+      </div>
+      {% endif %}
+      {% if instance.contributor %}
+      <div class="row">
+        <div class="col-12">
+          <h4>by {% for auth in instance.contributor %}{{auth}}{% if not loop.last %}, {% endif %}{% endfor %}</h4>
         </div>
       </div>
       {% endif %}
@@ -25,7 +30,11 @@
       {% if instance.description %}
       <div class="row">
         <div class="col-12">
+          {% if instance.description|is_list %}
+          {% for row in instance.description %}<p>{{ row }}</p>{% endfor %}
+          {% else %}
           <p>{{instance.description}}</p>
+          {% endif %}
         </div>
       </div>
       {% endif %}
@@ -35,13 +44,12 @@
           <p><b>Keywords:</b></p>
         </div>
         <div class="col-10">
-          <ul>{% for keyword in instance.keywords %}<li>{{keyword}}</li>{% endfor %}</ul>
+          <ul>{% for keyword in instance.keywords|sort %}<li>{{keyword}}</li>{% endfor %}</ul>
         </div>
       </div>
       {% endif %}
     </div>
     <div class="col-4">
-      {# <img src="{{url_for('static', filename='img/Sample-cover.png')}}"></img> #}
         {{ instance|cover_art|safe }}
     </div>
   </div>
@@ -56,11 +64,11 @@
             height="200"
             frameborder="0" style="border:0"
             src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCuODt2VKs726Htc3hVNDga2UP1AAOdDZs
-              &q={{loc}}" allowfullscreen>
+              &q={{item.provider.address.streetAddress}}" allowfullscreen>
           </iframe>
         </div>
         <div class="col">
-         <h3>{{ loc }}</h3>
+         <h3>{{ loc.name }}</h3>
           <p>Formats: 
           <div id="accordion" role="tablist" aria-multiselectable="true">
           {% for indivItem in items %}
@@ -112,7 +120,11 @@
               </div>
             </div>
           </div>
-          {% endif %} {% endfor %}</p>
+          {% endif %}
+          {% if indivItem.identifier %} 
+          <p><strong>{{ indivItem.identifier.propertyID }}:</strong> {{ indivItem.identifier.value }}</p>
+          {% endif %}
+          {% endfor %}</p>
           </div>
         </div>
       </div>
