@@ -188,27 +188,46 @@ def __construct_schema__(iri):
     --------
         SimpleNamespace
     """
+    def get_object(rdf_obj, entity):
+        if isinstance(rdf_obj, rdflib.BNode):
+            for pred, obj in SCHEMA_PROCESSOR.output.predicate_objects(
+                subject=rdf_obj):
+                pred_str = str(pred)
+                if "schema.org" in pred_str:
+                    property_name = pred_str.split("/")[-1]
+                elif pred == rdflib.RDF.value or pred == rdflib.RDFS.label:
+                    property_name = pred_str.split("#")[-1]
+                if not isinstance(obj, rdflib.BNode):
+                    setattr(entity, property_name, str(obj))
+                else:
+                    get_object(obj, entity)
+        else:
+            return str(rdf_obj)
+
     def __add_properties__(entity, entity_iri):
         for pred, obj in SCHEMA_PROCESSOR.output.predicate_objects(
             subject=entity_iri):
             pred_str = str(pred)
-            if "schema.org" in pred_str:
+            if "schema.org":
                 property_name = pred_str.split("/")[-1]
                 if hasattr(entity, property_name):
                     object_ = getattr(entity, property_name)
+                    value_of = get_object(obj, entity)
                     # Not a singleton, convert to a list for this property
                     if isinstance(object_, list):
-                        object_.append(str(obj))
+                        object_.append(value_of)
                     else:
-                        setattr(entity, property_name, [object_,])
+                        setattr(entity, property_name, [value_of,])
                 else:        
-                    setattr(entity, property_name, str(obj))
+                    setattr(entity, property_name, get_object(obj, entity))
+            if pred == rdflib.RDF.value or pred == rdflib.RDFS.label:
+                property_name = str(pred).split("#")[-1]
+                setattr(entity, property_name, str(obj))
     instance = SimpleNamespace()
     instance.iri = str(iri)
     SCHEMA_PROCESSOR.run(instance=instance.iri, limit=1, offset=0)
     __add_properties__(instance, iri)
     # Repopulate Items as Namespaces
-    
     if hasattr(instance, "workExample"):
         if not isinstance(instance.workExample, list):
             instance.workExample = [instance.workExample, ]
@@ -264,6 +283,8 @@ def display_item(title, institution):
     instance_iri = rdflib.URIRef("{0}{1}".format(
         app.config.get("BASE_URL"),
         str(title)))
+    if institution.endswith("/"):
+        institution = institution[:-1]
     item_iri = rdflib.URIRef("{0}/{1}".format(
         instance_iri,
         institution))
@@ -287,6 +308,9 @@ def display_instance(title):
     Args:
         title(path): Slugified title of Instance
     """
+    # Kludge ensures that IRI does not have trailing /
+    if title.endswith("/"):
+        title = title[:-1]
     instance_iri = rdflib.URIRef("{0}{1}".format(
         app.config.get("BASE_URL"),
         title))
