@@ -183,7 +183,7 @@ def __construct_schema__(iri):
                 setattr(entity, key, val)
         return entity
     SCHEMA_PROCESSOR.run(instance=iri, limit=1, offset=0)
-    instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld'))
+    instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld').decode())
     instance_vars = dict()
     for row in instance_listing:
         entity_url = row['@id']
@@ -351,7 +351,8 @@ def display_instance(title):
         
     if request.path.endswith(".json"):
         raw_json = output_jsonld(instance)
-        return jsonify(json.loads(raw_json))
+        
+        return jsonify(json.loads(raw_json)
     return render_template("instance.html",
         instance=instance)
     
