@@ -76,9 +76,17 @@
         <div class="col">
          <img src="{{ url_for('static', filename='img/' + loc.logo) }}">
          <h3>{{ loc.name }}</h3>
-          <p>Formats: 
+         {% for indivItem in items %}
+            {% if indivItem.sameAs %}
+            <a href="{{ indivItem.sameAs.0.get('@id') }}" class="btn btn-warning">
+                <i class="fa fa-external-link-square" aria-hidden="true"></i>
+            </a>
+            {% endif %}
+            <a href="{{ indivItem.url }}" class="btn btn-primary">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+            </a>
+        <p>Formats: 
           <div id="accordion" role="tablist" aria-multiselectable="true">
-          {% for indivItem in items %}
           {% if   indivItem.fileFormat == "pdf" %}
           <div class="card">
             <div class="card-header" role="tab" id="heading{{loc}}Pdf">

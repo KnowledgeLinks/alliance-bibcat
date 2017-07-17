@@ -31,19 +31,20 @@ SCHEMA_PROCESSOR = SPARQLProcessor(
     rml_rules=["bibcat-bf-to-schema.ttl"],
     triplestore_url=app.config.get("TRIPLESTORE_URL"))
 
-def set_libraries():
-    global LIBRARIES
-    bindings = __run_query__(LIBRARY_GEO)
-    for row in bindings:
-        library_iri = row.get('library').get('value')
-        LIBRARIES[library_iri] = {
-            "name": row.get('name').get('value'),
-            "address": get_address(library_iri),
-            "image": row.get('image').get('value'),
-            "latitude": row.get('lat').get('value'),
-            "longitude": row.get('long').get('value'),
-            "telephone": row.get('telephone').get('value')
-        }
+#def set_libraries():
+#    global LIBRARIES
+#    bindings = __run_query__(LIBRARY_GEO)
+#    for row in bindings:
+#        library_iri = row.get('library').get('value')
+#        LIBRARIES[library_iri] = {
+
+#            "name": row.get('name').get('value'),
+#            "address": get_address(library_iri),
+#            "image": row.get('image').get('value'),
+#            "latitude": row.get('lat').get('value'),
+#            "longitude": row.get('long').get('value'),
+#            "telephone": row.get('telephone').get('value')
+#        }
         
 
 
@@ -124,8 +125,8 @@ def test_for_list(is_list):
 def home():
     triples_store_stats = {}
     bf_counts = {}
-    if len(LIBRARIES) < 1:
-        set_libraries()
+    #if len(LIBRARIES) < 1:
+        #set_libraries()
     for iri, info in LIBRARIES.items():
         bf_counts_bindings = __run_query__(BIBFRAME_COUNTS.format(iri))
         bf_counts[iri] = {"name": info.get('name'),
@@ -176,13 +177,12 @@ def __construct_schema__(iri):
         entity.iri = entity_dict['@id']
         for key, val in instance_vars[entity_dict['@id']].items():
             for row in val:
-                if '@id' in row:
+                if '@id' in row and not key.startswith("sameAs"):
                     setattr(entity, key, build_entity(row))
             if not hasattr(entity, key): 
                 setattr(entity, key, val)
         return entity
     SCHEMA_PROCESSOR.run(instance=iri, limit=1, offset=0)
-    print(SCHEMA_PROCESSOR.output.serialize(format='turtle').decode())
     instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld'))
     instance_vars = dict()
     for row in instance_listing:
@@ -287,7 +287,6 @@ def display_item(title, institution):
     instance = __construct_schema__(instance_iri)
     instance.workExample = [instance.workExample,]
     for row in instance.workExample:
-        print(row.iri, item_iri, row.iri == item_iri, type(row.iri), type(item_iri))
         if row.iri == str(item_iri):
             item = row
     if not item:
