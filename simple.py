@@ -311,6 +311,7 @@ def display_instance(title):
         title))
     if not __check_exists__(instance_iri):
         abort(404)
+    print("Instance iri is {}".format(instance_iri))
     instance = __construct_schema__(instance_iri)
     instance.workExample = [instance.workExample,]
     for item in instance.workExample:
