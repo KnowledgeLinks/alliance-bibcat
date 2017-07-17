@@ -313,6 +313,41 @@ def display_instance(title):
         abort(404)
     instance = __construct_schema__(instance_iri)
     instance.workExample = [instance.workExample,]
+    for item in instance.workExample:
+        if not hasattr(item, "provider"):
+            # Try to directly query for bf:heldBy for item iri
+            sparql = PREFIX + """
+            SELECT DISTINCT ?provider ?name ?logo ?street ?city ?state ?zip
+                  WHERE {{ <{item}>  bf:heldBy ?provider . 
+                           ?provider schema:logo ?logo .
+                           ?library schema:parentOrganization ?provider ;
+                                    rdfs:label ?name ;
+                                    schema:address ?addr .
+                           ?addr    schema:streetAddress ?street ;
+                                    schema:addressLocality ?city ;
+                                    schema:addressRegion ?state ;
+                                    schema:postalCode ?zip .
+                                                    }}""".format(item=item.iri)
+            bindings = __run_query__(sparql) 
+            provider = SimpleNamespace()
+            address = SimpleNamespace()
+            if len(bindings) > 0:
+                provider.name = bindings[0].get('name').get('value')
+                provider.iri =  bindings[0].get('provider').get('value')
+                provider.logo = bindings[0].get('logo').get('value')
+                address.streetAddress = bindings[0].get('street').get('value')
+            else:
+                # Default to the Alliance
+                provider.logo = "alliance-logo.png"
+                provider.name = "Unknown"
+                provider.iri = app.config.get('BASE_URL')
+                address.streetAddress = "E Florida Ave"
+                address.city = "Denver"
+                address.state = "Colorado"
+                address.postalCode = "80210"
+            setattr(provider, "address", address)
+            setattr(item, "provider", provider)
+        
     if request.path.endswith(".json"):
         raw_json = output_jsonld(instance)
         return jsonify(json.loads(raw_json))
