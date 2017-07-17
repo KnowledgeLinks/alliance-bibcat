@@ -182,6 +182,7 @@ def __construct_schema__(iri):
                 setattr(entity, key, val)
         return entity
     SCHEMA_PROCESSOR.run(instance=iri, limit=1, offset=0)
+    print(SCHEMA_PROCESSOR.output.serialize(format='turtle').decode())
     instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld'))
     instance_vars = dict()
     for row in instance_listing:
