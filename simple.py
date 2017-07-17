@@ -351,8 +351,7 @@ def display_instance(title):
         
     if request.path.endswith(".json"):
         raw_json = output_jsonld(instance)
-        
-        return jsonify(json.loads(raw_json)
+        return jsonify(json.loads(raw_json))
     return render_template("instance.html",
         instance=instance)
     
