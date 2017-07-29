@@ -286,7 +286,13 @@ def turtles():
                start.isoformat()))
     # Load custom ttl files for institutional metadata for richer
     # context for ttl files in the data directory
-    for directory in ["custom", "data"]: 
+    headers = {"Content-type": "text/turtle"} 
+    with open(os.path.join(PROJECT_BASE, "custom/alliance.ttl"), "rb") as fo:
+        result = requests.post(config.TRIPLESTORE_URL,
+            data=fo.read(),
+            headers=headers)
+        print(result.status_code)
+    for directory in ["data"]: 
         turtle_path = os.path.join(PROJECT_BASE, directory)
         walker = next(os.walk(turtle_path))
         for filename in walker[2]:
@@ -296,9 +302,9 @@ def turtles():
             with open(full_path, "rb") as fo:
                 raw_turtle = fo.read()
             request = urllib.request.Request(
-                          url=TRIPLESTORE_URL,
+                          url=config.TRIPLESTORE_URL,
                           data=raw_turtle,
-                          headers={"Content-type": "text/turtle"})
+                          headers=headers)
             with urllib.request.urlopen(request) as triplestore_response:
                 click.echo("\t{} ingest result {}".format(filename, 
                           triplestore_response.read().decode('utf-8')))

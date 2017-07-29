@@ -67,10 +67,12 @@
         </div> 
         {% endif %}
     </div>
-  {% if item.url %}
+  {% if item.sameAs %}
   <div class="row">
-    <p><h4>Library catalogue link:</h4></p>
-    <p><a href="{{instance.url}}">{{instance.url}}</a></p>
+    <div class="col-12">
+        <h4>Library catalogue link:</h4>
+        <p><a href="{{ item.sameAs.0.get('@id') }}">{{ item.sameAs.0.get('@id') }}</a></p>
+    </div>
   </div>
   {% endif %}
   <div class="row">
@@ -82,7 +84,7 @@
             {% endif %}
             {% if instance.isbn %}
                 <dt>ISBN</dt>
-                <dd>{% for isbn in instanc.isbn %}{{ isbn }}<br>{% endfor %}
+                <dd>{% for isbn in instance.isbn %}{{ isbn }}<br>{% endfor %}
                 </dd>
             {% endif %}
             </dl>

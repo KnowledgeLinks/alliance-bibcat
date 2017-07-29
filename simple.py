@@ -31,19 +31,20 @@ SCHEMA_PROCESSOR = SPARQLProcessor(
     rml_rules=["bibcat-bf-to-schema.ttl"],
     triplestore_url=app.config.get("TRIPLESTORE_URL"))
 
-def set_libraries():
-    global LIBRARIES
-    bindings = __run_query__(LIBRARY_GEO)
-    for row in bindings:
-        library_iri = row.get('library').get('value')
-        LIBRARIES[library_iri] = {
-            "name": row.get('name').get('value'),
-            "address": get_address(library_iri),
-            "image": row.get('image').get('value'),
-            "latitude": row.get('lat').get('value'),
-            "longitude": row.get('long').get('value'),
-            "telephone": row.get('telephone').get('value')
-        }
+#def set_libraries():
+#    global LIBRARIES
+#    bindings = __run_query__(LIBRARY_GEO)
+#    for row in bindings:
+#        library_iri = row.get('library').get('value')
+#        LIBRARIES[library_iri] = {
+
+#            "name": row.get('name').get('value'),
+#            "address": get_address(library_iri),
+#            "image": row.get('image').get('value'),
+#            "latitude": row.get('lat').get('value'),
+#            "longitude": row.get('long').get('value'),
+#            "telephone": row.get('telephone').get('value')
+#        }
         
 
 
@@ -124,8 +125,8 @@ def test_for_list(is_list):
 def home():
     triples_store_stats = {}
     bf_counts = {}
-    if len(LIBRARIES) < 1:
-        set_libraries()
+    #if len(LIBRARIES) < 1:
+        #set_libraries()
     for iri, info in LIBRARIES.items():
         bf_counts_bindings = __run_query__(BIBFRAME_COUNTS.format(iri))
         bf_counts[iri] = {"name": info.get('name'),
@@ -176,13 +177,13 @@ def __construct_schema__(iri):
         entity.iri = entity_dict['@id']
         for key, val in instance_vars[entity_dict['@id']].items():
             for row in val:
-                if '@id' in row:
+                if '@id' in row and not key.startswith("sameAs"):
                     setattr(entity, key, build_entity(row))
             if not hasattr(entity, key): 
                 setattr(entity, key, val)
         return entity
     SCHEMA_PROCESSOR.run(instance=iri, limit=1, offset=0)
-    instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld'))
+    instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld').decode())
     instance_vars = dict()
     for row in instance_listing:
         entity_url = row['@id']
@@ -286,7 +287,6 @@ def display_item(title, institution):
     instance = __construct_schema__(instance_iri)
     instance.workExample = [instance.workExample,]
     for row in instance.workExample:
-        print(row.iri, item_iri, row.iri == item_iri, type(row.iri), type(item_iri))
         if row.iri == str(item_iri):
             item = row
     if not item:
@@ -311,8 +311,44 @@ def display_instance(title):
         title))
     if not __check_exists__(instance_iri):
         abort(404)
+    print("Instance iri is {}".format(instance_iri))
     instance = __construct_schema__(instance_iri)
     instance.workExample = [instance.workExample,]
+    for item in instance.workExample:
+        if not hasattr(item, "provider"):
+            # Try to directly query for bf:heldBy for item iri
+            sparql = PREFIX + """
+            SELECT DISTINCT ?provider ?name ?logo ?street ?city ?state ?zip
+                  WHERE {{ <{item}>  bf:heldBy ?provider . 
+                           ?provider schema:logo ?logo .
+                           ?library schema:parentOrganization ?provider ;
+                                    rdfs:label ?name ;
+                                    schema:address ?addr .
+                           ?addr    schema:streetAddress ?street ;
+                                    schema:addressLocality ?city ;
+                                    schema:addressRegion ?state ;
+                                    schema:postalCode ?zip .
+                                                    }}""".format(item=item.iri)
+            bindings = __run_query__(sparql) 
+            provider = SimpleNamespace()
+            address = SimpleNamespace()
+            if len(bindings) > 0:
+                provider.name = bindings[0].get('name').get('value')
+                provider.iri =  bindings[0].get('provider').get('value')
+                provider.logo = bindings[0].get('logo').get('value')
+                address.streetAddress = bindings[0].get('street').get('value')
+            else:
+                # Default to the Alliance
+                provider.logo = "alliance-logo.png"
+                provider.name = "Unknown"
+                provider.iri = app.config.get('BASE_URL')
+                address.streetAddress = "E Florida Ave"
+                address.city = "Denver"
+                address.state = "Colorado"
+                address.postalCode = "80210"
+            setattr(provider, "address", address)
+            setattr(item, "provider", provider)
+        
     if request.path.endswith(".json"):
         raw_json = output_jsonld(instance)
         return jsonify(json.loads(raw_json))
