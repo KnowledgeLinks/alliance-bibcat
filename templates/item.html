@@ -59,8 +59,11 @@
         </div>
         {% if instance.keywords %}
         <div class="col-4">
-            <strong>Subjects:</strong>
-            <ul>{% for sub in instance.keywords %}<li>{{sub}}</li>{% endfor %}</ul>
+            {% if instance.keywords|is_list %}
+              {% for keyword in instance.keywords|sort %}<li>{{keyword}}</li>{% endfor %}
+            {% else %}
+                <li>{{ instance.keywords }}</li>
+            {% endif %}
         </div> 
         {% endif %}
     </div>
