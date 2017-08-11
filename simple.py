@@ -303,6 +303,8 @@ def display_instance(title):
     Args:
         title(path): Slugified title of Instance
     """
+    if title.startswith("google"):
+        return render_template(title)
     # Kludge ensures that IRI does not have trailing /
     if title.endswith("/"):
         title = title[:-1]
