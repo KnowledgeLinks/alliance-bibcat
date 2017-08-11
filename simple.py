@@ -59,7 +59,7 @@ def __run_query__(sparql):
 
 @app.template_filter('cover_art')
 def retrieve_cover_art(instance):
-    cover_template = "http://covers.openlibrary.org/b/isbn/{}-M.jpg"
+    cover_template = "http://images.amazon.com/images/P/{}.jpg"
     if not hasattr(instance, 'isbn'):
         return ''
     for isbn in instance.isbn:
