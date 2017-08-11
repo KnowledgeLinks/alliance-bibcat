@@ -73,3 +73,134 @@
     
 <https://bibcat.coalliance.org/topic/leadership-training> a bf:Topic ;
     rdfs:label "Leadership Training." .
+    
+    
+    
+    
+    
+    
+    
+    
+    
+<https://bibcat.coalliance.org/the-triple-bottom-line-how-todays-best-run-companies-are-achieving-economic-social-and-environmental-success-and-how-you-can-too/colorado-college> a bf:Item ;
+    bf:heldBy <https://www.coloradocollege.edu/> ;
+    bf:itemOf <https://bibcat.coalliance.org/the-triple-bottom-line-how-todays-best-run-companies-are-achieving-economic-social-and-environmental-success-and-how-you-can-too> ;
+    bf:shelfMark [ a bf:ShelfMarkLLC ;
+            rdfs:label "HF5386.S346 2014eb" ] ;
+    rdfs:seeAlso <https://tiger.coloradocollege.edu/record=b2231182> .
+    
+<https://bibcat.coalliance.org/the-triple-bottom-line-how-todays-best-run-companies-are-achieving-economic-social-and-environmental-success-and-how-you-can-too/colorado-college-1> a bf:Item ;
+    bf:heldBy <https://www.coloradocollege.edu/> ;
+    bf:itemOf <https://bibcat.coalliance.org/the-triple-bottom-line-how-todays-best-run-companies-are-achieving-economic-social-and-environmental-success-and-how-you-can-too> ;
+    rdfs:seeAlso <https://tiger.coloradocollege.edu/record=b2231182> .
+    
+<https://bibcat.coalliance.org/the-triple-bottom-line-how-todays-best-run-companies-are-achieving-economic-social-and-environmental-success-and-how-you-can-too/colorado-college-2> a bf:Item ;
+    bf:heldBy <https://www.coloradocollege.edu/> ;
+    bf:itemOf <https://bibcat.coalliance.org/the-triple-bottom-line-how-todays-best-run-companies-are-achieving-economic-social-and-environmental-success-and-how-you-can-too> ;
+    bf:shelfMark [ a bf:ShelfMarkLLC ;
+            rdfs:label "HF5386.S346 2014eb" ] ;
+    rdfs:seeAlso <https://tiger.coloradocollege.edu/record=b2231182> .
+    
+<https://bibcat.coalliance.org/the-triple-bottom-line-how-todays-best-run-companies-are-achieving-economic-social-and-environmental-success-and-how-you-can-too> a bf:Electronic,
+        bf:Instance ;
+    rdfs:label "The triple bottom line : how today's best-run companies are achieving economic, social, and environmental success--and how you can too /" ;
+    bf:carrier <http://id.loc.gov/vocabulary/carriers/cr> ;
+    bf:editionStatement "Revised and updated" ;
+    bf:identifiedBy [ a bf:Isbn ;
+            rdf:value "1118333179 (electronic bk.)" ],
+        [ a bf:Isbn ;
+            rdf:value "1118330374 (electronic bk.)" ],
+        [ a bf:Isbn ;
+            rdf:value "9781118333174 (electronic bk.)" ],
+        [ a bf:Isbn ;
+            rdf:value "9781118226223 (cloth)" ],
+        [ a bf:Isbn ;
+            rdf:value "9781118330371 (electronic bk.)" ],
+        [ a bf:Local ;
+            bf:source <https://www.coalliance.org/> ;
+            rdf:value "triple_bottom_line__how_todays_best_run_companies_are_achiev_____2014____revjossey_basa________________________________________savitz__andrew_w___________________" ] ;
+    bf:instanceOf <https://bibcat.coalliance.org/ebl1495625#Work> ;
+    bf:issuance <http://id.loc.gov/vocabulary/issuance/mono> ;
+    bf:note [ a bf:Note ;
+            rdfs:label "Description based on print version record and CIP data provided by publisher; resource not viewed." ;
+            bf:noteType "description source" ],
+        [ a bf:Note ;
+            rdfs:label "Includes bibliographical references and index." ;
+            bf:noteType "bibliography" ] ;
+    bf:provisionActivity [ a bf:ProvisionActivity,
+                bf:Publication ;
+            bf:date "2014" ;
+            bf:place "San Francisco" ],
+        [ a bf:ProvisionActivity,
+                bf:Publication ;
+            bf:date "2014"^^<http://id.loc.gov/datatypes/edtf> ;
+            bf:place <http://id.loc.gov/vocabulary/countries/cau> ] ;
+    bf:provisionActivityStatement "San Francisco : Jossey-Bass, [2014]" ;
+    bf:responsibilityStatement "Andrew W. Savitz, with Karl Weber" ;
+    bf:soundContent [ a bf:SoundContent ;
+            rdfs:label "silent" ] ;
+    bf:title [ a bf:Title ;
+            rdfs:label "The triple bottom line : how today's best-run companies are achieving economic, social, and environmental success--and how you can too /" ;
+            bf:mainTitle "The triple bottom line" ;
+            bf:subtitle "how today's best-run companies are achieving economic, social, and environmental success--and how you can too" ] .
+            
+<https://bibcat.coalliance.org/ebl1495625#Work> a bf:Text,
+        bf:Work ;
+    bf:contribution [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/agent/ebooks-corporation>,
+                <https://bibcat.coalliance.org/agent/jossey-bass-a-wiley-brand>,
+                <https://bibcat.coalliance.org/agent/savitz-andrew-w>,
+                <https://bibcat.coalliance.org/agent/weber-karl-1953-> ;
+            bf:role relators:ctb ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/agent/ebooks-corporation>,
+                <https://bibcat.coalliance.org/agent/jossey-bass-a-wiley-brand>,
+                <https://bibcat.coalliance.org/agent/savitz-andrew-w>,
+                <https://bibcat.coalliance.org/agent/weber-karl-1953-> ;
+            bf:role relators:ctb ],
+        [ a bf:Contribution ;
+            bf:agent <https://bibcat.coalliance.org/agent/ebooks-corporation>,
+                <https://bibcat.coalliance.org/agent/jossey-bass-a-wiley-brand>,
+                <https://bibcat.coalliance.org/agent/savitz-andrew-w>,
+                <https://bibcat.coalliance.org/agent/weber-karl-1953-> ;
+            bf:role relators:ctb ] ;
+    bf:subject <https://bibcat.coalliance.org/topic/electronic-books>,
+        <https://bibcat.coalliance.org/topic/industrial-management-environmental-aspects>,
+        <https://bibcat.coalliance.org/topic/social-responsibility-of-business>,
+        <https://bibcat.coalliance.org/topic/success-in-business> .
+        
+        
+<https://bibcat.coalliance.org/agent/weber-karl-1953-> a bf:Agent ;
+    rdfs:label "Weber, Karl, 1953-" ;
+    owl:sameAs <https://bibcat.coalliance.org/ebl1495625#Agent700-42> .
+
+        
+<https://bibcat.coalliance.org/agent/savitz-andrew-w> a bf:Agent ;
+    rdfs:label "Savitz, Andrew W." ;
+    owl:sameAs <https://bibcat.coalliance.org/ebl1495625#Agent100-22> .
+        
+<https://bibcat.coalliance.org/agent/jossey-bass-a-wiley-brand> a bf:Agent ;
+    rdfs:label "Jossey-Bass",
+        "Jossey-Bass, a Wiley Brand",
+        "Jossey-Bass, a Wiley brand",
+        "Wiley" ;
+    skos:altLabel "Jossey-Bass",
+        "Wiley" .
+
+<https://bibcat.coalliance.org/agent/ebooks-corporation> a bf:Agent ;
+    rdfs:label "Ebooks Corporation." .
+    
+<https://bibcat.coalliance.org/topic/electronic-books> a bf:Topic ;
+    rdfs:label "Electronic books." .
+    
+<https://bibcat.coalliance.org/topic/industrial-management-environmental-aspects> a bf:Topic ;
+    rdfs:label "Industrial management--Environmental aspects." ;
+    owl:sameAs <https://bibcat.coalliance.org/ebl1495625#Topic650-41> .
+    
+<https://bibcat.coalliance.org/topic/social-responsibility-of-business> a bf:Topic ;
+    rdfs:label "Social responsibility of business." ;
+    owl:sameAs <https://bibcat.coalliance.org/ebl1495625#Topic650-40>,
+        <https://bibcat.coalliance.org/fod100095280#Topic650-42>,
+        <https://bibcat.coalliance.org/kan1062781#Topic650-29>,
+        <https://bibcat.coalliance.org/spr9781137586001#Topic650-29> .
+        

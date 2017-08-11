@@ -86,61 +86,19 @@
                 <i class="fa fa-info-circle" aria-hidden="true"></i>
             </a>
         <p>Formats: 
-          <div id="accordion" role="tablist" aria-multiselectable="true">
-          {% if   indivItem.fileFormat == "pdf" %}
-          <div class="card">
-            <div class="card-header" role="tab" id="heading{{loc}}Pdf">
-              <h5 class="mb-0">
-                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{loc}}Pdf" aria-expanded="false" aria-controls="collapse{{loc}}Pdf">
-                  Ima PDF <i class="fa fa-file-pdf-o fa-2x"></i>
-                </a>
-              </h5>
-            </div>
-
-            <div id="collapse{{loc}}Pdf" class="collapse" role="tabpanel" aria-labelledby="heading{{loc}}Pdf">
-              <div class="card-block">
-                See my PDF glory.
-              </div>
-            </div>
-          </div>
-          {% elif indivItem.fileFormat == "audio" %}
-          <div class="card">
-            <div class="card-header" role="tab" id="heading{{loc}}Audio">
-              <h5 class="mb-0">
-                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{loc}}Audio" aria-expanded="false" aria-controls="collapse{{loc}}Audio">
-                  Ima audio <i class="fa fa-music fa-2x"></i>
-                </a>
-              </h5>
-            </div>
-
-            <div id="collapse{{loc}}Audio" class="collapse" role="tabpanel" aria-labelledby="heading{{loc}}Audio">
-              <div class="card-block">
-                Heer me
-              </div>
-            </div>
-          </div>
-          {% elif indivItem.fileFormat == "print" %}
-          <div class="card">
-            <div class="card-header" role="tab" id="heading{{loc}}Print">
-              <h5 class="mb-0">
-                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{loc}}Print" aria-expanded="false" aria-controls="collapse{{loc}}Print">
-                  Ima book <i class="fa fa-book fa-2x"></i>
-                </a>
-              </h5>
-            </div>
-
-            <div id="collapse{{loc}}Print" class="collapse" role="tabpanel" aria-labelledby="heading{{loc}}Print">
-              <div class="card-block">
-                Reed me
-              </div>
-            </div>
-          </div>
+          {% if  "pdf" in indivItem.fileFormat %}
+          <i class="fa fa-file-pdf-o fa-2x" aria-hidden="true"></i>
+          {% endif %}{% if "audio" in indivItem.fileFormat %}
+          <i class="fa fa-music fa-2x" aria-hidden="true"></i>
+          {% endif %}{% if "print" in indivItem.fileFormat %}
+          <i class="fa fa-book fa-2x" aria-hidden="true"></i>
+          {% endif %}{% if "video" in indivItem.fileFormat %}
+          <i class="fa fa-file-movie-o fa-2x" aria-hidden="true"></i>
           {% endif %}
           {% if indivItem.identifier %} 
           <p><strong>{{ indivItem.identifier.propertyID }}:</strong> {{ indivItem.identifier.value }}</p>
           {% endif %}
           {% endfor %}</p>
-          </div>
         </div>
       </div>
     </div>
