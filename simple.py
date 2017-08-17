@@ -107,13 +107,19 @@ def output_jsonld(instance):
                                               filename="img/{}".format(
                                                   item.provider.logo))),
                     "url": item.provider.iri,
-                    "address": {
+                                        "address": {
                         "@type": "PostalAddress",
                         "streetAddress": item.provider.address.streetAddress,
                         "postalCode": item.provider.address.postalCode
                     }
                 }
             }
+            if hasattr(item.provider, "latitude"):
+                item_example["geo"] = {
+                        "@type": "GeoCoordinates",
+                        "latitude": item.provider.latitude,
+                        "longitude": item.provider.longitude
+                }
             instance_ld['workExample'].append(item_example)
     return json.dumps(instance_ld, indent=2, sort_keys=True)
 
@@ -185,6 +191,7 @@ def __construct_schema__(iri):
     SCHEMA_PROCESSOR.run(instance=iri, limit=1, offset=0)
     instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld').decode())
     instance_vars = dict()
+    #print(json.dumps(instance_listing, indent=2, sort_keys=True))
     for row in instance_listing:
         entity_url = row['@id']
         instance_vars[entity_url] = {}
@@ -313,7 +320,6 @@ def display_instance(title):
         title))
     if not __check_exists__(instance_iri):
         abort(404)
-    print("Instance iri is {}".format(instance_iri))
     instance = __construct_schema__(instance_iri)
     instance.workExample = [instance.workExample,]
     for item in instance.workExample:

@@ -39,11 +39,21 @@
         </div>
 
       </div>
-      
+   {% if item.sameAs %}
+    <div class="row">
+        <div class="col-12">
+            <h4>Library catalogue link:</h4>
+            <p><a href="{{ item.sameAs.0.get('@id') }}">{{ item.sameAs.0.get('@id') }}</a></p>
+        </div>
+  </div>
+  {% endif %}
+     
       {% if instance.datePublished %}
       <div class="row">
         <div class="col-12">
-          <h3>{{instance.datePublished}}</h3>
+          <h3>{% if instance.datePublished|is_list %}
+                {% for date_pub in instance.datePublished %}{{ date_pub }}{% if not loop.last %},{% endif %}{% endfor %}
+              {% else %}{{instance.datePublished}}{% endif %}</h3>
         </div>
       </div>
       {% endif %}
@@ -67,14 +77,6 @@
         </div> 
         {% endif %}
     </div>
-  {% if item.sameAs %}
-  <div class="row">
-    <div class="col-12">
-        <h4>Library catalogue link:</h4>
-        <p><a href="{{ item.sameAs.0.get('@id') }}">{{ item.sameAs.0.get('@id') }}</a></p>
-    </div>
-  </div>
-  {% endif %}
   <div class="row">
         <div class="col-6">
             <dl>

@@ -23,7 +23,9 @@
       {% if instance.datePublished %}
       <div class="row">
         <div class="col-12">
-          <h3>{{instance.datePublished}}</h3>
+            <h3>{% if instance.datePublished|is_list %}
+                {% for date_pub in instance.datePublished %}{{ date_pub }}{% if not loop.last %}, {% endif %}{% endfor %}
+              {% else %}{{instance.datePublished}}{% endif %}</h3>
         </div>
       </div>
       {% endif %}
