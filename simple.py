@@ -310,7 +310,9 @@ def display_instance(title):
     Args:
         title(path): Slugified title of Instance
     """
-    if title.startswith("google") or title.startswith("robots.txt"):
+    if title.startswith("google") or \
+       title.startswith("robots.txt") or \
+       title.startswith("BingSiteAuth"):
         return render_template(title)
     # Kludge ensures that IRI does not have trailing /
     if title.endswith("/"):
@@ -393,67 +395,6 @@ def sitemap(offset=0):
     xml = render_template("sitemap_template.xml", instances=instances) 
     return Response(xml, mimetype="text/xml")
 
-
-
-TEST_INSTANCE = SimpleNamespace()
-TEST_INSTANCE.name="Environment Sustainibility for Boring People"
-TEST_INSTANCE.authors=["Jerome Nielsen", "Jaye Pietrson", "Felix Colgrave"]
-TEST_INSTANCE.editors=["Qwert Yuiop", "As Def", "Ghy Jikl"]
-TEST_INSTANCE.datePublished="Apr. 1, 3000" 
-TEST_INSTANCE.description="A book about environments, sustainability, more environments, and oh whatever lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit tortor quis elit ullamcorper, in congue odio placerat. Pellentesque quis gravida odio. Fusce tempor ex quam. Fusce et vestibulum velit. Maecenas magna diam, eleifend in feugiat vitae, eleifend quis neque. Vivamus egestas sapien vitae velit facilisis, et aliquam erat ultrices. Quisque purus nunc, gravida eget blandit eu, sollicitudin sit amet erat. Nullam blandit urna ut convallis placerat. Phasellus lectus neque, efficitur quis volutpat nec, laoreet nec velit. In interdum ipsum eget turpis tincidunt posuere. Nam pretium, eros quis aliquet egestas, nisl neque aliquet risus, ut cursus tellus sapien ac leo. Ut gravida diam et odio porttitor, vel vehicula massa malesuada. Fusce ornare commodo elit tincidunt venenatis."
-TEST_INSTANCE.keywords = ["Maths", "Sciences", "Underwater basketweaving for the narcoleptic"]
-TEST_INSTANCE.about=["Science", "Environment", "Sustenence"]
-wex1 = SimpleNamespace() #No way am I putting these into the array first. Declare and flesh them out, THEN put them in there!
-wex1.identifier = SimpleNamespace() 
-wex1.identifier.propertyID = "1a2b3c-4d5e9z"
-wex1.identifier.value = True
-wex1.provider = SimpleNamespace()
-wex1.provider.name = "Majestic Theatre"
-wex1.fileFormat = "pdf"
-
-wex2 = SimpleNamespace()
-wex2.identifier = SimpleNamespace() 
-wex2.identifier.propertyID = "aabbccddee"
-wex2.identifier.value = False
-wex2.provider = SimpleNamespace()
-wex2.provider.name = "Ruby Cinema"
-wex2.fileFormat = "print"
-
-wex3 = SimpleNamespace()
-wex3.identifier = SimpleNamespace() 
-wex3.identifier.propertyID = "aabbccddee"
-wex3.identifier.value = False
-wex3.provider = SimpleNamespace()
-wex3.provider.name = "Ruby Cinema"
-wex3.fileFormat = "audio"
-
-TEST_INSTANCE.workExample = [wex1, wex2, wex3] #I think that's how it works?
-@app.route("/instance")
-@app.route("/instance_test")
-def bf_instance():
-    return render_template("instance.html", instance=TEST_INSTANCE)
-    
-    
-    
-TEST_ITEM = SimpleNamespace()
-TEST_ITEM.name="Environment Sustainibility for Boring People"
-TEST_ITEM.authors=["Jerome Nielsen", "Jaye Pietrson", "Felix Colgrave"]
-TEST_ITEM.editors=["Qwert Yuiop", "As Def", "Ghy Jikl"]
-TEST_ITEM.datePublished="Apr. 1, 3000" 
-TEST_ITEM.description="A book about environments, sustainability, more environments, and oh whatever lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut hendrerit tortor quis elit ullamcorper, in congue odio placerat. Pellentesque quis gravida odio. Fusce tempor ex quam. Fusce et vestibulum velit. Maecenas magna diam, eleifend in feugiat vitae, eleifend quis neque. Vivamus egestas sapien vitae velit facilisis, et aliquam erat ultrices. Quisque purus nunc, gravida eget blandit eu, sollicitudin sit amet erat. Nullam blandit urna ut convallis placerat. Phasellus lectus neque, efficitur quis volutpat nec, laoreet nec velit. In interdum ipsum eget turpis tincidunt posuere. Nam pretium, eros quis aliquet egestas, nisl neque aliquet risus, ut cursus tellus sapien ac leo. Ut gravida diam et odio porttitor, vel vehicula massa malesuada. Fusce ornare commodo elit tincidunt venenatis."
-TEST_ITEM.about=["Science", "Environment", "Sustenence"]
-TEST_ITEM.location="Western State Coloradu Univarsetet" 
-TEST_ITEM.refnumber="1A2B3C" 
-TEST_ITEM.availability="Available" 
-TEST_ITEM.url="http://google.com"
-TEST_ITEM.genre=["Textbook", "Science", "Sustainability", "Nonbiodegradable"]
-TEST_ITEM.publisher="Obadiah Books"
-TEST_ITEM.fileFormat="pdf"
-
-@app.route("/item")
-def bf_item():
-    return render_template("item.html", instance=TEST_ITEM)
-    
     
 PREFIX = """PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
