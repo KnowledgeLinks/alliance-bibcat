@@ -302,6 +302,11 @@ def display_item(title, institution):
         item=item,
         instance=instance)
 
+@app.route("/robots.txt")
+def robots():
+    robots_txt = render_template("robots.txt")
+    return Response(robots_txt, mimetype="text/plain")        
+
 @app.route("/<path:title>.json")
 @app.route("/<path:title>")
 def display_instance(title):
@@ -311,7 +316,6 @@ def display_instance(title):
         title(path): Slugified title of Instance
     """
     if title.startswith("google") or \
-       title.startswith("robots.txt") or \
        title.startswith("BingSiteAuth"):
         return render_template(title)
     # Kludge ensures that IRI does not have trailing /
