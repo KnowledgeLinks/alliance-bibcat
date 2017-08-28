@@ -63,7 +63,9 @@
   </div>
   <div class="row">
   {% if instance.workExample %}
-    {% for loc, items in instance.workExample|groupby('provider') %} 
+    {% for row in instance.workExample %}
+    {% set loc = row.provider %}
+    {% set items = [row,] %} 
     <div class="col-12 card">
       <div class="row">
         <div class="col-lg-auto">

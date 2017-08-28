@@ -214,12 +214,15 @@ def __construct_schema__(iri):
     entity = SimpleNamespace()
     entity.iri = iri
     for key, val in instance_vars.get(str(iri)).items():
+        output = []
         for row in val:
             if '@id' in row:
-                setattr(entity, key, build_entity(row))
+                output.append(build_entity(row))
+        if len(output) < 1:
+            output = val
         if not hasattr(entity , key):
-            setattr(entity, key, val)
-    return entity 
+            setattr(entity, key, output) 
+    return entity
 
 def __check_exists__(iri):
     """Internal function takes an iri and queries triplestore for
@@ -327,7 +330,6 @@ def display_instance(title):
     if not __check_exists__(instance_iri):
         abort(404)
     instance = __construct_schema__(instance_iri)
-    instance.workExample = [instance.workExample,]
     for item in instance.workExample:
         if not hasattr(item, "provider"):
             # Try to directly query for bf:heldBy for item iri
