@@ -35,7 +35,7 @@
           {% if instance.description|is_list %}
           {% for row in instance.description %}<p>{{ row }}</p>{% endfor %}
           {% else %}
-          <p>{{instance.description}}</p>
+          <p>{{instance.description|truncate(500)}}</p>
           {% endif %}
         </div>
       </div>
