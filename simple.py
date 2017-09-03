@@ -9,6 +9,7 @@ import threading
 import rdflib
 import sys
 import time
+import re
 from types import SimpleNamespace
 
 from flask import Flask, render_template, request
@@ -30,6 +31,8 @@ BACKGROUND_THREAD = None
 SCHEMA_PROCESSOR = SPARQLProcessor(
     rml_rules=["bibcat-bf-to-schema.ttl"],
     triplestore_url=app.config.get("TRIPLESTORE_URL"))
+    
+ISBN_RE = re.compile(r"^(\d+)\b")
 
 #def set_libraries():
 #    global LIBRARIES
@@ -63,10 +66,16 @@ def retrieve_cover_art(instance):
     if not hasattr(instance, 'isbn'):
         return ''
     for isbn in instance.isbn:
-        cover_url = cover_template.format(isbn)
+        isbn_result = ISBN_RE.match(isbn)
+        if isbn_result is None:
+            continue
+        #print(isbn_result.groups()[0])
+        isbn_formatted = isbn_result.groups()[0]
+        cover_url = cover_template.format(isbn_formatted)
+        #print(isbn)
         result = requests.get(cover_url)
         #print(cover_url, result.status_code)
-        if result.status_code < 400:
+        if len(result.content) > 100:
             return """<img src="{}" alt="{} Cover Art" />""".format(cover_url,
                 instance.name)
     return ''
