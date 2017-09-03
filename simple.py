@@ -98,7 +98,7 @@ def output_jsonld(instance):
         for item in instance.workExample:
             item_example = {"@type": "CreativeWork",
                 "url": item.iri,
-                "name": instance.name,
+                "name": "{} -- {}".format(item.provider.name, instance.name),
                 "provider": {
                     "@type": "Organization",
                     "name": item.provider.name,
