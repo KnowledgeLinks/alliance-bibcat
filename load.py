@@ -23,11 +23,12 @@ from bibcat.linkers.deduplicate import Deduplicator
 
 PROJECT_BASE =  os.path.abspath(os.path.dirname(__file__))
 sys.path.append(PROJECT_BASE)
-try:
-    import instance.config as config
-except ImportError:
-    config = SimpleNamespace()
-    config.TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
+#try:
+#    import instance.config as config
+#    print("Config is instance.config {}".format(config))
+#except ImportError:
+config = SimpleNamespace()
+config.TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
 
 processor.NS_MGR.bf = rdflib.Namespace("http://id.loc.gov/ontologies/bibframe/")
 processor.NS_MGR.rdf = rdflib.RDF

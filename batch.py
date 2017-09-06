@@ -5,7 +5,6 @@ import datetime
 import gzip
 import io
 import logging
-import multiprocessing
 import copyreg
 import os
 import rdflib
@@ -96,9 +95,6 @@ def run_workflow(**kwargs):
     workflow.run(record, counter)
     return workflow.lean_graph, workflow.output_graph
     
-def pool_init(queue):
-    run_workflow.queue = queue
-
 #copyreg.pickle(lxml.etree._ElementTree,
 #    lxml_elementtree_pickler,
 #    lxml_elementtree_unpickler)
@@ -139,11 +135,6 @@ def process_xml(filepath,
         click.echo(start_msg)
     except io.UnsupportedOperation:
         print(start_msg)
-    #queue = multiprocessing.Queue()
-    #pool = multiprocessing.Pool(processes=3,
-    #    initializer=pool_init,
-    #    initargs=(queue,))
-        
     for action, element in etree.iterparse(filepath):
         if "record" in element.tag:
             if counter < offset:# and counter > 0:
@@ -202,10 +193,8 @@ class AllianceWorkflow(object):
     def __init__(self, **kwargs):
         self.institution_iri = rdflib.URIRef(kwargs.get('institution'))
         self.ils_minter = kwargs.get("ils_minter")
-        self.base_url = kwargs.get("base_url",
-                                   config.BASE_URL)
-        self.triplestore_url = kwargs.get("triplestore_url",
-                                          config.TRIPLESTORE_URL)
+        self.base_url = kwargs.get("base_url")
+        self.triplestore_url = kwargs.get("triplestore_url")
         marc2bibframe2_xslt = kwargs.get("marc2bibframe2")
         if not os.path.exists(marc2bibframe2_xslt):
             raise FileNotFoundError("{} not found".format(marc2bibframe2_xslt))
