@@ -76,7 +76,7 @@ def retrieve_cover_art(instance):
         result = requests.get(cover_url)
         #print(cover_url, result.status_code)
         if len(result.content) > 100:
-            return """<img src="{}" alt="{} Cover Art" />""".format(cover_url,
+            return """<img src="{}" alt="{} Cover Art" align="right" />""".format(cover_url,
                 instance.name)
     return ''
 
