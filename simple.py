@@ -304,7 +304,7 @@ def display_item(title, institution):
     
     item = None
     instance = __construct_schema__(instance_iri)
-    instance.workExample = [instance.workExample,]
+    instance.workExample = instance.workExample
     for row in instance.workExample:
         if row.iri == str(item_iri):
             item = row
