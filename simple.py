@@ -388,7 +388,7 @@ def site_index():
     template"""
     bindings = __run_query__(INSTANCE_COUNT)
     count = int(bindings[0].get('count').get('value'))
-    shards = math.ceil(count/15000)
+    shards = math.ceil(count/10000)
     mod_date = app.config.get('MOD_DATE')
     if mod_date is None: 
         mod_date=datetime.datetime.utcnow().strftime("%Y-%m-%d")
@@ -400,7 +400,7 @@ def site_index():
 @app.route("/sitemap<offset>.xml", methods=["GET"]) 
 #@cache.cached(timeout=86400)
 def sitemap(offset=0):
-    offset = (int(offset)*15000) - 15000
+    offset = (int(offset)*10000) - 10000
     sparql = INSTANCES.format(offset)
     result = requests.post(app.config.get("TRIPLESTORE_URL"), 
         data={"query": sparql,
