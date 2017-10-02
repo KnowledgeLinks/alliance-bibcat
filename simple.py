@@ -489,6 +489,12 @@ SELECT (count(*) as ?count) WHERE {
    ?s rdf:type bf:Instance .
 }"""
 
+ITEM_COUNT = PREFIX + """
+SELECT (count(?s) as ?count) WHERE {
+    ?s rdf:type bf:Item .
+    FILTER(strStarts(
+}
+
 ISBNS = PREFIX + """
 
 SELECT DISTINCT ?isbn
