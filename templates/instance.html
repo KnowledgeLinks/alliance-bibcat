@@ -82,13 +82,15 @@
          <h3>{{ loc.name }}</h3>
          {% for indivItem in items %}
             {% if indivItem.sameAs %}
-            <a href="{{ indivItem.sameAs.0.get('@id') }}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Link to Catalog">
-                <i class="fa fa-external-link-square" aria-hidden="true"></i>
-            </a>
-            {% endif %}
-            <a href="{{ indivItem.iri }}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="More information">
-                <i class="fa fa-info-circle" aria-hidden="true"></i>
-            </a>
+            <div class="buttonholder">
+              <a href="{{ indivItem.sameAs.0.get('@id') }}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Link to Catalog">
+                  <i class="fa fa-external-link-square" aria-hidden="true"></i>
+              </a>
+              {% endif %}
+              <a href="{{ indivItem.iri }}" class="btn btn-primary" data-toggle="tooltip" data-placement="top" title="More information">
+                  <i class="fa fa-info-circle" aria-hidden="true"></i>
+              </a>
+            </div>
         <p>Formats: 
           {% if  "pdf" in indivItem.fileFormat %}
           <i class="fa fa-file-pdf-o fa-2x" aria-hidden="true"></i>
