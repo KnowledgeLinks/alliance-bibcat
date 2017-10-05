@@ -497,7 +497,7 @@ SELECT (count(?s) as ?count) WHERE {
 
 ISBNS = PREFIX + """
 
-SELECT DISTINCT ?isbn
+ISBNS = PREFIX + """SELECT DISTINCT ?isbn
 WHERE {{
     <{0}> bf:identifiedBy ?isbn_node .
     ?isbn_node rdf:type bf:Isbn .
