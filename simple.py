@@ -15,7 +15,7 @@ from types import SimpleNamespace
 from flask import Flask, render_template, request
 from flask import abort, jsonify, flash, Response, url_for
 from flask_cache import Cache
-from bibcat.rml.processor import SPARQLProcessor
+from bibcat.rml.processor import SPARQLBatchProcessor
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -28,8 +28,8 @@ cache = Cache(app, config={"CACHE_TYPE": "filesystem",
 
 BACKGROUND_THREAD = None
 
-SCHEMA_PROCESSOR = SPARQLProcessor(
-    rml_rules=["bibcat-bf-to-schema.ttl"],
+SCHEMA_PROCESSOR = SPARQLBatchProcessor(
+    rml_rules=["bf-to-schema.ttl"],
     triplestore_url=app.config.get("TRIPLESTORE_URL"))
     
 ISBN_RE = re.compile(r"^(\d+)\b")
