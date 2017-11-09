@@ -15,7 +15,7 @@ from types import SimpleNamespace
 from flask import Flask, render_template, request
 from flask import abort, jsonify, flash, Response, url_for
 from flask_cache import Cache
-from bibcat.rml.processor import SPARQLBatchProcessor
+from bibcat.rml.processor import SPARQLProcessor
 
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
@@ -28,7 +28,7 @@ cache = Cache(app, config={"CACHE_TYPE": "filesystem",
 
 BACKGROUND_THREAD = None
 
-SCHEMA_PROCESSOR = SPARQLBatchProcessor(
+SCHEMA_PROCESSOR = SPARQLProcessor(
     rml_rules=["bf-to-schema.ttl"],
     triplestore_url=app.config.get("TRIPLESTORE_URL"))
     
@@ -200,7 +200,6 @@ def __construct_schema__(iri):
     SCHEMA_PROCESSOR.run(instance=iri, limit=1, offset=0)
     instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld').decode())
     instance_vars = dict()
-    #print(json.dumps(instance_listing, indent=2, sort_keys=True))
     for row in instance_listing:
         entity_url = row['@id']
         instance_vars[entity_url] = {}
