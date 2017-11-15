@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 
+{% block view_title %} {{ item.provider.name }}: {{ instance.name }}{% endblock %}
+
 {% block main %}
 <script src="https://use.fontawesome.com/f0e99862c1.js"></script>
 <div class="container">
-  <h1>{{instance.name}}</h1>
+  <h1><span class='d-none'>{{ item.provider.name }}:</span> {{instance.name}}</h1>
   <div class="row">
     <div class="col-12">
       {% if instance.authors %}
@@ -30,7 +32,7 @@
           <img src="{{ url_for('static', filename='img/' + item.provider.logo) }}">
           <h3>{{item.provider.name }}</h3>
           {% if item.identifier %}
-          <p>{{ item.identifier.propertyID }}<strong>{{item.identifier.value}}</strong></p>
+          <p>{{ item.identifier.propertyID }}<strong>{{ item.identifier.value}}</strong></p>
           {% endif %}
           {# <p>Availability: {{instance.availability}}</p> #}
         </div>
@@ -86,7 +88,8 @@
             {% endif %}
             {% if instance.isbn %}
                 <dt>ISBN</dt>
-                <dd>{% for isbn in instance.isbn %}{{ isbn }}<br>{% endfor %}
+                <dd>{% if instance.isbn|is_list %}{% for isbn in instance.isbn %}{{ isbn }}<br>{% endfor %}
+                    {% else %}{{ instance.isbn }}{% endif %}
                 </dd>
             {% endif %}
             </dl>
@@ -105,3 +108,10 @@
   
 </div>
 {% endblock main %}
+
+{% block more_js %}
+<script type="application/ld+json">
+ {{ instance|get_jsonld|safe }}
+</script>
+{% endblock more_js %}
+

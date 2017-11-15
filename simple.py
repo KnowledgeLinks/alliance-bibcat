@@ -80,6 +80,10 @@ def retrieve_cover_art(instance):
                 instance.name)
     return ''
 
+#@app.template_filter("get_itemjsonld")
+#def item_jsonld(instance):
+    
+
 @app.template_filter('get_jsonld')
 def output_jsonld(instance):
     #print(instance)
