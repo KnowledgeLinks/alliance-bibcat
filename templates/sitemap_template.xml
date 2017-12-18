@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    {% for instance in instances %}
-    {% set instance_iri = instance.get('instance').get('value') %}
-    {% if not "Instance" in instance_iri %}
+    {% for item in items %}
+    {% set item_iri = item.get('item').get('value') %}
     <url>
-        <loc>{{ instance_iri }}</loc>
-        <lastmod>{% if config.MOD_DATE %}{{ config.MOD_DATE }}{% else %}{{ instance.get('date').get('value')[0:10] }}{% endif %}</lastmod>
+        <loc>{{ item_iri }}</loc>
+        <lastmod>{% if config.MOD_DATE %}{{ config.MOD_DATE }}{% else %}{{ item.get('date').get('value')[0:10] }}{% endif %}</lastmod>
     </url>
-    {% endif %}
     {% endfor %}
 </urlset>

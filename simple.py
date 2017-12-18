@@ -35,23 +35,6 @@ SCHEMA_PROCESSOR = SPARQLProcessor(
 
 ISBN_RE = re.compile(r"^(\d+)\b")
 
-#def set_libraries():
-#    global LIBRARIES
-#    bindings = __run_query__(LIBRARY_GEO)
-#    for row in bindings:
-#        library_iri = row.get('library').get('value')
-#        LIBRARIES[library_iri] = {
-
-#            "name": row.get('name').get('value'),
-#            "address": get_address(library_iri),
-#            "image": row.get('image').get('value'),
-#            "latitude": row.get('lat').get('value'),
-#            "longitude": row.get('long').get('value'),
-#            "telephone": row.get('telephone').get('value')
-#        }
-
-
-
 def __run_query__(sparql):
     result = requests.post(app.config.get("TRIPLESTORE_URL"),
         data={"query": sparql,
@@ -397,7 +380,7 @@ def site_index():
     """Generates siteindex XML, each sitemap has a maximum of 50k links
     dynamically generates the necessary number of sitemaps in the
     template"""
-    bindings = __run_query__(INSTANCE_COUNT)
+    bindings = __run_query__(ITEM_COUNT)
     count = int(bindings[0].get('count').get('value'))
     shards = math.ceil(count/10000)
     mod_date = app.config.get('MOD_DATE')
@@ -412,13 +395,13 @@ def site_index():
 #@cache.cached(timeout=86400)
 def sitemap(offset=0):
     offset = (int(offset)*10000) - 10000
-    sparql = INSTANCES.format(offset)
+    sparql = ITEMS.format(10000, offset)
     result = requests.post(app.config.get("TRIPLESTORE_URL"),
         data={"query": sparql,
               "format": "json"})
-    instances = result.json().get('results').get('bindings')
+    items = result.json().get('results').get('bindings')
     #print("Number of instances {}".format(len(instances)))
-    xml = render_template("sitemap_template.xml", instances=instances)
+    xml = render_template("sitemap_template.xml", items=items)
     return Response(xml, mimetype="text/xml")
 
 
@@ -495,6 +478,19 @@ WHERE {{
 LIMIT 50000
 OFFSET {0}"""
 
+ITEMS = PREFIX + """
+SELECT DISTINCT ?item ?date
+WHERE {{
+    ?item rdf:type bf:Item ;
+          bf:itemOf ?instance .
+    OPTIONAL {{
+        ?instance bf:generationProcess ?process .
+        ?process bf:generationDate ?date 
+    }}
+}} ORDER BY ?item 
+LIMIT {0}
+OFFSET {1}"""
+
 INSTANCE_COUNT = PREFIX + """
 SELECT (count(*) as ?count) WHERE {
    ?s rdf:type bf:Instance .
@@ -503,10 +499,7 @@ SELECT (count(*) as ?count) WHERE {
 ITEM_COUNT = PREFIX + """
 SELECT (count(?s) as ?count) WHERE {
     ?s rdf:type bf:Item .
-    FILTER(strStarts(
-}
-
-ISBNS = PREFIX + """
+}"""
 
 ISBNS = PREFIX + """SELECT DISTINCT ?isbn
 WHERE {{
