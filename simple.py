@@ -346,7 +346,7 @@ def display_instance(title):
         abort(404)
     start = datetime.datetime.now()
     instance = __construct_schema__(instance_iri)
-    print("Schema generated in %s" % (datetime.datetime.now() - start))
+    # print("Schema generated in %s" % (datetime.datetime.now() - start))
     for item in instance.workExample:
 
         if not hasattr(item, "provider"):

@@ -23,14 +23,14 @@ def turtles():
     conn = CFG.data_tstore
     start = datetime.datetime.now()
     print("Loading RDF turtle files for Alliance BIBCAT at {}".format(
-               start.isoformat()))
+                start.isoformat()))
 
     conn.load_directory(file_directory=os.path.join(PROJECT_BASE, 'data'),
                         file_extensions=['ttl'],
                         include_subfolders=True,
                         reset=False,
-                        use_threading=True,
-                        method='local')
+                        use_threading=True)
+                        # method='local')
 
     conn.load_data(os.path.join(PROJECT_BASE, "custom", "alliance.ttl"),
                    is_file=True)
