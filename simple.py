@@ -9,14 +9,15 @@ import threading
 import rdflib
 import sys
 import time
-import re
+import re, pdb
 from types import SimpleNamespace
 
 from flask import Flask, render_template, request
 from flask import abort, jsonify, flash, Response, url_for
 from flask_cache import Cache
-from bibcat.rml.processor import SPARQLProcessor
-
+# from bibcat.rml.processor import SPARQLProcessor
+from rdfframework.rml.processor import SPARQLProcessor
+# from rdfframework.rml.processor2 import SPARQLProcessor
 app = Flask(__name__, instance_relative_config=True)
 app.config.from_pyfile('config.py')
 
@@ -29,9 +30,9 @@ cache = Cache(app, config={"CACHE_TYPE": "filesystem",
 BACKGROUND_THREAD = None
 
 SCHEMA_PROCESSOR = SPARQLProcessor(
-    rml_rules=["bf-to-schema.ttl"],
+    rml_rules=["bf-to-schema_rdfw.ttl"],
     triplestore_url=app.config.get("TRIPLESTORE_URL"))
-    
+
 ISBN_RE = re.compile(r"^(\d+)\b")
 
 #def set_libraries():
@@ -48,7 +49,7 @@ ISBN_RE = re.compile(r"^(\d+)\b")
 #            "longitude": row.get('long').get('value'),
 #            "telephone": row.get('telephone').get('value')
 #        }
-        
+
 
 
 def __run_query__(sparql):
@@ -82,7 +83,7 @@ def retrieve_cover_art(instance):
 
 #@app.template_filter("get_itemjsonld")
 #def item_jsonld(instance):
-    
+
 
 @app.template_filter('get_jsonld')
 def output_jsonld(instance):
@@ -116,7 +117,7 @@ def output_jsonld(instance):
                     "@type": "Organization",
                     "name": item.provider.name,
                     "logo": "{}{}".format(app.config.get("BASE_URL")[:-1],
-                                          url_for('static', 
+                                          url_for('static',
                                               filename="img/{}".format(
                                                   item.provider.logo))),
                     "url": item.provider.iri,
@@ -151,7 +152,7 @@ def home():
         bf_counts[iri] = {"name": info.get('name'),
                           "counts": bf_counts_bindings}
 
-    return render_template("simple.html", 
+    return render_template("simple.html",
         ts_stats=triples_store_stats,
         bf_counts=bf_counts)
 
@@ -175,7 +176,7 @@ def get_place(uri):
         output["name"] = LIBRARIES[library_uri]["name"]
         output["telephone"] = LIBRARIES[library_uri]["telephone"]
     return output
-        
+
 
 def __construct_schema__(iri):
     """Constructs a simple Python object populated from rdflib.Graph
@@ -183,7 +184,7 @@ def __construct_schema__(iri):
 
     Args:
     -----
-        iri: rdflib.URIRef of Instance 
+        iri: rdflib.URIRef of Instance
 
     Returns:
     --------
@@ -198,12 +199,13 @@ def __construct_schema__(iri):
             for row in val:
                 if '@id' in row and not key.startswith("sameAs"):
                     setattr(entity, key, build_entity(row))
-            if not hasattr(entity, key): 
+            if not hasattr(entity, key):
                 setattr(entity, key, val)
         return entity
-    SCHEMA_PROCESSOR.run(instance=iri, limit=1, offset=0)
+    SCHEMA_PROCESSOR.run(instance=iri, limit=1, offset=0, threading=False)
     instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld').decode())
     instance_vars = dict()
+    # pdb.set_trace()
     for row in instance_listing:
         entity_url = row['@id']
         instance_vars[entity_url] = {}
@@ -233,7 +235,7 @@ def __construct_schema__(iri):
         if len(output) < 1:
             output = val
         if not hasattr(entity , key):
-            setattr(entity, key, output) 
+            setattr(entity, key, output)
     return entity
 
 def __check_exists__(iri):
@@ -278,7 +280,7 @@ def display_topic(name):
         app.config.get('BASE_URL'),
         name))
     sparql = TOPIC_DETAIL.format(topic=topic_iri)
-    bindings = __run_query__(sparql) 
+    bindings = __run_query__(sparql)
     if len(bindings) < 1:
         abort(404)
     return render_template('collections.html',
@@ -286,10 +288,10 @@ def display_topic(name):
         collection_name=bindings[0].get('name').get('value'),
         instances=bindings)
 
-    
+
 @app.route("/<path:title>/<path:institution>")
 def display_item(title, institution):
-    """Displays different views of bf:Item 
+    """Displays different views of bf:Item
 
     Args:
     -----
@@ -304,9 +306,10 @@ def display_item(title, institution):
     item_iri = rdflib.URIRef("{0}/{1}".format(
         instance_iri,
         institution))
-    
+
     item = None
     instance = __construct_schema__(instance_iri)
+    # x=y
     instance.workExample = instance.workExample
     for row in instance.workExample:
         if row.iri == str(item_iri):
@@ -320,12 +323,12 @@ def display_item(title, institution):
 @app.route("/robots.txt")
 def robots():
     robots_txt = render_template("robots.txt")
-    return Response(robots_txt, mimetype="text/plain")        
+    return Response(robots_txt, mimetype="text/plain")
 
 @app.route("/<path:title>.json")
 @app.route("/<path:title>")
 def display_instance(title):
-    """Displays different views of bf:Instance 
+    """Displays different views of bf:Instance
 
     Args:
         title(path): Slugified title of Instance
@@ -341,23 +344,28 @@ def display_instance(title):
         title))
     if not __check_exists__(instance_iri):
         abort(404)
+    start = datetime.datetime.now()
     instance = __construct_schema__(instance_iri)
+    print("Schema generated in %s" % (datetime.datetime.now() - start))
     for item in instance.workExample:
+
         if not hasattr(item, "provider"):
+            # x=y
             # Try to directly query for bf:heldBy for item iri
-            sparql = PREFIX + """
-            SELECT DISTINCT ?provider ?name ?logo ?street ?city ?state ?zip
-                  WHERE {{ <{item}>  bf:heldBy ?provider . 
-                           ?provider schema:logo ?logo .
-                           ?library schema:parentOrganization ?provider ;
-                                    rdfs:label ?name ;
-                                    schema:address ?addr .
-                           ?addr    schema:streetAddress ?street ;
-                                    schema:addressLocality ?city ;
-                                    schema:addressRegion ?state ;
-                                    schema:postalCode ?zip .
-                                                    }}""".format(item=item.iri)
-            bindings = __run_query__(sparql) 
+            # sparql = PREFIX + """
+            # SELECT DISTINCT ?provider ?name ?logo ?street ?city ?state ?zip
+            #       WHERE {{ <{item}>  bf:heldBy ?provider .
+            #                ?provider schema:logo ?logo .
+            #                ?library schema:parentOrganization ?provider ;
+            #                         rdfs:label ?name ;
+            #                         schema:address ?addr .
+            #                ?addr    schema:streetAddress ?street ;
+            #                         schema:addressLocality ?city ;
+            #                         schema:addressRegion ?state ;
+            #                         schema:postalCode ?zip .
+            #                                         }}""".format(item=item.iri)
+            # bindings = __run_query__(sparql)
+            bindings = []
             provider = SimpleNamespace()
             address = SimpleNamespace()
             if len(bindings) > 0:
@@ -376,44 +384,44 @@ def display_instance(title):
                 address.postalCode = "80210"
             setattr(provider, "address", address)
             setattr(item, "provider", provider)
-        
+
     if request.path.endswith(".json"):
         raw_json = output_jsonld(instance)
         return jsonify(json.loads(raw_json))
     return render_template("instance.html",
         instance=instance)
-    
+
 @app.route("/siteindex.xml")
 @cache.cached(timeout=86400) # Cached for 1 day
 def site_index():
     """Generates siteindex XML, each sitemap has a maximum of 50k links
-    dynamically generates the necessary number of sitemaps in the 
+    dynamically generates the necessary number of sitemaps in the
     template"""
     bindings = __run_query__(INSTANCE_COUNT)
     count = int(bindings[0].get('count').get('value'))
     shards = math.ceil(count/10000)
     mod_date = app.config.get('MOD_DATE')
-    if mod_date is None: 
+    if mod_date is None:
         mod_date=datetime.datetime.utcnow().strftime("%Y-%m-%d")
-    xml = render_template("siteindex.xml", 
-            count=range(1, shards+1), 
+    xml = render_template("siteindex.xml",
+            count=range(1, shards+1),
             last_modified=mod_date)
     return Response(xml, mimetype="text/xml")
 
-@app.route("/sitemap<offset>.xml", methods=["GET"]) 
+@app.route("/sitemap<offset>.xml", methods=["GET"])
 #@cache.cached(timeout=86400)
 def sitemap(offset=0):
     offset = (int(offset)*10000) - 10000
     sparql = INSTANCES.format(offset)
-    result = requests.post(app.config.get("TRIPLESTORE_URL"), 
+    result = requests.post(app.config.get("TRIPLESTORE_URL"),
         data={"query": sparql,
               "format": "json"})
     instances = result.json().get('results').get('bindings')
     #print("Number of instances {}".format(len(instances)))
-    xml = render_template("sitemap_template.xml", instances=instances) 
+    xml = render_template("sitemap_template.xml", instances=instances)
     return Response(xml, mimetype="text/xml")
 
-    
+
 PREFIX = """PREFIX bf: <http://id.loc.gov/ontologies/bibframe/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX relators: <http://id.loc.gov/vocabulary/relators/>
@@ -446,15 +454,15 @@ CREATORS = PREFIX + """
 
 SELECT DISTINCT ?name ?type_of
 WHERE {{
-    BIND(<{0}> as ?instance) 
+    BIND(<{0}> as ?instance)
  {{
-    ?instance relators:aut ?author 
+    ?instance relators:aut ?author
  }} UNION {{
-    ?instance relators:cre ?author 
+    ?instance relators:cre ?author
  }} UNION {{
-    ?instance relators:aus ?author 
+    ?instance relators:aus ?author
  }}
- ?author schema:name ?name . 
+ ?author schema:name ?name .
  ?author rdf:type ?type_of .
 }} ORDER BY ?name"""
 
@@ -470,7 +478,7 @@ WHERE {
 
 GET_CLASS = PREFIX + """
 
-SELECT DISTINCT ?type_of 
+SELECT DISTINCT ?type_of
 WHERE {{
     <{0}> rdf:type ?type_of .
 }}"""
@@ -481,7 +489,7 @@ SELECT DISTINCT ?instance ?date
 WHERE {{
     ?instance rdf:type bf:Instance .
     OPTIONAL {{ ?instance bf:generationProcess ?process .
-                ?process bf:generationDate ?date }} 
+                ?process bf:generationDate ?date }}
     FILTER(isIRI(?instance))
 }} ORDER BY ?instance
 LIMIT 50000
@@ -512,12 +520,12 @@ ITEM = PREFIX + """
 SELECT DISTINCT ?item
 WHERE {{
     ?item bf:itemOf <{0}> .
-}}""" 
+}}"""
 
 
 LIBRARY = PREFIX + """
 
-SELECT DISTINCT ?library 
+SELECT DISTINCT ?library
 WHERE {{
     ?item bf:itemOf <{0}> .
     ?item bf:heldBy ?library .
