@@ -382,7 +382,7 @@ def display_instance(title):
         instance=instance)
 
 @app.route("/siteindex.xml")
-@cache.cached(timeout=86400) # Cached for 1 day
+# @cache.cached(timeout=86400) # Cached for 1 day
 def site_index():
     """Generates siteindex XML, each sitemap has a maximum of 50k links
     dynamically generates the necessary number of sitemaps in the
