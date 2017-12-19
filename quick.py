@@ -11,12 +11,14 @@ sys.path.append(PROJECT_BASE)
 try:
     import instance.config as config
 except ImportError:
+    print("Cannot import config from instance")
     try:
         from example_instance import config
     except ImportError:
         config = SimpleNamespace()
         config.TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
 
+print(config)
 CFG = RdfConfigManager(config=config)
 
 def turtles():

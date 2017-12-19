@@ -232,19 +232,12 @@ def __check_exists__(iri):
         iri: A rdflib.URIRef
     """
     start = datetime.datetime.now()
-    # sparql = PREFIX +"""
-    # SELECT DISTINCT ?iri
-    #                  WHERE {{ OPTIONAL {{ ?iri rdf:type bf:Instance . }}
-    #                           OPTIONAL {{ ?iri rdf:type bf:Item . }}
-    #                           FILTER (sameTerm(?iri, <{iri}>))
-    #                 }}""".format(iri=iri)
     sparql = PREFIX +"""
     SELECT DISTINCT *
                      WHERE {{ <{iri}> rdf:type ?type .
                               FILTER (?type=bf:Instance||?type=bf:Item)
                     }}""".format(iri=iri)
     bindings = __run_query__(sparql)
-    # print("check_exists ran in: ", (datetime.datetime.now() - start))
     if len(bindings) > 0:
         return True
     return False
