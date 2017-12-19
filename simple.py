@@ -188,7 +188,8 @@ def __construct_schema__(iri):
     SCHEMA_PROCESSOR.run(instance=iri, limit=1, offset=0, threading=False)
     instance_listing = json.loads(SCHEMA_PROCESSOR.output.serialize(format='json-ld').decode())
     instance_vars = dict()
-    # pdb.set_trace()
+    if not instance_listing:
+        raise LookupError("IRI --- %s --- returned no data" % iri)
     for row in instance_listing:
         entity_url = row['@id']
         instance_vars[entity_url] = {}
@@ -230,13 +231,20 @@ def __check_exists__(iri):
     ----
         iri: A rdflib.URIRef
     """
+    start = datetime.datetime.now()
+    # sparql = PREFIX +"""
+    # SELECT DISTINCT ?iri
+    #                  WHERE {{ OPTIONAL {{ ?iri rdf:type bf:Instance . }}
+    #                           OPTIONAL {{ ?iri rdf:type bf:Item . }}
+    #                           FILTER (sameTerm(?iri, <{iri}>))
+    #                 }}""".format(iri=iri)
     sparql = PREFIX +"""
-    SELECT DISTINCT ?iri
-                     WHERE {{ OPTIONAL {{ ?iri rdf:type bf:Instance . }}
-                              OPTIONAL {{ ?iri rdf:type bf:Item . }}
-                              FILTER (sameTerm(?iri, <{iri}>))
+    SELECT DISTINCT *
+                     WHERE {{ <{iri}> rdf:type ?type .
+                              FILTER (?type=bf:Instance||?type=bf:Item)
                     }}""".format(iri=iri)
     bindings = __run_query__(sparql)
+    # print("check_exists ran in: ", (datetime.datetime.now() - start))
     if len(bindings) > 0:
         return True
     return False
@@ -291,8 +299,11 @@ def display_item(title, institution):
         institution))
 
     item = None
-    instance = __construct_schema__(instance_iri)
-    # x=y
+    try:
+        instance = __construct_schema__(instance_iri)
+    except LookupError as err:
+        print(err.args[0])
+        abort(404)
     instance.workExample = instance.workExample
     for row in instance.workExample:
         if row.iri == str(item_iri):
@@ -325,15 +336,18 @@ def display_instance(title):
     instance_iri = rdflib.URIRef("{0}{1}".format(
         app.config.get("BASE_URL"),
         title))
-    if not __check_exists__(instance_iri):
-        abort(404)
+    # if not __check_exists__(instance_iri):
+    #     abort(404)
     start = datetime.datetime.now()
-    instance = __construct_schema__(instance_iri)
+    try:
+        instance = __construct_schema__(instance_iri)
+    except LookupError:
+        abort(404)
+    # pdb.set_trace()
     # print("Schema generated in %s" % (datetime.datetime.now() - start))
     for item in instance.workExample:
 
         if not hasattr(item, "provider"):
-            # x=y
             # Try to directly query for bf:heldBy for item iri
             # sparql = PREFIX + """
             # SELECT DISTINCT ?provider ?name ?logo ?street ?city ?state ?zip
@@ -485,9 +499,9 @@ WHERE {{
           bf:itemOf ?instance .
     OPTIONAL {{
         ?instance bf:generationProcess ?process .
-        ?process bf:generationDate ?date 
+        ?process bf:generationDate ?date
     }}
-}} ORDER BY ?item 
+}} ORDER BY ?item
 LIMIT {0}
 OFFSET {1}"""
 
