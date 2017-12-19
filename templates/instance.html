@@ -81,8 +81,8 @@
          <img src="{{ url_for('static', filename='img/' + loc.logo) }}">
          <h3>{{ loc.name }}</h3>
          {% for indivItem in items %}
-            {% if indivItem.sameAs %}
             <div class="buttonholder">
+              {% if indivItem.sameAs %}
               <a href="{{ indivItem.sameAs.0.get('@id') }}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Link to Catalog">
                   <i class="fa fa-external-link-square" aria-hidden="true"></i>
               </a>
