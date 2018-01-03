@@ -16,8 +16,8 @@
           <h4>by {% for auth in instance.contributor %}{{auth}}{% if not loop.last %}, {% endif %}{% endfor %}</h4>
      {% endif %}
     </div>
-  </div>   
-      
+  </div>
+
       <div class="row">
         <div class="col-lg-auto">
           <iframe
@@ -25,7 +25,7 @@
             height="200"
             frameborder="0" style="border:0"
             src="https://www.google.com/maps/embed/v1/place?key=AIzaSyCuODt2VKs726Htc3hVNDga2UP1AAOdDZs
-            &q={{ item.provider.address.streetAddress }}" allowfullscreen>
+            &q={{ item.provider.address.streetAddress }}, {{item.provider.address.addressLocality}}, {{item.provider.address.addressRegion}}" allowfullscreen>
           </iframe>
         </div>
         <div class="col">
@@ -49,7 +49,7 @@
         </div>
   </div>
   {% endif %}
-     
+
       {% if instance.datePublished %}
       <div class="row">
         <div class="col-12">
@@ -76,7 +76,7 @@
             {% else %}
                 <li>{{ instance.keywords }}</li>
             {% endif %}
-        </div> 
+        </div>
         {% endif %}
     </div>
   <div class="row">
@@ -105,7 +105,7 @@
             {% endif %}
         </div>
   </div>
-  
+
 </div>
 {% endblock main %}
 
