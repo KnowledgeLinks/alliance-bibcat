@@ -21,6 +21,7 @@ RUN  cd $BIBCAT_HOME && ls -ltra && pip3 install -r requirements.txt
 COPY static/ $BIBCAT_HOME/static/
 COPY instance/config.py $BIBCAT_HOME/instance/config.py
 COPY instance/google*.html $BIBCAT_HOME/templates/
+COPY instance/BingSiteAuth* $BIBCAT_HOME/templates/
 
 EXPOSE 5000
 
