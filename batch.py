@@ -163,6 +163,7 @@ def process_xml(filepath,
                     master_graph += lean
                     loc_graph += loc
             except:
+                print(sys.exc_info())
                 err_msg = "E{}".format(counter)
                 try:
                     click.echo(err_msg, nl=False)
@@ -194,7 +195,8 @@ class AllianceWorkflow(object):
         self.institution_iri = rdflib.URIRef(kwargs.get('institution'))
         self.ils_minter = kwargs.get("ils_minter")
         self.base_url = kwargs.get("base_url")
-        self.triplestore_url = kwargs.get("triplestore_url")
+        self.triplestore_url = kwargs.get("triplestore_url",
+                                          config.TRIPLESTORE_URL)
         marc2bibframe2_xslt = kwargs.get("marc2bibframe2")
         if not os.path.exists(marc2bibframe2_xslt):
             raise FileNotFoundError("{} not found".format(marc2bibframe2_xslt))
@@ -212,7 +214,7 @@ class AllianceWorkflow(object):
                 rml_rules=[os.path.abspath(
                     os.path.join(PROJECT_BASE, "custom/rml-alliance-item.ttl"))]))
         self.lean_processor = processor.SPARQLProcessor(
-            rml_rules="bibcat-loc-bf-to-lean-bf.ttl")
+            rml_rules="loc-bf-to-lean-bf.ttl")
         self.record, self.output_graph, self.lean_graph = None, None, None
 
     def __ils_link__(self):
