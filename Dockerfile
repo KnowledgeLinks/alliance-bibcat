@@ -3,7 +3,7 @@ FROM python:3.5.1
 MAINTAINER Jeremy Nelson <jermnelson@gmail.com>
 
 # Set environmental variables
-ENV BIBCAT_GIT https://github.com/KnowledgeLink/alliance-bibcat.git
+ENV BIBCAT_GIT https://github.com/KnowledgeLinks/alliance-bibcat.git
 ENV BIBCAT_HOME /opt/alliance-bibcat/
 
 # Update and install Python3 setuptool and pip
