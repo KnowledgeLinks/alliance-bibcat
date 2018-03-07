@@ -320,8 +320,8 @@ def __update_instances__(xml, bf_rdf):
     fields997 = xml.xpath(
         "marc:datafield[@tag='997']/marc:subfield[@code='a']",
         namespaces={"marc": "http://www.loc.gov/MARC21/slim"})
-    if len(fields) > 0:
-        match_key = fields[0].text
+    if len(fields997) > 0:
+        match_key = fields997[0].text
         bf_rdf.update("""INSERT {{
            ?instance bf:identifiedBy _:key .
            _:key rdf:type bf:Local .
@@ -386,12 +386,12 @@ def marc_xml(marc_filepath, mrc2bf_xsl, held_by, shard_size):
                 click.echo("w", nl=False)
                 output_file = os.path.join(
                     PROJECT_BASE, 
-                    os.path.join("data", "marc-output-{}-{}-{}k.ttl".format(
+                    os.path.join("data", "marc-output-{}-{}-{}k.xml".format(
                        start.strftime("%Y%m%d%H%M%S"),
                         total-shard_size,
                         total)))
                 with open(output_file, "wb") as fo:
-                    fo.write(output_graph.serialize(format='turtle'))
+                    fo.write(output_graph.serialize())
                 output_graph = rdflib.Graph()
                  
             
