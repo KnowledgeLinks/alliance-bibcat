@@ -17,6 +17,7 @@ try:
 except ImportError:
     import xml.etree.ElementTree as etree
 
+from xml.etree import ElementTree as default_etree
 from bibcat import clean_uris, replace_iri, slugify
 from bibcat.rml import processor
 from bibcat.linkers.deduplicate import Deduplicator
@@ -29,6 +30,7 @@ sys.path.append(PROJECT_BASE)
 #except ImportError:
 config = SimpleNamespace()
 config.TRIPLESTORE_URL = "http://localhost:9999/blazegraph/sparql"
+config.BASE_URL = "https://bibcat.coalliance.org/"
 
 processor.NS_MGR.bf = rdflib.Namespace("http://id.loc.gov/ontologies/bibframe/")
 processor.NS_MGR.rdf = rdflib.RDF
@@ -314,11 +316,32 @@ def turtles():
                end,
                (end-start).seconds / 60.0))
 
+def __update_instances__(xml, bf_rdf):
+    fields997 = xml.xpath(
+        "marc:datafield[@tag='997']/marc:subfield[@code='a']",
+        namespaces={"marc": "http://www.loc.gov/MARC21/slim"})
+    if len(fields997) > 0:
+        match_key = fields997[0].text
+        bf_rdf.update("""INSERT {{
+           ?instance bf:identifiedBy _:key .
+           _:key rdf:type bf:Local .
+           _:key rdf:source <https://www.coalliance.org/> .
+           _:key rdf:value \"""{0}\""" .
+        }} WHERE {{
+          ?instance rdf:type bf:Instance .
+        }}""".format(match_key)) 
+
 @click.command()
 @click.argument('marc_filepath')
 @click.argument('mrc2bf_xsl')
+@click.argument("held_by")
+@click.argument("output_file_base")
 @click.option('--shard_size', default=None, help="Sharded output graphs") 
-def marc_xml(marc_filepath, mrc2bf_xsl, shard_size):
+def marc_xml(marc_filepath, 
+    mrc2bf_xsl, 
+    held_by,
+    output_file_base,
+    shard_size):
     """Takes a MARC XML file and path to LOC's xslt file and transforms 
     to BIBFRAME 2.0 entities. If shard_size is set, shards records and
     saves to output RDF ttl file.
@@ -327,9 +350,12 @@ def marc_xml(marc_filepath, mrc2bf_xsl, shard_size):
     Args:
         marc_filepath(str): File path to MARC XML
         mrc2bf_xsl(str): File path to LOC's marc2bibframe.xsl XSLT file
+        held_by(str): Institution URL
+        output_file_base(str): Output file base 
+        shard_size(int): Size of shard in MARC records
     """
     logging.getLogger('rdflib').setLevel(logging.CRITICAL)
-    marc_context = etree.iterparse(marc_filepath)
+    #marc_context = etree.iterparse(marc_filepath)
     xslt_tree = etree.parse(mrc2bf_xsl)
     xslt_transform = etree.XSLT(xslt_tree)
     match_keys, record, total = None, {}, 0
@@ -341,35 +367,53 @@ def marc_xml(marc_filepath, mrc2bf_xsl, shard_size):
     click.echo("Started transforming MARC to BF at {} for {}".format(
         start.isoformat(),
         marc_filepath))
-    for action, elem in marc_context:
+    for action, elem in default_etree.iterparse(marc_filepath):
         if "record" in elem.tag:
-            record = elem
-            bf_rdf_xml = xslt_transform(
-                record, 
-                baseuri="'{0}'".format(config.BASE_URL))
+            record = etree.XML(default_etree.tostring(elem))
+            try:
+                bf_rdf_xml = xslt_transform(
+                    record, 
+                    baseuri="'{0}'".format(config.BASE_URL))
+            except:
+                click.echo("XSLT error with {:,}".format(total),
+                           nl=False)
+                continue
             bf_rdf = rdflib.Graph()
-            bf_rdf.parse(data=etree.tostring(bf_rdf_xml))
+            bf_rdf.namespace_manager.bind("bf", processor.NS_MGR.bf)
+            try:
+                bf_rdf.parse(data=etree.tostring(bf_rdf_xml))
+            except:
+                click.echo("XML parse error with {:,}".format(total),
+                           nl=False)
+                continue
             clean_uris(bf_rdf)
+            bf_rdf.update("""INSERT {{
+              ?item bf:heldBy <{0}> .
+              }} WHERE {{
+              ?item rdf:type bf:Item .
+            }}""".format(held_by))
+            __update_instances__(record, bf_rdf)
             if output_graph is not None:
                 output_graph += bf_rdf
             total += 1
             if not total%100:
                 click.echo(".", nl=False)
             if not total%1000:
-                click.echo(record, nl=False)
+                click.echo("{:,}".format(total), nl=False)
             if shard_size is not None and not total%shard_size:
+                click.echo("w", nl=False)
                 output_file = os.path.join(
                     PROJECT_BASE, 
-                    os.path.join("data", "marc-output-{}-{}-{}k.ttl".format(
-                       start.strftime("%Y%m%d%H%M%S"),
+                    os.path.join("data", "marc-output-{}-{}-{}k.xml".format(
+                        output_file_base,
                         total-shard_size,
                         total)))
                 with open(output_file, "wb") as fo:
-                    fo.write(output_graph.serialize(format='turtle'))
+                    fo.write(output_graph.serialize())
                 output_graph = rdflib.Graph()
                  
             
-    end = dateime.datetime.utcnow()
+    end = datetime.datetime.utcnow()
     click.echo("Finished at {} total time {} minutes for {} records".format(
         end.isoformat(),
         (end-start).seconds / 60.0,
