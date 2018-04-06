@@ -94,6 +94,11 @@
 
 <http://suny.buffalostate.edu/> a bf:Organization, schema:CollegeOrUniversity ;
         rdfs:label "SUNY Buffalo State"@en ;
-        schema:logo "suny-buffalo-logo.png".
+        schema:logo "suny-buffalo-logo.png" .
+
+<https://www.denverlibrary.org/> a bf:Organization, schema:Library ;
+    rdfs:label "Denver Public Library"@en ;
+    schema:logo "dpl-logo.png" .
+
 
 

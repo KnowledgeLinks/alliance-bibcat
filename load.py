@@ -335,8 +335,13 @@ def __update_instances__(xml, bf_rdf):
 @click.argument('marc_filepath')
 @click.argument('mrc2bf_xsl')
 @click.argument("held_by")
+@click.argument("output_file_base")
 @click.option('--shard_size', default=None, help="Sharded output graphs") 
-def marc_xml(marc_filepath, mrc2bf_xsl, held_by, shard_size):
+def marc_xml(marc_filepath, 
+    mrc2bf_xsl, 
+    held_by,
+    output_file_base,
+    shard_size):
     """Takes a MARC XML file and path to LOC's xslt file and transforms 
     to BIBFRAME 2.0 entities. If shard_size is set, shards records and
     saves to output RDF ttl file.
@@ -346,6 +351,8 @@ def marc_xml(marc_filepath, mrc2bf_xsl, held_by, shard_size):
         marc_filepath(str): File path to MARC XML
         mrc2bf_xsl(str): File path to LOC's marc2bibframe.xsl XSLT file
         held_by(str): Institution URL
+        output_file_base(str): Output file base 
+        shard_size(int): Size of shard in MARC records
     """
     logging.getLogger('rdflib').setLevel(logging.CRITICAL)
     #marc_context = etree.iterparse(marc_filepath)
@@ -363,11 +370,22 @@ def marc_xml(marc_filepath, mrc2bf_xsl, held_by, shard_size):
     for action, elem in default_etree.iterparse(marc_filepath):
         if "record" in elem.tag:
             record = etree.XML(default_etree.tostring(elem))
-            bf_rdf_xml = xslt_transform(
-                record, 
-                baseuri="'{0}'".format(config.BASE_URL))
+            try:
+                bf_rdf_xml = xslt_transform(
+                    record, 
+                    baseuri="'{0}'".format(config.BASE_URL))
+            except:
+                click.echo("XSLT error with {:,}".format(total),
+                           nl=False)
+                continue
             bf_rdf = rdflib.Graph()
-            bf_rdf.parse(data=etree.tostring(bf_rdf_xml))
+            bf_rdf.namespace_manager.bind("bf", processor.NS_MGR.bf)
+            try:
+                bf_rdf.parse(data=etree.tostring(bf_rdf_xml))
+            except:
+                click.echo("XML parse error with {:,}".format(total),
+                           nl=False)
+                continue
             clean_uris(bf_rdf)
             bf_rdf.update("""INSERT {{
               ?item bf:heldBy <{0}> .
@@ -387,7 +405,7 @@ def marc_xml(marc_filepath, mrc2bf_xsl, held_by, shard_size):
                 output_file = os.path.join(
                     PROJECT_BASE, 
                     os.path.join("data", "marc-output-{}-{}-{}k.xml".format(
-                       start.strftime("%Y%m%d%H%M%S"),
+                        output_file_base,
                         total-shard_size,
                         total)))
                 with open(output_file, "wb") as fo:
@@ -395,7 +413,7 @@ def marc_xml(marc_filepath, mrc2bf_xsl, held_by, shard_size):
                 output_graph = rdflib.Graph()
                  
             
-    end = dateime.datetime.utcnow()
+    end = datetime.datetime.utcnow()
     click.echo("Finished at {} total time {} minutes for {} records".format(
         end.isoformat(),
         (end-start).seconds / 60.0,
