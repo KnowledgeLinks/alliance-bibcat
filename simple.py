@@ -30,7 +30,7 @@ cache = Cache(app, config={"CACHE_TYPE": "filesystem",
 BACKGROUND_THREAD = None
 
 SCHEMA_PROCESSOR = SPARQLProcessor(
-    rml_rules=["bf-to-schema_rdfw.ttl"],
+    rml_rules=["/usr/local/lib/python3.5/site-packages/bibcat/maps/bf-to-schema_rdfw.ttl"],
     triplestore_url=app.config.get("TRIPLESTORE_URL"))
 
 ISBN_RE = re.compile(r"^(\d+)\b")
