@@ -14,7 +14,7 @@ from types import SimpleNamespace
 
 from flask import Flask, render_template, request
 from flask import abort, jsonify, flash, Response, url_for
-from flask_cache import Cache
+from flask_caching import Cache
 # from bibcat.rml.processor import SPARQLProcessor
 from rdfframework.rml.processor import SPARQLProcessor
 # from rdfframework.rml.processor2 import SPARQLProcessor
