@@ -1,8 +1,12 @@
-# CARL BIBCAT 
+#  Goldrush BIBCAT 
 
-## Manually Operation
+## Narrative
+Professional library staff will use the Colorado Alliance of Research 
+Libraries GoldRush comparison tool to generate an MARC XML export from 
+their collection and publish these records as BIBFRAME linked data.
 
-1.  Launch a `jermnelson/semantic-server-core:dev` Docker Container:
-
-    `docker run -p 8080:8080 -p 9999:9999 -v /opt/bibcat_triplestore:/opt/triplestore/data jermnelson/semantic-server-core:dev`
+### Proposed Architecture 
+*  Kubernates for container management and deployment
+*  TensorFlow for entity classification and consolidation
+*  Responder for Web Server and Application Layer
 
